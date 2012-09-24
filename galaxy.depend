@@ -1,0 +1,393 @@
+# depslib dependency file v1.0
+1249171102 source:/home/user/workspace/galaxy/BHTree.cpp
+	"BHTree.h"
+	<cstdio>
+	<cstring>
+	<cassert>
+	<cmath>
+	<iostream>
+	<stdexcept>
+	<sstream>
+
+1249090825 /home/user/workspace/galaxy/BHTree.h
+	<vector>
+	"Vector.h"
+	"Types.h"
+
+1248385374 /home/user/workspace/galaxy/Vector.h
+
+1248817684 /home/user/workspace/galaxy/Types.h
+
+1248209216 source:/home/user/workspace/galaxy/IIntegrator.cpp
+	"IIntegrator.h"
+	<stdexcept>
+	<cassert>
+
+1248209216 /home/user/workspace/galaxy/IIntegrator.h
+	<memory>
+	"IModel.h"
+
+1249161727 /home/user/workspace/galaxy/IModel.h
+	<string>
+
+1249161527 source:/home/user/workspace/galaxy/IModel.cpp
+	"IModel.h"
+
+1244494442 source:/home/user/workspace/galaxy/IntegratorADB2.cpp
+	"IntegratorADB2.h"
+	<cassert>
+	<stdexcept>
+	<sstream>
+	<iostream>
+
+1242588898 /home/user/workspace/galaxy/IntegratorADB2.h
+	"IIntegrator.h"
+
+1244412444 source:/home/user/workspace/galaxy/IntegratorADB3.cpp
+	"IntegratorADB3.h"
+	<cassert>
+	<stdexcept>
+	<sstream>
+
+1242588474 /home/user/workspace/galaxy/IntegratorADB3.h
+	"IIntegrator.h"
+
+1244413462 source:/home/user/workspace/galaxy/IntegratorADB4.cpp
+	"IntegratorADB4.h"
+	<cassert>
+	<stdexcept>
+	<sstream>
+
+1242082146 /home/user/workspace/galaxy/IntegratorADB4.h
+	"IIntegrator.h"
+
+1245618852 source:/home/user/workspace/galaxy/IntegratorADB5.cpp
+	"IntegratorADB5.h"
+	<cassert>
+	<stdexcept>
+	<sstream>
+	<iostream>
+	<cstring>
+
+1245617404 /home/user/workspace/galaxy/IntegratorADB5.h
+	"IIntegrator.h"
+	"IntegratorRK4.h"
+
+1244408452 /home/user/workspace/galaxy/IntegratorRK4.h
+	"IIntegrator.h"
+
+1248209216 source:/home/user/workspace/galaxy/IntegratorADB6.cpp
+	"IntegratorADB6.h"
+	<cassert>
+	<stdexcept>
+	<sstream>
+	<iostream>
+	<cstring>
+
+1248209216 /home/user/workspace/galaxy/IntegratorADB6.h
+	"IIntegrator.h"
+
+1244846544 source:/home/user/workspace/galaxy/IntegratorEuler.cpp
+	"IntegratorEuler.h"
+	<cassert>
+	<stdexcept>
+	<sstream>
+
+1241420348 /home/user/workspace/galaxy/IntegratorEuler.h
+	<string>
+	"IIntegrator.h"
+
+1244846546 source:/home/user/workspace/galaxy/IntegratorEulerImproved.cpp
+	"IntegratorEulerImproved.h"
+	<cassert>
+	<stdexcept>
+	<sstream>
+
+1244406310 /home/user/workspace/galaxy/IntegratorEulerImproved.h
+	"IIntegrator.h"
+
+1244846546 source:/home/user/workspace/galaxy/IntegratorHeun.cpp
+	"IntegratorHeun.h"
+	<cassert>
+	<stdexcept>
+	<sstream>
+
+1244406154 /home/user/workspace/galaxy/IntegratorHeun.h
+	"IIntegrator.h"
+
+1244846546 source:/home/user/workspace/galaxy/IntegratorRK3.cpp
+	"IntegratorRK3.h"
+	<cassert>
+	<stdexcept>
+	<sstream>
+
+1241420348 /home/user/workspace/galaxy/IntegratorRK3.h
+	"IIntegrator.h"
+
+1244846546 source:/home/user/workspace/galaxy/IntegratorRK4.cpp
+	"IntegratorRK4.h"
+	<cassert>
+	<stdexcept>
+	<sstream>
+
+1244846548 source:/home/user/workspace/galaxy/IntegratorRK5.cpp
+	"IntegratorRK5.h"
+	<cassert>
+	<stdexcept>
+	<sstream>
+
+1243984744 /home/user/workspace/galaxy/IntegratorRK5.h
+	"IIntegrator.h"
+
+1244846546 source:/home/user/workspace/galaxy/IntegratorRKF4.cpp
+	"IntegratorRKF4.h"
+	<cassert>
+	<stdexcept>
+	<sstream>
+	<cmath>
+	<iostream>
+
+1242600064 /home/user/workspace/galaxy/IntegratorRKF4.h
+	"IIntegrator.h"
+
+1249852164 source:/home/user/workspace/galaxy/SDLWnd.cpp
+	"SDLWnd.h"
+	<stdexcept>
+	<iostream>
+	<iomanip>
+	<sstream>
+	<fstream>
+	<ctime>
+	<cmath>
+	<GL/gl.h>
+	<GL/glu.h>
+	<GL/glx.h>
+
+1249484047 /home/user/workspace/galaxy/SDLWnd.h
+	<string>
+	<GL/gl.h>
+	<GL/glext.h>
+	<GL/glu.h>
+	<SDL/SDL.h>
+	<SDL/SDL_gfxPrimitives.h>
+	<SDL/SDL_opengl.h>
+	"Vector.h"
+
+1248817684 source:/home/user/workspace/galaxy/Types.cpp
+	"Types.h"
+	<cassert>
+	<cstdlib>
+
+1248385374 source:/home/user/workspace/galaxy/Vector.cpp
+	"Vector.h"
+
+1249779840 source:/home/user/workspace/galaxy/main.cpp
+	<cstdlib>
+	<iostream>
+	"NBodyWnd.h"
+
+1250006225 /home/user/workspace/galaxy/NBodyWnd.h
+	<stdint.h>
+	<fstream>
+	"SDLWnd.h"
+	"Galaxy.h"
+
+1249253541 /home/user/workspace/galaxy/ModelNBody.h
+	"IModel.h"
+	"Vector.h"
+	"BHTree.h"
+	"Types.h"
+
+1249251382 source:/home/user/workspace/galaxy/ModelNBody.cpp
+	"ModelNBody.h"
+	<cstdlib>
+	<cmath>
+	<limits>
+	<iostream>
+	<omp.h>
+
+1250114854 source:/home/user/workspace/galaxy/NBodyWnd.cpp
+	"NBodyWnd.h"
+	<iostream>
+	<cmath>
+	<cassert>
+	<limits>
+	<omp.h>
+	<stdexcept>
+	"Constants.h"
+	"specrend.h"
+
+1250114905 source:/home/user/workspace/galaxy/Galaxy.cpp
+	"Galaxy.h"
+	<cstdlib>
+	<stdexcept>
+	<cmath>
+	<iostream>
+	"Constants.h"
+	"FastMath.h"
+
+1250023400 /home/user/workspace/galaxy/Galaxy.h
+	"Vector.h"
+
+1249591710 source:/home/user/workspace/galaxy/Constants.cpp
+
+1249592168 /home/user/workspace/galaxy/Constants.h
+	<cmath>
+
+1249601062 source:/home/user/workspace/galaxy/GalaxyProp.cpp
+	"GalaxyProp.h"
+
+1249601062 /home/user/workspace/galaxy/GalaxyProp.h
+
+1249745183 source:/home/user/workspace/galaxy/specrend.c
+	<stdio.h>
+	<math.h>
+	"specrend.h"
+
+1249745717 /home/user/workspace/galaxy/specrend.h
+
+1249745559 source:/home/user/workspace/galaxy/specrend.cpp
+	<stdio.h>
+	<math.h>
+	"specrend.h"
+
+1249939927 source:/home/user/workspace/galaxy/FastMath.cpp
+	"FastMath.h"
+	<cmath>
+	<cassert>
+	<cstdlib>
+	<iostream>
+
+1249939927 /home/user/workspace/galaxy/FastMath.h
+	<cmath>
+
+1249591710 source:/home/user/projekte/galaxy/Constants.cpp
+
+1324586910 source:/home/user/projekte/galaxy/FastMath.cpp
+	"FastMath.h"
+	<cmath>
+	<cassert>
+	<cstdlib>
+	<iostream>
+
+1332192455 /home/user/projekte/galaxy/FastMath.h
+	<cmath>
+
+1249601062 source:/home/user/projekte/galaxy/GalaxyProp.cpp
+	"GalaxyProp.h"
+
+1249601062 /home/user/projekte/galaxy/GalaxyProp.h
+
+1248817684 source:/home/user/projekte/galaxy/Types.cpp
+	"Types.h"
+	<cassert>
+	<cstdlib>
+
+1248817684 /home/user/projekte/galaxy/Types.h
+
+1248385374 source:/home/user/projekte/galaxy/Vector.cpp
+	"Vector.h"
+
+1248385374 /home/user/projekte/galaxy/Vector.h
+
+1249779840 source:/home/user/projekte/galaxy/main.cpp
+	<cstdlib>
+	<iostream>
+	"NBodyWnd.h"
+
+1324421653 /home/user/projekte/galaxy/NBodyWnd.h
+	<stdint.h>
+	<fstream>
+	"SDLWnd.h"
+	"Galaxy.h"
+
+1324220232 /home/user/projekte/galaxy/SDLWnd.h
+	<string>
+	<GL/gl.h>
+	<GL/glext.h>
+	<GL/glu.h>
+	<SDL/SDL.h>
+	<SDL/SDL_gfxPrimitives.h>
+	<SDL/SDL_opengl.h>
+	"Vector.h"
+
+1250023400 /home/user/projekte/galaxy/Galaxy.h
+	"Vector.h"
+
+1249745559 source:/home/user/projekte/galaxy/specrend.cpp
+	<stdio.h>
+	<math.h>
+	"specrend.h"
+
+1249745717 /home/user/projekte/galaxy/specrend.h
+
+1333200729 source:/home/user/projekte/galaxy/Galaxy.cpp
+	"Galaxy.h"
+	<cstdlib>
+	<stdexcept>
+	<cmath>
+	<iostream>
+	"Constants.h"
+	"FastMath.h"
+	"CumulativeDistributionFunction.h"
+
+1249592168 /home/user/projekte/galaxy/Constants.h
+	<cmath>
+
+1333137324 source:/home/user/projekte/galaxy/NBodyWnd.cpp
+	"NBodyWnd.h"
+	<iostream>
+	<cmath>
+	<cassert>
+	<limits>
+	<omp.h>
+	<stdexcept>
+	"Constants.h"
+	"specrend.h"
+	"FastMath.h"
+
+1324220018 source:/home/user/projekte/galaxy/SDLWnd.cpp
+	"SDLWnd.h"
+	<stdexcept>
+	<iostream>
+	<iomanip>
+	<sstream>
+	<fstream>
+	<ctime>
+	<cmath>
+	<GL/gl.h>
+	<GL/glu.h>
+	<GL/glx.h>
+
+1249171102 source:/home/user/projekte/galaxy/BHTree.cpp
+	"BHTree.h"
+	<cstdio>
+	<cstring>
+	<cassert>
+	<cmath>
+	<iostream>
+	<stdexcept>
+	<sstream>
+
+1249090825 /home/user/projekte/galaxy/BHTree.h
+	<vector>
+	"Vector.h"
+	"Types.h"
+
+1330899869 source:/home/user/projekte/galaxy/CumulativeDistributionFunction.cpp
+	"CumulativeDistributionFunction.h"
+	<cassert>
+	<cstdlib>
+	<cstdio>
+	<cmath>
+	<stdexcept>
+
+1330899860 /home/user/projekte/galaxy/CumulativeDistributionFunction.h
+	<vector>
+
+1330897404 source:/home/user/projekte/galaxy/Intensity.cpp
+	<cmath>
+	"Intensity.h"
+
+1330897726 /home/user/projekte/galaxy/Intensity.h
+

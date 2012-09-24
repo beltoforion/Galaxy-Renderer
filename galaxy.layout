@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="Constants.cpp" open="0" top="0" tabpos="14">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="Constants.h" open="0" top="0" tabpos="7">
+		<Cursor position="382" topLine="0" />
+	</File>
+	<File name="CumulativeDistributionFunction.cpp" open="0" top="0" tabpos="1">
+		<Cursor position="808" topLine="17" />
+	</File>
+	<File name="CumulativeDistributionFunction.h" open="0" top="0" tabpos="2">
+		<Cursor position="828" topLine="3" />
+	</File>
+	<File name="FastMath.cpp" open="1" top="0" tabpos="7">
+		<Cursor position="2092" topLine="0" />
+	</File>
+	<File name="FastMath.h" open="1" top="0" tabpos="6">
+		<Cursor position="901" topLine="0" />
+	</File>
+	<File name="Galaxy.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="11013" topLine="359" />
+	</File>
+	<File name="Galaxy.h" open="1" top="0" tabpos="4">
+		<Cursor position="134" topLine="42" />
+	</File>
+	<File name="GalaxyProp.cpp" open="0" top="0" tabpos="9">
+		<Cursor position="595" topLine="0" />
+	</File>
+	<File name="GalaxyProp.h" open="0" top="0" tabpos="8">
+		<Cursor position="976" topLine="0" />
+	</File>
+	<File name="NBodyWnd.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="24128" topLine="49" />
+	</File>
+	<File name="NBodyWnd.h" open="1" top="0" tabpos="8">
+		<Cursor position="830" topLine="20" />
+	</File>
+	<File name="SDLWnd.cpp" open="1" top="0" tabpos="3">
+		<Cursor position="7963" topLine="250" />
+	</File>
+	<File name="SDLWnd.h" open="0" top="0" tabpos="5">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="Types.cpp" open="0" top="0" tabpos="11">
+		<Cursor position="1336" topLine="26" />
+	</File>
+	<File name="Types.h" open="0" top="0" tabpos="10">
+		<Cursor position="838" topLine="22" />
+	</File>
+	<File name="Vector.cpp" open="0" top="0" tabpos="10">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="Vector.h" open="1" top="0" tabpos="5">
+		<Cursor position="356" topLine="0" />
+	</File>
+	<File name="main.cpp" open="0" top="0" tabpos="6">
+		<Cursor position="410" topLine="0" />
+	</File>
+	<File name="specrend.cpp" open="0" top="0" tabpos="10">
+		<Cursor position="1682" topLine="42" />
+	</File>
+	<File name="specrend.h" open="0" top="0" tabpos="11">
+		<Cursor position="682" topLine="0" />
+	</File>
+</CodeBlocks_layout_file>
