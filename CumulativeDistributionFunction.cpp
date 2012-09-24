@@ -53,7 +53,7 @@ void CumulativeDistributionFunction::BuildCDF(int nSteps)
   m_vX2.clear();
   m_vY2.clear();
   m_vM1.clear();
-  m_vM1.clear();
+  m_vM2.clear();
 
   // Simpson rule for integration of the distribution function
   m_vY1.push_back(0.0);
@@ -69,6 +69,11 @@ void CumulativeDistributionFunction::BuildCDF(int nSteps)
 
 //    printf("%2.2f, %2.2f, %2.2f\n", m_fMin + (i+2) * h, v, h);
   }
+  m_vM1.push_back(0.0);
+
+  // all arrays must have the same length
+  if (m_vM1.size()!=m_vX1.size() || m_vM1.size()!=m_vY1.size())
+    throw std::runtime_error("CumulativeDistributionFunction::BuildCDF: array size mismatch (1)!");
 
   // normieren
   for (std::size_t i=0; i<m_vY1.size(); ++i)
@@ -77,10 +82,8 @@ void CumulativeDistributionFunction::BuildCDF(int nSteps)
     m_vM1[i] /= m_vY1.back();
   }
 
-
   //
-  m_vY2.clear();
-  m_vM2.clear();
+  m_vX2.push_back(0.0);
   m_vY2.push_back(0.0);
 
   double p=0;
@@ -101,6 +104,12 @@ void CumulativeDistributionFunction::BuildCDF(int nSteps)
     m_vX2.push_back(p);
     m_vY2.push_back(y);
   }
+  m_vM2.push_back(0.0);
+
+  // all arrays must have the same length
+  if (m_vM2.size()!=m_vX2.size() || m_vM2.size()!=m_vY2.size())
+    throw std::runtime_error("CumulativeDistributionFunction::BuildCDF: array size mismatch (1)!");
+
 }
 
 //-------------------------------------------------------------------------------------------------

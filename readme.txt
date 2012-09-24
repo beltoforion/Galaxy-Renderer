@@ -16,7 +16,7 @@ Disclaimer and Credits:
   specrend.c was published as public domain and can be obtained from the 
   authors web site: 
 
-		  http://www.fourmilab.ch/documents/specrend/specrend.c
+		http://www.fourmilab.ch/documents/specrend/specrend.c
 
 ---------------------------------------------------------------------------------------
   
