@@ -117,7 +117,7 @@ CumulativeDistributionFunction::~CumulativeDistributionFunction()
 {}
 
 //-------------------------------------------------------------------------------------------------
-double CumulativeDistributionFunction::PropFromVal(double fVal)
+double CumulativeDistributionFunction::ProbFromVal(double fVal)
 {
   if (fVal<m_fMin || fVal>m_fMax)
     throw std::runtime_error("out of range");
@@ -132,7 +132,7 @@ double CumulativeDistributionFunction::PropFromVal(double fVal)
 }
 
 //-------------------------------------------------------------------------------------------------
-double CumulativeDistributionFunction::ValFromProp(double fVal)
+double CumulativeDistributionFunction::ValFromProb(double fVal)
 {
   if (fVal<0 || fVal>1)
     throw std::runtime_error("out of range");

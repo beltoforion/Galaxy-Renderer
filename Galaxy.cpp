@@ -192,7 +192,7 @@ void Galaxy::InitStars(double sigma)
     // random value between -1 and 1
 //    double rad = std::fabs(FastMath::nvzz(0, sigma)) * m_radGalaxy;
 
-    double rad = cdf.ValFromProp((double)rand()/(double)RAND_MAX);
+    double rad = cdf.ValFromProb((double)rand()/(double)RAND_MAX);
 
     m_pStars[i].m_a = rad;
     m_pStars[i].m_b = rad * GetExcentricity(rad);
@@ -323,26 +323,11 @@ void Galaxy::SetAngularOffset(double offset)
 */
 double Galaxy::GetOrbitalVelocity(double rad) const
 {
-  double vel_kms(0);  // velovity in kilometer per seconds
+    double vel_kms(0);  // velovity in kilometer per seconds
 
-/*
-  // Calculate velovity in km per second
-  if (rad<m_radCore)
-  {
-    double dv = (m_velInner-m_velOrigin) / m_radCore;
-    vel_kms = m_velOrigin + rad * dv;
-  }
-  else if (rad>=m_radCore)
-  {
-    double dv = (m_velOuter-m_velInner) / (m_radGalaxy - m_radCore);
-    vel_kms = m_velInner + dv * (rad-m_radCore);
-  }
-*/
-
-  // A better velocity curve for the wikipedia models, the parameter values
-  // are irrelevant they were selected to yield a realistically looking curve
-  struct VelocityCurve
-  {
+    // Realistically looking velocity curves for the Wikipedia models.
+    struct VelocityCurve
+    {
       static double MS(double r)
       {
         double d = 2000;  // Dicke der Scheibe
@@ -373,16 +358,19 @@ double Galaxy::GetOrbitalVelocity(double rad) const
         double G=6.672e-11;
         return 20000*sqrt(G*(MS(r)+MZ)/r);
       }
-  };
+    };
 
+    //  with dark matter
 //  vel_kms = VelocityCurve::v(rad);
-  vel_kms = VelocityCurve::vd(rad);
 
-  // Calculate velocity in degree per year
-  double u = 2 * M_PI * rad * Constant::PC_TO_KM;        // Umfang in km
-  double time = u / (vel_kms * Constant::SEC_PER_YEAR);  // Umlaufzeit in Jahren
+    // without dark matter:
+    vel_kms = VelocityCurve::vd(rad);
 
-  return 360.0 / time;                                   // Grad pro Jahr
+    // Calculate velocity in degree per year
+    double u = 2 * M_PI * rad * Constant::PC_TO_KM;        // Umfang in km
+    double time = u / (vel_kms * Constant::SEC_PER_YEAR);  // Umlaufzeit in Jahren
+
+    return 360.0 / time;                                   // Grad pro Jahr
 }
 
 //------------------------------------------------------------------------

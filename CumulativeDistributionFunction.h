@@ -13,8 +13,8 @@ class CumulativeDistributionFunction
     CumulativeDistributionFunction();
     virtual ~CumulativeDistributionFunction();
 
-    double PropFromVal(double fVal);
-    double ValFromProp(double fVal);
+    double ProbFromVal(double fVal);
+    double ValFromProb(double fVal);
 
     void SetupRealistic(double I0, double k, double a, double RBulge, double min, double max, int nSteps);
 
