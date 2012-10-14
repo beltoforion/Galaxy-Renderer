@@ -557,7 +557,7 @@ void NBodyWnd::OnProcessEvents(uint8_t type)
                 break;
 
           case SDLK_d:
-                m_galaxy.SetAngularOffset(std::max(m_galaxy.GetAngularOffset()-0.0001, 0.0));
+                m_galaxy.SetAngularOffset(m_galaxy.GetAngularOffset()-0.0001);
                 break;
 
           case SDLK_r:

@@ -9,10 +9,20 @@
    (C) 2012 Ingo Berg
 
 ---------------------------------------------------------------------------------------
+
+This Project provides source code to render a 2D Galaxy with the SDL/OpenGL. The code
+will compile into a small application allowing you to create 2D galaxies by modifying
+a set of geometrical parameters. There is only a minimalistic user interface 
+as main purpose of the code was to render animations for the wikipedia article on dark 
+matter:
+
+http://de.wikipedia.org/wiki/Datei:Galaxy_rotation_under_the_influence_of_dark_matter.ogv
+
+---------------------------------------------------------------------------------------
   
 Disclaimer and Credits:
 
-  The simulator is in part based on code written by John Walker (specrend.c). 
+  The renderer is in part based on code written by John Walker (specrend.c). 
   specrend.c was published as public domain and can be obtained from the 
   authors web site: 
 
@@ -20,7 +30,7 @@ Disclaimer and Credits:
 
 ---------------------------------------------------------------------------------------
   
-  The rest of the code is published under the BSD-License:
+  The Code is published under the BSD-License:
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of
   this software and associated documentation files (the "Software"), to deal in 
