@@ -66,8 +66,8 @@ Galaxy::Galaxy(double rad,
   ,m_sigma(0.45)
   ,m_velAngle(0.000001)
   ,m_numStars(numStars)
-  ,m_numDust(numStars/3.5)
-  ,m_numH2(200)
+  ,m_numDust(numStars/2)
+  ,m_numH2(300)
   ,m_time(0)
   ,m_timeStep(0)
   ,m_pos(0, 0)
@@ -200,8 +200,8 @@ void Galaxy::InitStars(double sigma)
     m_pStars[i].m_theta = 360.0 * ((double)rand() / RAND_MAX);
     m_pStars[i].m_velTheta = GetOrbitalVelocity(rad);
     m_pStars[i].m_center = Vec2D(0,0);
-    m_pStars[i].m_temp = 6000 + (6000 * ((double)rand() / RAND_MAX)) - 3000;
-    m_pStars[i].m_mag = 0.1 + 0.4 * (double)rand()/(double)RAND_MAX;
+    m_pStars[i].m_temp = 6000 + (4000 * ((double)rand() / RAND_MAX)) - 2000;
+    m_pStars[i].m_mag = 0.1 +  0.2 * (double)rand()/(double)RAND_MAX;
 
     int idx = std::min(1.0/dh * (m_pStars[i].m_a + m_pStars[i].m_b)/2.0, 99.0);
     m_numberByRad[idx]++;
@@ -211,9 +211,16 @@ void Galaxy::InitStars(double sigma)
   double x,y,rad;
   for (int i=0; i<m_numDust; ++i)
   {
-    x = 2*m_radGalaxy * ((double)rand() / RAND_MAX) - m_radGalaxy;
-    y = 2*m_radGalaxy * ((double)rand() / RAND_MAX) - m_radGalaxy;
-    rad = sqrt(x*x+y*y);
+      if (i%4==0)
+      {
+        rad = cdf.ValFromProb((double)rand()/(double)RAND_MAX);
+      }
+      else
+      {
+        x = 2*m_radGalaxy * ((double)rand() / RAND_MAX) - m_radGalaxy;
+        y = 2*m_radGalaxy * ((double)rand() / RAND_MAX) - m_radGalaxy;
+        rad = sqrt(x*x+y*y);
+      }
 
     m_pDust[i].m_a = rad;
     m_pDust[i].m_b = rad * GetExcentricity(rad);
@@ -221,7 +228,10 @@ void Galaxy::InitStars(double sigma)
     m_pDust[i].m_theta = 360.0 * ((double)rand() / RAND_MAX);
     m_pDust[i].m_velTheta = GetOrbitalVelocity( (m_pDust[i].m_a + m_pDust[i].m_b)/2.0 );
     m_pDust[i].m_center = Vec2D(0,0);
-    m_pDust[i].m_temp = 6000 + rad/4.0;
+
+    // I want the outer parts to appear blue, the inner parts yellow. I'm imposing
+    // the following temperature distribution (no science here it just looks right)
+    m_pDust[i].m_temp = 5000 + rad/4.5;
 
     m_pDust[i].m_mag = 0.015 + 0.01 * (double)rand()/(double)RAND_MAX;
     int idx = std::min(1.0/dh * (m_pDust[i].m_a + m_pDust[i].m_b)/2.0, 99.0);
@@ -250,7 +260,7 @@ void Galaxy::InitStars(double sigma)
     int k2 = 2*i+1;
     m_pH2[k2].m_a = rad + 1000;
     m_pH2[k2].m_b = rad * GetExcentricity(rad);
-    m_pH2[k2].m_angle = m_pH2[k1].m_angle; //GetAngularOffset(rad);
+    m_pH2[k2].m_angle = /*m_pH2[k1].m_angle;*/ GetAngularOffset(rad);
     m_pH2[k2].m_theta = m_pH2[k1].m_theta;
     m_pH2[k2].m_velTheta = m_pH2[k1].m_velTheta;
     m_pH2[k2].m_center = m_pH2[k1].m_center;
@@ -361,10 +371,10 @@ double Galaxy::GetOrbitalVelocity(double rad) const
     };
 
     //  with dark matter
-//  vel_kms = VelocityCurve::v(rad);
+    vel_kms = VelocityCurve::v(rad);
 
     // without dark matter:
-    vel_kms = VelocityCurve::vd(rad);
+//    vel_kms = VelocityCurve::vd(rad);
 
     // Calculate velocity in degree per year
     double u = 2 * M_PI * rad * Constant::PC_TO_KM;        // Umfang in km
