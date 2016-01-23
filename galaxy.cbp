@@ -36,6 +36,7 @@
 			<Add library="SDL" />
 			<Add library="GL" />
 			<Add library="GLU" />
+			<Add library="X11" />
 		</Linker>
 		<Unit filename="Constants.cpp" />
 		<Unit filename="Constants.h" />
