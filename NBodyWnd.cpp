@@ -335,11 +335,10 @@ void NBodyWnd::DrawDust()
   glEnable(GL_BLEND);            // soft blending of point sprites
   glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-
   Star *pDust = m_galaxy.GetDust();
   int num = m_galaxy.GetNumDust();
 
-  glPointSize(maxSize); //*(double)rand()/(double)RAND_MAX);
+  glPointSize(65); //*(double)rand()/(double)RAND_MAX);
   glBegin(GL_POINTS);
 
   for (int i=0; i<num; ++i)
