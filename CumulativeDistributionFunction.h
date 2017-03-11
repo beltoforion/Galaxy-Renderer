@@ -17,9 +17,7 @@ class CumulativeDistributionFunction
     double ValFromProb(double fVal);
 
     void SetupRealistic(double I0, double k, double a, double RBulge, double min, double max, int nSteps);
-
-
-
+	
   private:
     dist_fun_t m_pDistFun;
     double m_fMin;

@@ -10,7 +10,7 @@ using namespace std;
 
 //-------------------------------------------------------------------------------------------------
 CumulativeDistributionFunction::CumulativeDistributionFunction()
-  :m_pDistFun(NULL)
+  :m_pDistFun(nullptr)
   ,m_vM1()
   ,m_vY1()
   ,m_vX1()
@@ -22,11 +22,6 @@ CumulativeDistributionFunction::CumulativeDistributionFunction()
 //-------------------------------------------------------------------------------------------------
 void CumulativeDistributionFunction::SetupRealistic(double I0, double k, double a, double RBulge, double min, double max, int nSteps)
 {
-//  double I0 = 1;
-//  double k=0.2;
-// double RBulge = 3;
-
-
   m_fMin = min;
   m_fMax = max;
   m_nSteps = nSteps;
@@ -98,7 +93,7 @@ void CumulativeDistributionFunction::BuildCDF(int nSteps)
 
     y = m_vX1[k] + (p - m_vY1[k]) / m_vM1[k];
 
-    printf("%2.4f, %2.4f, k=%d, %2.4f, %2.4f\n", p, y, k, m_vY1[k], m_vM1[k]);
+//    printf("%2.4f, %2.4f, k=%d, %2.4f, %2.4f\n", p, y, k, m_vY1[k], m_vM1[k]);
 
     m_vM2.push_back( (y - m_vY2.back()) / h);
     m_vX2.push_back(p);
@@ -128,6 +123,7 @@ double CumulativeDistributionFunction::ProbFromVal(double fVal)
 
 //  printf("fVal=%2.2f; h=%2.2f; i=%d; m_vVal[i]=%2.2f; m_vAsc[i]=%2.2f;\n", fVal, h, i, m_vVal[i], m_vAsc[i]);
 
+  assert(i >= 0 && i < (int)m_vM1.size());
   return (m_vY1[i] + m_vM1[i] * remainder) /* / m_vVal.back()*/;
 }
 
@@ -137,11 +133,12 @@ double CumulativeDistributionFunction::ValFromProb(double fVal)
   if (fVal<0 || fVal>1)
     throw std::runtime_error("out of range");
 
-  double h = 1.0 / m_vY2.size();
+  double h = 1.0 / (m_vY2.size()-1);
 
   int i = (int)(fVal / h);
   double remainder = fVal - i*h;
 
+  assert(i >= 0 && i < (int)m_vM2.size());
   return (m_vY2[i] + m_vM2[i] * remainder) /* / m_vVal.back()*/;
 }
 

@@ -5,8 +5,7 @@
  * Created on 8. Juli 2009, 21:54
  */
 #include "NBodyWnd.h"
-
-//--- Standard icludes ---------------------------------------------------------
+#include <algorithm>
 #include <iostream>
 #include <cmath>
 #include <cassert>
@@ -14,11 +13,13 @@
 #include <omp.h>
 #include <stdexcept>
 
-//------------------------------------------------------------------------------
 #include "Constants.h"
 #include "specrend.h"
 #include "FastMath.h"
 
+#if defined(_WIN32) || defined(_WIN64)
+#pragma warning(disable:4244)
+#endif
 
 //------------------------------------------------------------------------------
 NBodyWnd::NBodyWnd(int sz, std::string caption)
@@ -197,8 +198,8 @@ void NBodyWnd::DrawEllipsis(double a, double b, double angle)
     double sinalpha = sin(alpha);
     double cosalpha = cos(alpha);
 
-    double X = x + (a * cosalpha * cosbeta - b * sinalpha * sinbeta);
-    double Y = y + (a * cosalpha * sinbeta + b * sinalpha * cosbeta);
+	GLfloat X = x + (a * cosalpha * cosbeta - b * sinalpha * sinbeta);
+	GLfloat Y = y + (a * cosalpha * sinbeta + b * sinalpha * cosbeta);
 
     glVertex3f(X, Y, 0);
    }

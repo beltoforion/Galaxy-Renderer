@@ -1,4 +1,5 @@
 #include "Galaxy.h"
+#include <algorithm>
 #include <cstdlib>
 #include <stdexcept>
 #include <cmath>
@@ -203,7 +204,7 @@ void Galaxy::InitStars(double sigma)
     m_pStars[i].m_temp = 6000 + (4000 * ((double)rand() / RAND_MAX)) - 2000;
     m_pStars[i].m_mag = 0.1 +  0.2 * (double)rand()/(double)RAND_MAX;
 
-    int idx = std::min(1.0/dh * (m_pStars[i].m_a + m_pStars[i].m_b)/2.0, 99.0);
+    int idx = (int)std::min(1.0/dh * (m_pStars[i].m_a + m_pStars[i].m_b)/2.0, 99.0);
     m_numberByRad[idx]++;
   }
 
@@ -234,7 +235,7 @@ void Galaxy::InitStars(double sigma)
     m_pDust[i].m_temp = 5000 + rad/4.5;
 
     m_pDust[i].m_mag = 0.015 + 0.01 * (double)rand()/(double)RAND_MAX;
-    int idx = std::min(1.0/dh * (m_pDust[i].m_a + m_pDust[i].m_b)/2.0, 99.0);
+    int idx = (int)std::min(1.0/dh * (m_pDust[i].m_a + m_pDust[i].m_b)/2.0, 99.0);
     m_numberByRad[idx]++;
   }
 
@@ -254,7 +255,7 @@ void Galaxy::InitStars(double sigma)
     m_pH2[k1].m_center = Vec2D(0,0);
     m_pH2[k1].m_temp = 6000 + (6000 * ((double)rand() / RAND_MAX)) - 3000;
     m_pH2[k1].m_mag = 0.1 + 0.05 * (double)rand()/(double)RAND_MAX;
-    int idx = std::min(1.0/dh * (m_pH2[k1].m_a + m_pH2[k1].m_b)/2.0, 99.0);
+    int idx = (int)std::min(1.0/dh * (m_pH2[k1].m_a + m_pH2[k1].m_b)/2.0, 99.0);
     m_numberByRad[idx]++;
 
     int k2 = 2*i+1;
@@ -266,7 +267,7 @@ void Galaxy::InitStars(double sigma)
     m_pH2[k2].m_center = m_pH2[k1].m_center;
     m_pH2[k2].m_temp = m_pH2[k1].m_temp;
     m_pH2[k2].m_mag = m_pH2[k1].m_mag;
-    idx = std::min(1.0/dh * (m_pH2[k2].m_a + m_pH2[k2].m_b)/2.0, 99.0);
+    idx = (int)std::min(1.0/dh * (m_pH2[k2].m_a + m_pH2[k2].m_b)/2.0, 99.0);
     m_numberByRad[idx]++;
   }
 }

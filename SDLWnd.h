@@ -4,15 +4,28 @@
 //--- Standard includes --------------------------------------------------------
 #include <string>
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <Windows.h>
+#endif
+
 //--- SDL and OpenGL includes --------------------------------------------------
-//#include <GL/glew.h>
+
+#if defined(_WIN32) || defined(_WIN64)
+// i don't support on screen text output on windows for the time being.
+#include <GL/gl.h>	
+#include <GL/glu.h>
+#include <SDL.h>
+#include <SDL_opengl.h> 
+#else
 #include <GL/gl.h>	// Header File For The OpenGL32 Library
 #include <GL/glext.h>
 #include <GL/glu.h>	// Header File For The GLu32 Library
-
 #include <SDL/SDL.h>
 #include <SDL/SDL_gfxPrimitives.h>
 #include <SDL/SDL_opengl.h> // opengl support
+#endif
+
+
 
 #include "Vector.h"
 
