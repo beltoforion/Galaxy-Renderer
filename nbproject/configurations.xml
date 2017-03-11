@@ -59,6 +59,9 @@
         <cTool>
           <commandLine>-Wall -O3 -std=c++11</commandLine>
         </cTool>
+        <ccTool>
+          <commandLine>-std=c++11</commandLine>
+        </ccTool>
         <linkerTool>
           <linkerLibItems>
             <linkerOptionItem>`pkg-config --libs SDL_ttf`</linkerOptionItem>

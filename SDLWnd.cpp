@@ -10,7 +10,11 @@
 #include <cmath>
 
 #if defined(_WIN32) || defined(_WIN64)
-#pragma warning(disable:4244)
+    #pragma warning(disable:4244)
+#else
+    #include <GL/gl.h>	// Header File For The OpenGL32 Library
+    #include <GL/glu.h>	// Header File For The GLu32 Library
+    #include <GL/glx.h> 
 #endif
 
 // static functions / variables
