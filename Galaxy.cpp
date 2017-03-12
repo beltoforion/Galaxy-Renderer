@@ -37,10 +37,10 @@ const Vec2D& Star::CalcXY()
          alpha = theta * Constant::DEG_TO_RAD;
 
   // temporaries to save cpu time
-  double cosalpha = cos(alpha), //FastMath::cos(alpha),
-         sinalpha = sin(alpha), //FastMath::sin(alpha),
-         cosbeta  = cos(beta),//FastMath::cos(beta),
-         sinbeta  = sin(beta); //FastMath::sin(beta);
+  double cosalpha = cos(alpha),
+         sinalpha = sin(alpha),
+         cosbeta  = cos(beta),
+         sinbeta  = sin(beta);
 
   m_pos = Vec2D(p.x + (a * cosalpha * cosbeta - b * sinalpha * sinbeta),
                 p.y + (a * cosalpha * sinbeta + b * sinalpha * cosbeta));
@@ -56,25 +56,27 @@ Galaxy::Galaxy(double rad,
                double velInner,
                double velOuter,
                int numStars)
-  :m_elEx1(ex1)
-  ,m_elEx2(ex2)
-  ,m_velOrigin(30)
-  ,m_velInner(velInner)
-  ,m_velOuter(velOuter)
-  ,m_angleOffset(deltaAng)
-  ,m_radCore(radCore)
-  ,m_radGalaxy(rad)
-  ,m_sigma(0.45)
-  ,m_velAngle(0.000001)
-  ,m_numStars(numStars)
-  ,m_numDust(numStars/2)
-  ,m_numH2(300)
-  ,m_time(0)
-  ,m_timeStep(0)
-  ,m_pos(0, 0)
-  ,m_pStars(NULL)
-  ,m_pDust(NULL)
-  ,m_pH2(NULL)
+    :m_elEx1(ex1)
+    ,m_elEx2(ex2)
+    ,m_velOrigin(30)
+    ,m_velInner(velInner)
+    ,m_velOuter(velOuter)
+    ,m_angleOffset(deltaAng)
+    ,m_radCore(radCore)
+    ,m_radGalaxy(rad)
+    ,m_sigma(0.45)
+    ,m_velAngle(0.000001)
+    ,m_numStars(numStars)
+    ,m_numDust(numStars)
+    ,m_numH2(300)
+    ,m_time(0)
+    ,m_timeStep(0)
+    ,m_bHasDarkMatter(true)
+    ,m_pos(0, 0)
+    ,m_pStars(nullptr)
+    ,m_pDust(nullptr)
+    ,m_pH2(nullptr)
+    ,m_dustRenderSize(70)
 {
   FastMath::init();
 }
@@ -99,7 +101,8 @@ void Galaxy::Reset()
         m_sigma,
         m_velInner,
         m_velOuter,
-        m_numStars);
+        m_numStars,
+        m_bHasDarkMatter);
 }
 
 //------------------------------------------------------------------------
@@ -111,7 +114,8 @@ void Galaxy::Reset(double rad,
                    double sigma,
                    double velInner,
                    double velOuter,
-                   int numStars)
+                   int numStars,
+                   bool hasDarkMatter)
 {
   m_elEx1 = ex1;
   m_elEx2 = ex2;
@@ -121,16 +125,24 @@ void Galaxy::Reset(double rad,
   m_angleOffset = deltaAng;
   m_radCore = radCore;
   m_radGalaxy = rad;
-  m_radFarField = m_radGalaxy * 2;  // there is no science behind this threshold it just should look nice
+  m_radFarField = m_radGalaxy * 2;  // there is no science behind this threshold it just looks nice
   m_sigma = sigma;
   m_numStars = numStars;
   m_numDust = numStars/2;
   m_time = 0;
-
+  m_dustRenderSize = 70.0;
+  m_bHasDarkMatter = hasDarkMatter;
+  
   for (int i=0; i<100; ++i)
     m_numberByRad[i] = 0;
 
   InitStars(m_sigma);
+}
+
+void Galaxy::ToggleDarkMatter() 
+{
+    m_bHasDarkMatter ^= true;
+    Reset();
 }
 
 //------------------------------------------------------------------------
@@ -190,9 +202,6 @@ void Galaxy::InitStars(double sigma)
                      1000);           // Anzahl der stützstellen
   for (int i=3; i<m_numStars; ++i)
   {
-    // random value between -1 and 1
-//    double rad = std::fabs(FastMath::nvzz(0, sigma)) * m_radGalaxy;
-
     double rad = cdf.ValFromProb((double)rand()/(double)RAND_MAX);
 
     m_pStars[i].m_a = rad;
@@ -202,7 +211,7 @@ void Galaxy::InitStars(double sigma)
     m_pStars[i].m_velTheta = GetOrbitalVelocity(rad);
     m_pStars[i].m_center = Vec2D(0,0);
     m_pStars[i].m_temp = 6000 + (4000 * ((double)rand() / RAND_MAX)) - 2000;
-    m_pStars[i].m_mag = 0.1 +  0.2 * (double)rand()/(double)RAND_MAX;
+    m_pStars[i].m_mag = 0.3 +  0.2 * (double)rand()/(double)RAND_MAX;
 
     int idx = (int)std::min(1.0/dh * (m_pStars[i].m_a + m_pStars[i].m_b)/2.0, 99.0);
     m_numberByRad[idx]++;
@@ -279,6 +288,12 @@ double Galaxy::GetSigma() const
 }
 
 //------------------------------------------------------------------------
+void Galaxy::SetDustRenderSize(double sz)
+{
+    m_dustRenderSize = std::max(sz, 1.0);
+}
+
+//------------------------------------------------------------------------
 void Galaxy::SetSigma(double s)
 {
   m_sigma = s;
@@ -301,6 +316,12 @@ Star* Galaxy::GetDust() const
 Star* Galaxy::GetH2() const
 {
   return m_pH2;
+}
+
+//------------------------------------------------------------------------
+double Galaxy::GetDustRenderSize() const
+{
+    return m_dustRenderSize;
 }
 
 //------------------------------------------------------------------------
@@ -371,11 +392,16 @@ double Galaxy::GetOrbitalVelocity(double rad) const
       }
     };
 
-    //  with dark matter
-    vel_kms = VelocityCurve::v(rad);
-
-    // without dark matter:
-//    vel_kms = VelocityCurve::vd(rad);
+    if (m_bHasDarkMatter)
+    {
+        //  with dark matter
+        vel_kms = VelocityCurve::v(rad);
+    }
+    else
+    {
+        // without dark matter:
+        vel_kms = VelocityCurve::vd(rad);
+    }
 
     // Calculate velocity in degree per year
     double u = 2 * M_PI * rad * Constant::PC_TO_KM;        // Umfang in km

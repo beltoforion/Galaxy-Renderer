@@ -3,23 +3,24 @@
 
 
 //------------------------------------------------------------------------------
-class Vec2D
+struct Vec2D
 {
 public:
 
-  Vec2D(double _x=0, double _y=0);
+  Vec2D(double x=0, double y=0);
   double x;
   double y;
 };
 
 //------------------------------------------------------------------------------
-class Vec3D
+struct Vec3D
 {
 public:
 
-  Vec3D(double _x=0, double _y=0, double _z=0);
+  Vec3D(double x=0, double y=0, double z=0);
   double x;
   double y;
   double z;
 };
+
 #endif //_VECTOR_H

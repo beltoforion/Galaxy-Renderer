@@ -43,6 +43,9 @@ void ShowHelp()
 	printf("  F8    - Radii\r\n");
 	printf("  +     - Zoom in\r\n");
 	printf("  -     - Zoom out\r\n");
+        printf("  b     - Decrease Dust Render Size\r\n");
+        printf("  n     - Increase Dust Render Size\r\n");
+        printf("  m     - Toggle dark matter on/off\r\n");
 	printf("Misc\r\n");
 	printf("  pause - halt simulation\r\n");
 	printf("  F12   - Write frames to TGA\r\n");

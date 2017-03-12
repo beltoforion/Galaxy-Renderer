@@ -7,8 +7,8 @@
 
 //--------------------------------------------------------------------------------
 int FastMath::s_num = 0;
-double *FastMath::s_sin = NULL;
-double *FastMath::s_cos = NULL;
+double *FastMath::s_sin = nullptr;
+double *FastMath::s_cos = nullptr;
 double FastMath::s_da = 0;
 
 //--------------------------------------------------------------------------------

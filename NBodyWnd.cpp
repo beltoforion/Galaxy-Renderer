@@ -71,7 +71,8 @@ void NBodyWnd::Init(int num)
                  0.5,
                  200,      // orbital velocity at the edge of the core
                  300,      // orbital velovity at the edge of the disk
-                 30000);   // total number of stars
+                 30000,    // total number of stars
+                 true);    // has dark matter
 
 
   m_roi = m_galaxy.GetFarFieldRad() * 1.3;
@@ -294,11 +295,13 @@ void NBodyWnd::DrawStars()
   Star *pStars = m_galaxy.GetStars();
 
 
-  glPointSize(4); //pStars[i].m_mag*10);
+  glPointSize(3); //4
   glBegin(GL_POINTS);
 
   if (m_starRenderType==2)
     glColor3f(1, 1, 1);
+  
+  // Render all Stars from the stars array 
   for (int i=1; i<num; ++i)
   {
     const Vec2D &pos = pStars[i].m_pos;
@@ -313,6 +316,30 @@ void NBodyWnd::DrawStars()
 
   }
   glEnd();
+  
+  // Render a portion of the stars as bright distinct stars
+  glPointSize(6); //4
+  glBegin(GL_POINTS);
+
+ 
+  for (int i=1; i<num/30; ++i)
+  {
+    const Vec2D &pos = pStars[i].m_pos;
+    const Color &col = ColorFromTemperature(pStars[i].m_temp);
+    if (m_starRenderType==1)
+    {
+      glColor3f(0.2 + col.r * pStars[i].m_mag,
+                0.2 + col.g * pStars[i].m_mag,
+                0.2 + col.b * pStars[i].m_mag);
+    }
+    glVertex3f(pos.x, pos.y, 0.0f);
+
+  }
+  glEnd();
+  
+  
+  
+  
 
   glDisable(GL_POINT_SPRITE_ARB);
   glDisable(GL_BLEND);
@@ -336,10 +363,11 @@ void NBodyWnd::DrawDust()
   glEnable(GL_BLEND);            // soft blending of point sprites
   glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-  Star *pDust = m_galaxy.GetDust();
+  const Star *pDust = m_galaxy.GetDust();
   int num = m_galaxy.GetNumDust();
 
-  glPointSize(65); //*(double)rand()/(double)RAND_MAX);
+  // size 70 looks ok when the fov is 28174
+  glPointSize(std::min((float)(m_galaxy.GetDustRenderSize() * 28174 / m_fov), maxSize));
   glBegin(GL_POINTS);
 
   for (int i=0; i<num; ++i)
@@ -433,6 +461,7 @@ void NBodyWnd::DrawStat()
   TextOut(x0, y0 + dy * line++, "ExOuter:     %2.2f", m_galaxy.GetExOuter());
   TextOut(x0, y0 + dy * line++, "Sigma:       %2.2f", m_galaxy.GetSigma());
   TextOut(x0, y0 + dy * line++, "AngOff:      %1.4f deg/pc", m_galaxy.GetAngularOffset());
+  TextOut(x0, y0 + dy * line++, "FoV:         %1.2f pc", m_fov);
 }
 
 //------------------------------------------------------------------------------
@@ -495,8 +524,12 @@ void NBodyWnd::DrawHelp()
   TextOut(x0, y0 + dy * line++, "  F6    - Density waves (Star orbits)");
   TextOut(x0, y0 + dy * line++, "  F7    - Axis");
   TextOut(x0, y0 + dy * line++, "  F8    - Radii");
-  TextOut(x0, y0 + dy * line++, "  +     - Zoom in");
-  TextOut(x0, y0 + dy * line++, "  -     - Zoom out");
+  TextOut(x0, y0 + dy * line++, "  +    - Zoom in");
+  TextOut(x0, y0 + dy * line++, "  -    - Zoom out");
+  TextOut(x0, y0 + dy * line++, "  b    - Decrease Dust Render Size");
+  TextOut(x0, y0 + dy * line++, "  n    - Increase Dust Render Size");
+  TextOut(x0, y0 + dy * line++, "  m    - Toggle Dark Matter on/off");
+
   TextOut(x0, y0 + dy * line++, "Misc");
   TextOut(x0, y0 + dy * line++, "  pause - halt simulation");
   TextOut(x0, y0 + dy * line++, "  F12   - Write frames to TGA");
@@ -568,6 +601,10 @@ void NBodyWnd::OnProcessEvents(uint8_t type)
                 std::cout << "Bulge radius " << m_galaxy.GetCoreRad() << "\n";
                 break;
 
+          case SDLK_m:
+                m_galaxy.ToggleDarkMatter();
+                break;
+                
           case SDLK_f:
                 m_galaxy.SetCoreRad(std::max(m_galaxy.GetCoreRad()-500, 0.0));
                 std::cout << "Bulge radius " << m_galaxy.GetCoreRad() << "\n";
@@ -581,6 +618,13 @@ void NBodyWnd::OnProcessEvents(uint8_t type)
                 m_galaxy.SetRad(std::max(m_galaxy.GetRad()-1000, 0.0));
                 break;
 
+          case SDLK_b:
+                m_galaxy.SetDustRenderSize(m_galaxy.GetDustRenderSize()-5);
+                break;
+          case SDLK_n:
+                m_galaxy.SetDustRenderSize(m_galaxy.GetDustRenderSize()+5);
+                break;  
+                
           case SDLK_z:
           case SDLK_y:
                 m_galaxy.SetSigma(m_galaxy.GetSigma()+0.05);
@@ -665,7 +709,7 @@ void NBodyWnd::OnProcessEvents(uint8_t type)
                               0.5,
                               200,      // orbital velocity at the edge of the core
                               300,      // orbital velovity at the edge of the disk
-                              30000);   // total number of stars
+                              30000, true);   // total number of stars
                               break;
 
           case SDLK_KP2:
@@ -677,7 +721,7 @@ void NBodyWnd::OnProcessEvents(uint8_t type)
                                0.5,
                                200,      // orbital velocity at the edge of the core
                                300,      // orbital velovity at the edge of the disk
-                               30000);   // total number of stars
+                               30000, true);   // total number of stars
                                break;
           case SDLK_KP3:
                m_galaxy.Reset(13000,    // radius of the galaxy
@@ -688,7 +732,7 @@ void NBodyWnd::OnProcessEvents(uint8_t type)
                               0.5,
                               200,      // orbital velocity at the edge of the core
                               300,      // orbital velovity at the edge of the disk
-                              40000);   // total number of stars
+                              40000, true);   // total number of stars
                               break;
 
           // Typ Sa
@@ -701,7 +745,7 @@ void NBodyWnd::OnProcessEvents(uint8_t type)
                               0.5,
                               200,      // orbital velocity at the edge of the core
                               300,      // orbital velovity at the edge of the disk
-                              40000);   // total number of stars
+                              40000, true);   // total number of stars
                               break;
 
           // Typ SBb
@@ -714,7 +758,7 @@ void NBodyWnd::OnProcessEvents(uint8_t type)
                               0.5,
                               400,      // orbital velocity at the edge of the core
                               420,      // orbital velovity at the edge of the disk
-                              40000);   // total number of stars
+                              40000, true);   // total number of stars
                               break;
 
           // zum debuggen
@@ -727,7 +771,7 @@ void NBodyWnd::OnProcessEvents(uint8_t type)
                               0.5,
                               400,      // orbital velocity at the edge of the core
                               200,      // orbital velovity at the edge of the disk
-                              40000);   // total number of stars
+                              40000, true);   // total number of stars
                               break;
 
           // für Wikipedia: realistische Rotationskurve
@@ -740,7 +784,8 @@ void NBodyWnd::OnProcessEvents(uint8_t type)
                               0.5,
                               400,      // orbital velocity at the edge of the core
                               420,      // orbital velovity at the edge of the disk
-                              30000);   // total number of stars
+                              30000,    // total number of stars
+                              true);    // has dark matter
                               break;
 
 
@@ -748,12 +793,13 @@ void NBodyWnd::OnProcessEvents(uint8_t type)
                m_galaxy.Reset(12000,    // radius of the galaxy
                               2000,     // radius of the core
                               0.0004,   // angluar offset of the density wave per parsec of radius
-                              0.75,      // excentricity at the edge of the core
+                              0.75,     // excentricity at the edge of the core
                               0.9,      // excentricity at the edge of the disk
                               0.5,
                               400,      // orbital velocity at the edge of the core
                               150,      // orbital velovity at the edge of the disk
-                              30000);   // total number of stars
+                              30000,    // total number of stars
+                              true);    // has dark matter
                               break;
 
 
@@ -766,7 +812,8 @@ void NBodyWnd::OnProcessEvents(uint8_t type)
                               0.5,
                               200,      // orbital velocity at the edge of the core
                               220,      // orbital velovity at the edge of the disk
-                              40000);   // total number of stars
+                              40000,    // total number of stars
+                              true);    // has dark matter
                               break;
 
           case SDLK_F12:

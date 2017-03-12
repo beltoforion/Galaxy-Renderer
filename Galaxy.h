@@ -48,7 +48,8 @@ public:
              double sigma,
              double velInner,
              double velOuter,
-             int numStars);
+             int numStars,
+             bool hasDarkMatter);
 
   void Reset();
 
@@ -73,11 +74,13 @@ public:
   double GetExOuter() const;
   double GetTimeStep() const;
   double GetTime() const;
+  double GetDustRenderSize() const;
   int GetNumStars() const;
   int GetNumDust() const;
   int GetNumH2() const;
 
-
+  void ToggleDarkMatter();
+  
   void SingleTimeStep(double time);
 
   const Vec2D& GetStarPos(int idx);
@@ -88,7 +91,8 @@ public:
   void SetRad(double rad);
   void SetExInner(double ex);
   void SetExOuter(double ex);
-
+  void SetDustRenderSize(double sz);
+  
 private:
 
   void InitStars(double sigma);
@@ -109,12 +113,17 @@ private:
   double m_radFarField;    ///< The radius after which all density waves must have circular shape
   double m_sigma;          ///< Distribution of stars
   double m_velAngle;       ///< Angular velocity of the density waves
+  
+  double m_dustRenderSize;
+  
   int m_numStars;          ///< Total number of stars
   int m_numDust;           ///< Number of Dust Particles
   int m_numH2;             ///< Number of H2 Regions
 
   double m_time;
   double m_timeStep;
+  
+  bool m_bHasDarkMatter;
 
 public:
 
