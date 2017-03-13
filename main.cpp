@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 	try
 	{
 		ShowHelp();
-		NBodyWnd wndMain(800, "Density wave simulation");
+		NBodyWnd wndMain(1000, "Density wave simulation");
 
 		// Define simulation size
 		wndMain.Init(4000);

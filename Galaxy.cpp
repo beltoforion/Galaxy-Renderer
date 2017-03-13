@@ -8,6 +8,7 @@
 //------------------------------------------------------------------------
 #include "Constants.h"
 #include "FastMath.h"
+#include "Star.h"
 #include "CumulativeDistributionFunction.h"
 
 
@@ -15,36 +16,6 @@
 double rnd_spread(double v, double o)
 {
   return (v + (2*o * (double)rand()/RAND_MAX - o));
-}
-
-//------------------------------------------------------------------------
-Star::Star()
-  :m_theta(0)
-  ,m_a(0)
-  ,m_b(0)
-  ,m_center(0,0)
-{}
-
-//-----------------------------------------------------------------------
-const Vec2D& Star::CalcXY()
-{
-  double &a = m_a,
-         &b = m_b,
-         &theta = m_theta;
-  const Vec2D &p = m_center;
-
-  double beta  = -m_angle,
-         alpha = theta * Constant::DEG_TO_RAD;
-
-  // temporaries to save cpu time
-  double cosalpha = cos(alpha),
-         sinalpha = sin(alpha),
-         cosbeta  = cos(beta),
-         sinbeta  = sin(beta);
-
-  m_pos = Vec2D(p.x + (a * cosalpha * cosbeta - b * sinalpha * sinbeta),
-                p.y + (a * cosalpha * sinbeta + b * sinalpha * cosbeta));
-  return m_pos;
 }
 
 //------------------------------------------------------------------------
@@ -69,6 +40,8 @@ Galaxy::Galaxy(double rad,
     ,m_numStars(numStars)
     ,m_numDust(numStars)
     ,m_numH2(300)
+    ,m_pertN(0)
+    ,m_pertAmp(0)
     ,m_time(0)
     ,m_timeStep(0)
     ,m_bHasDarkMatter(true)
@@ -102,7 +75,10 @@ void Galaxy::Reset()
         m_velInner,
         m_velOuter,
         m_numStars,
-        m_bHasDarkMatter);
+        m_bHasDarkMatter,
+        m_pertN,
+        m_pertAmp,
+        m_dustRenderSize);
 }
 
 //------------------------------------------------------------------------
@@ -115,7 +91,10 @@ void Galaxy::Reset(double rad,
                    double velInner,
                    double velOuter,
                    int numStars,
-                   bool hasDarkMatter)
+                   bool hasDarkMatter,
+                   int pertN,
+                   double pertAmp,
+                   double dustRenderSize)
 {
   m_elEx1 = ex1;
   m_elEx2 = ex2;
@@ -130,8 +109,10 @@ void Galaxy::Reset(double rad,
   m_numStars = numStars;
   m_numDust = numStars/2;
   m_time = 0;
-  m_dustRenderSize = 70.0;
+  m_dustRenderSize = dustRenderSize;
   m_bHasDarkMatter = hasDarkMatter;
+  m_pertN = pertN;
+  m_pertAmp = pertAmp;
   
   for (int i=0; i<100; ++i)
     m_numberByRad[i] = 0;
@@ -457,6 +438,30 @@ double Galaxy::GetExOuter() const
 }
 
 //-----------------------------------------------------------------------
+int Galaxy::GetPertN() const
+{
+    return m_pertN;
+}
+
+//-----------------------------------------------------------------------
+double Galaxy::GetPertAmp() const
+{
+    return m_pertAmp;
+}
+
+//-----------------------------------------------------------------------
+void Galaxy::SetPertN(int n)
+{
+    m_pertN = std::max(0, n);
+}
+
+//-----------------------------------------------------------------------
+void Galaxy::SetPertAmp(double amp)
+{
+    m_pertAmp = std::max(0.0, amp);
+}
+
+//-----------------------------------------------------------------------
 void Galaxy::SetRad(double rad)
 {
   m_radGalaxy = rad;
@@ -507,7 +512,7 @@ void Galaxy::SingleTimeStep(double time)
   {
     m_pStars[i].m_theta += (m_pStars[i].m_velTheta * time);
     posOld = m_pStars[i].m_pos;
-    m_pStars[i].CalcXY();
+    m_pStars[i].CalcXY(m_pertN, m_pertAmp);
 
     Vec2D b = Vec2D(m_pStars[i].m_pos.x - posOld.x,
                     m_pStars[i].m_pos.y - posOld.y);
@@ -518,14 +523,14 @@ void Galaxy::SingleTimeStep(double time)
   {
     m_pDust[i].m_theta += (m_pDust[i].m_velTheta * time);
     posOld = m_pDust[i].m_pos;
-    m_pDust[i].CalcXY();
+    m_pDust[i].CalcXY(m_pertN, m_pertAmp);
   }
 
   for (int i=0; i<m_numH2*2; ++i)
   {
     m_pH2[i].m_theta += (m_pH2[i].m_velTheta * time);
     posOld = m_pDust[i].m_pos;
-    m_pH2[i].CalcXY();
+    m_pH2[i].CalcXY(m_pertN, m_pertAmp);
   }
 
 }

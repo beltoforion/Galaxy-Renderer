@@ -3,26 +3,9 @@
 
 #include "Vector.h"
 
+// Forward declarations
+class Star;
 
-//------------------------------------------------------------------------
-class Star
-{
-public:
-
-  Star();
-  const Vec2D& CalcXY();
-
-  double m_theta;    // position auf der ellipse
-  double m_velTheta; // angular velocity
-  double m_angle;    // Schräglage der Ellipse
-  double m_a;        // kleine halbachse
-  double m_b;        // große halbachse
-  double m_temp;     // star temperature
-  double m_mag;      // brigtness;
-  Vec2D  m_center;   // center of the elliptical orbit
-  Vec2D  m_vel;      // Current velocity (calculated)
-  Vec2D  m_pos;      // current position in kartesion koordinates
-};
 
 //------------------------------------------------------------------------
 /** \brief A class to encapsulate the geometric details of a spiral galaxy. */
@@ -49,7 +32,10 @@ public:
              double velInner,
              double velOuter,
              int numStars,
-             bool hasDarkMatter);
+             bool hasDarkMatter,
+             int pertN,
+             double pertAmp,
+             double dustRenderSize);
 
   void Reset();
 
@@ -78,13 +64,17 @@ public:
   int GetNumStars() const;
   int GetNumDust() const;
   int GetNumH2() const;
-
+  int GetPertN() const;
+  double GetPertAmp() const;
+  
   void ToggleDarkMatter();
   
   void SingleTimeStep(double time);
 
   const Vec2D& GetStarPos(int idx);
 
+  void SetPertN(int n);
+  void SetPertAmp(double amp);
   void SetSigma(double sigma);
   void SetAngularOffset(double offset);
   void SetCoreRad(double rad);
@@ -120,6 +110,9 @@ private:
   int m_numDust;           ///< Number of Dust Particles
   int m_numH2;             ///< Number of H2 Regions
 
+  int m_pertN;
+  double m_pertAmp;
+  
   double m_time;
   double m_timeStep;
   

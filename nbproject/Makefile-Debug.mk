@@ -41,7 +41,9 @@ OBJECTFILES= \
 	${OBJECTDIR}/Galaxy.o \
 	${OBJECTDIR}/GalaxyProp.o \
 	${OBJECTDIR}/NBodyWnd.o \
+	${OBJECTDIR}/OrbitCalculator.o \
 	${OBJECTDIR}/SDLWnd.o \
+	${OBJECTDIR}/Star.o \
 	${OBJECTDIR}/Types.o \
 	${OBJECTDIR}/Vector.o \
 	${OBJECTDIR}/main.o \
@@ -102,10 +104,20 @@ ${OBJECTDIR}/NBodyWnd.o: NBodyWnd.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NBodyWnd.o NBodyWnd.cpp
 
+${OBJECTDIR}/OrbitCalculator.o: OrbitCalculator.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/OrbitCalculator.o OrbitCalculator.cpp
+
 ${OBJECTDIR}/SDLWnd.o: SDLWnd.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SDLWnd.o SDLWnd.cpp
+
+${OBJECTDIR}/Star.o: Star.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Star.o Star.cpp
 
 ${OBJECTDIR}/Types.o: Types.cpp 
 	${MKDIR} -p ${OBJECTDIR}

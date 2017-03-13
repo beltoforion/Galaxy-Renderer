@@ -11,7 +11,9 @@
       <itemPath>GalaxyProp.h</itemPath>
       <itemPath>Intensity.h</itemPath>
       <itemPath>NBodyWnd.h</itemPath>
+      <itemPath>OrbitCalculator.h</itemPath>
       <itemPath>SDLWnd.h</itemPath>
+      <itemPath>Star.h</itemPath>
       <itemPath>Types.h</itemPath>
       <itemPath>Vector.h</itemPath>
       <itemPath>specrend.h</itemPath>
@@ -29,7 +31,9 @@
       <itemPath>Galaxy.cpp</itemPath>
       <itemPath>GalaxyProp.cpp</itemPath>
       <itemPath>NBodyWnd.cpp</itemPath>
+      <itemPath>OrbitCalculator.cpp</itemPath>
       <itemPath>SDLWnd.cpp</itemPath>
+      <itemPath>Star.cpp</itemPath>
       <itemPath>Types.cpp</itemPath>
       <itemPath>Vector.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
@@ -97,9 +101,17 @@
       </item>
       <item path="NBodyWnd.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="OrbitCalculator.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="OrbitCalculator.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="SDLWnd.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SDLWnd.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Star.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Star.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Types.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -128,6 +140,7 @@
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
+          <commandLine>-std=c++11 -O4 -ffast-math</commandLine>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
@@ -135,6 +148,14 @@
         <asmTool>
           <developmentMode>5</developmentMode>
         </asmTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerOptionItem>`pkg-config --libs SDL_ttf`</linkerOptionItem>
+            <linkerOptionItem>`pkg-config --libs gl`</linkerOptionItem>
+            <linkerOptionItem>`pkg-config --libs x11`</linkerOptionItem>
+            <linkerOptionItem>`pkg-config --libs glu`</linkerOptionItem>
+          </linkerLibItems>
+        </linkerTool>
       </compileType>
       <item path="Constants.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -162,9 +183,17 @@
       </item>
       <item path="NBodyWnd.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="OrbitCalculator.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="OrbitCalculator.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="SDLWnd.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SDLWnd.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Star.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Star.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Types.cpp" ex="false" tool="1" flavor2="0">
       </item>
