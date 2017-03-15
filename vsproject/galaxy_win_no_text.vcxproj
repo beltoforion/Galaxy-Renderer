@@ -121,6 +121,10 @@ xcopy /y /d $(SolutionDir)\..\star.bmp $(OutDir)</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y $(SolutionDir)..\particle.bmp $(OutDir)
+xcopy /Y $(SolutionDir)..\star.bmp $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -166,6 +170,11 @@ xcopy /y /d $(SolutionDir)\..\star.bmp $(OutDir)</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y $(SolutionDir)..\particle.bmp $(OutDir)
+xcopy /Y $(SolutionDir)..\star.bmp $(OutDir)</Command>
+      <Message>Copying assets to output folder</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

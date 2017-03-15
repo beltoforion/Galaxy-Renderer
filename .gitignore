@@ -1,0 +1,7 @@
+*.obj
+vsproject/galaxy_win_no_text.sdf
+*.tlog
+*.pdb
+*.ilk
+vsproject/x64/Debug/galaxy_win_no_text.log
+*.idb
