@@ -54,6 +54,12 @@
     <ClInclude Include="..\Vector.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="..\Star.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\OrbitCalculator.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Constants.cpp">
@@ -87,6 +93,12 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="..\Vector.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Star.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\OrbitCalculator.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
