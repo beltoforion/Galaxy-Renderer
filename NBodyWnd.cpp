@@ -115,10 +115,9 @@ void NBodyWnd::Render()
   // Rotate with galaxy core
   case 1:
          {
-           Vec2D p1 = m_galaxy.GetStarPos(0),
-                 p2 = m_galaxy.GetStarPos(1);
-           orient.x = p2.x - p1.x;
-           orient.y = p2.y - p1.y;
+           Vec2D p = m_galaxy.GetStarPos(1);
+           orient.x = p.x;
+           orient.y = p.y;
            orient.z = 0;
           }
           break;
@@ -126,10 +125,9 @@ void NBodyWnd::Render()
   // Rotate with edge of disk
   case 2:
          {
-           Vec2D p1 = m_galaxy.GetStarPos(0),
-                 p2 = m_galaxy.GetStarPos(2);
-           orient.x = p2.x - p1.x;
-           orient.y = p2.y - p1.y;
+           Vec2D p = m_galaxy.GetStarPos(2);
+           orient.x = p.x;
+           orient.y = p.y;
            orient.z = 0;
           }
           break;
@@ -412,9 +410,6 @@ void NBodyWnd::DrawH2()
   Star *pH2 = m_galaxy.GetH2();
   int num = m_galaxy.GetNumH2();
 
-  glPointSize(maxSize); //*(double)rand()/(double)RAND_MAX);
-
-
   for (int i=0; i<num; ++i)
   {
     int k1 = 2*i;
@@ -424,16 +419,17 @@ void NBodyWnd::DrawH2()
     const Vec2D &p2 = pH2[k2].m_pos;
 
     double dst = sqrt( (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y));
-    double size = ((1000-dst) / 10) - 50;
-    if (size<1)
+//    printf("dst: %2.1f; %2.1f\r\n", dst, 100-dst);
+     double size = ((1000-dst) / 10) - 50;
+    if (size < 1)
       continue;
 
     glPointSize(2*size);
     glBegin(GL_POINTS);
     const Color &col = ColorFromTemperature(pH2[k1].m_temp);
     glColor3f(col.r * pH2[i].m_mag * 2,
-              col.g * pH2[i].m_mag,
-              col.b * pH2[i].m_mag);
+              col.g * pH2[i].m_mag * 0.5,
+              col.b * pH2[i].m_mag * 0.5);
     glVertex3f(p1.x, p1.y, 0.0f);
     glEnd();
 

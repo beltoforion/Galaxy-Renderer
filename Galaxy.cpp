@@ -248,10 +248,12 @@ void Galaxy::InitStars(double sigma)
     int idx = (int)std::min(1.0/dh * (m_pH2[k1].m_a + m_pH2[k1].m_b)/2.0, 99.0);
     m_numberByRad[idx]++;
 
-    int k2 = 2*i+1;
-    m_pH2[k2].m_a = rad + 1000;
-    m_pH2[k2].m_b = rad * GetExcentricity(rad);
-    m_pH2[k2].m_angle = /*m_pH2[k1].m_angle;*/ GetAngularOffset(rad);
+    // Create second point 100 pc away from the first one
+    int dist = 1000.0;
+    int k2 = 2*i + 1;
+    m_pH2[k2].m_a = (rad + dist);
+    m_pH2[k2].m_b = (rad /*+ dist*/)* GetExcentricity(rad /*+ dist*/);
+    m_pH2[k2].m_angle = GetAngularOffset(rad);
     m_pH2[k2].m_theta = m_pH2[k1].m_theta;
     m_pH2[k2].m_velTheta = m_pH2[k1].m_velTheta;
     m_pH2[k2].m_center = m_pH2[k1].m_center;
