@@ -17,7 +17,7 @@
 #include "FastMath.h"
 #include "OrbitCalculator.h"
 #include "Star.h"
-#include "specrend.h"
+#include "third_party/specrend/specrend.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #pragma warning(disable : 4244)
