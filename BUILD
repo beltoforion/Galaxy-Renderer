@@ -20,11 +20,11 @@ cc_library(
     srcs = ["Galaxy.cpp"],
     hdrs = ["Galaxy.h"],
     deps = [
-        ":Vector",
-        ":FastMath",
         ":Constants",
         ":CumulativeDistributionFunction",
+        ":FastMath",
         ":Star",
+        ":Vector",
     ],
 )
 
@@ -44,13 +44,13 @@ cc_library(
     srcs = ["NBodyWnd.cpp"],
     hdrs = ["NBodyWnd.h"],
     deps = [
-        ":Galaxy",
-        ":SDLWnd",
         ":Constants",
         ":FastMath",
+        ":Galaxy",
         ":OrbitCalculator",
+        ":SDLWnd",
         ":Star",
-        "//third_party/specrend:specrend"
+        "//third_party/specrend",
     ],
 )
 
@@ -60,7 +60,7 @@ cc_library(
     hdrs = ["OrbitCalculator.h"],
     deps = [
         ":Constants",
-        ":Vector"
+        ":Vector",
     ],
 )
 
@@ -68,9 +68,15 @@ cc_library(
 # TODO(Frank): Upgrade to 2.0
 cc_library(
     name = "SDLWnd",
-    linkopts = ["-lX11", "-lGLU", "-lGL", "-L/usr/lib/x86_64-linux-gnu", "-lSDL"],
     srcs = ["SDLWnd.cpp"],
     hdrs = ["SDLWnd.h"],
+    linkopts = [
+        "-lX11",
+        "-lGLU",
+        "-lGL",
+        "-L/usr/lib/x86_64-linux-gnu",
+        "-lSDL",
+    ],
     deps = [":Vector"],
 )
 
@@ -79,7 +85,7 @@ cc_library(
     srcs = ["Star.cpp"],
     hdrs = ["Star.h"],
     deps = [
-        ":Constants", 
+        ":Constants",
         ":OrbitCalculator",
     ],
 )
@@ -101,13 +107,12 @@ cc_binary(
     srcs = ["main.cpp"],
     data = [":texture"],
     deps = [
-        ":NBodyWnd", 
+        ":NBodyWnd",
     ],
 )
-
 
 # TODO(Frank): Texture in its own folder
 filegroup(
     name = "texture",
-    srcs = glob(["*.bmp"])
+    srcs = glob(["*.bmp"]),
 )
