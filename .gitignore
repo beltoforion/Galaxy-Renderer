@@ -1,3 +1,5 @@
+build
+dist
 *.obj
 vsproject/galaxy_win_no_text.sdf
 *.tlog
@@ -6,5 +8,3 @@ vsproject/galaxy_win_no_text.sdf
 vsproject/x64/Debug/galaxy_win_no_text.log
 *.idb
 .dep.inc
-build/  # intermediate .o files
-dist/  # result binaries
