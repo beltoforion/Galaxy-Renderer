@@ -15,13 +15,10 @@ double IntensityBulge(double r, double i0, double k);
 // Intensitätsverteilung Scheibe und Zentralbereich
 double Intensity(double r, double r_bulge, double i0, double a, double k);
 
-
 //------------------------------------------------------------------------------------
 /** \brief Fast math functions using table lookup or other optimizations. */
-class FastMath
-{
+class FastMath {
 public:
-
   static void init(int num = 10000);
   static void release();
 
@@ -33,7 +30,6 @@ public:
   static void self_test();
 
 private:
-
   static int s_num;
   static double s_da;
   static double *s_sin;

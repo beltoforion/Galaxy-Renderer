@@ -1,12 +1,10 @@
 #ifndef _TYPES_H
 #define _TYPES_H
 
-
 #pragma pack(push, 1)
 
 //---------------------------------------------------------------------
-struct PODState
-{
+struct PODState {
   double x;
   double y;
   double vx;
@@ -14,14 +12,12 @@ struct PODState
 };
 
 //---------------------------------------------------------------------
-struct PODAuxState
-{
+struct PODAuxState {
   double mass;
 };
 
 //---------------------------------------------------------------------
-struct PODDeriv
-{
+struct PODDeriv {
   double vx;
   double vy;
   double ax;
@@ -31,12 +27,11 @@ struct PODDeriv
 #pragma pack(pop)
 
 //---------------------------------------------------------------------
-struct ParticleData
-{
+struct ParticleData {
   ParticleData();
   ParticleData(PODState *m_pState, PODAuxState *m_pAuxState);
   ParticleData(const ParticleData &ref);
-  ParticleData& operator=(const ParticleData &ref);
+  ParticleData &operator=(const ParticleData &ref);
 
   void Reset();
   bool IsNull() const;

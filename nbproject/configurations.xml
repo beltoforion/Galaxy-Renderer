@@ -25,7 +25,6 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>Constants.cpp</itemPath>
       <itemPath>CumulativeDistributionFunction.cpp</itemPath>
       <itemPath>FastMath.cpp</itemPath>
       <itemPath>Galaxy.cpp</itemPath>
@@ -75,8 +74,6 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="Constants.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="Constants.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="CumulativeDistributionFunction.cpp" ex="false" tool="1" flavor2="0">
@@ -157,8 +154,6 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="Constants.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="Constants.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="CumulativeDistributionFunction.cpp" ex="false" tool="1" flavor2="0">

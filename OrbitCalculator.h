@@ -3,11 +3,10 @@
 
 #include "Vector.h"
 
-class OrbitCalculator
-{
+class OrbitCalculator {
 public:
-    
-    static Vec2D Compute(double angle, double a, double b, double theta, const Vec2D &p, int pertN, double pertAmp);
+  static Vec2D Compute(double angle, double a, double b, double theta,
+                       const Vec2D &p, int pertN, double pertAmp);
 };
 
 #endif

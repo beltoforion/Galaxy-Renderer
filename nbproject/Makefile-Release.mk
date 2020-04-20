@@ -35,7 +35,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/Constants.o \
 	${OBJECTDIR}/CumulativeDistributionFunction.o \
 	${OBJECTDIR}/FastMath.o \
 	${OBJECTDIR}/Galaxy.o \
@@ -73,11 +72,6 @@ LDLIBSOPTIONS=`sdl-config --libs` `pkg-config --libs gl` `pkg-config --libs x11`
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/galaxy-renderer: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/galaxy-renderer ${OBJECTFILES} ${LDLIBSOPTIONS}
-
-${OBJECTDIR}/Constants.o: Constants.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 `sdl-config --cflags` `pkg-config --cflags gl` `pkg-config --cflags x11` `pkg-config --cflags glu`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Constants.o Constants.cpp
 
 ${OBJECTDIR}/CumulativeDistributionFunction.o: CumulativeDistributionFunction.cpp 
 	${MKDIR} -p ${OBJECTDIR}

@@ -12,30 +12,25 @@
 
 #if defined(_WIN32) || defined(_WIN64)
 // i don't support on screen text output on windows for the time being.
-#include <GL/gl.h>	
+#include <GL/gl.h>
 #include <GL/glu.h>
 #include <SDL.h>
-#include <SDL_opengl.h> 
+#include <SDL_opengl.h>
 #else
-#include <GL/gl.h>	// Header File For The OpenGL32 Library
+#include <GL/gl.h> // Header File For The OpenGL32 Library
 #include <GL/glext.h>
-#include <GL/glu.h>	// Header File For The GLu32 Library
+#include <GL/glu.h> // Header File For The GLu32 Library
 #include <SDL/SDL.h>
 #include <SDL/SDL_gfxPrimitives.h>
 #include <SDL/SDL_opengl.h> // opengl support
 #endif
 
-
-
 #include "Vector.h"
-
 
 //------------------------------------------------------------------------------
 /** \brief Basic infrastructure for grafical output using SDL/OpenGL */
-class SDLWindow
-{
+class SDLWindow {
 public:
-
   SDLWindow(int width, int height, double axisLen, const std::string &caption);
   virtual ~SDLWindow();
   void MainLoop();
@@ -46,7 +41,6 @@ public:
   virtual void Render() = 0;
 
 protected:
-
   virtual void PollEvents();
   virtual void OnProcessEvents(uint8_t type);
 
@@ -54,9 +48,9 @@ protected:
   // Camera setup
   //-----------------------------------------
 
-  const Vec3D& GetCamPos() const;
-  const Vec3D& GetCamOrient() const;
-  const Vec3D& GetCamLookAt() const;
+  const Vec3D &GetCamPos() const;
+  const Vec3D &GetCamOrient() const;
+  const Vec3D &GetCamLookAt() const;
   void SetCameraOrientation(const Vec3D &orientation);
   void SetCamera(const Vec3D &pos, const Vec3D &lookAt, const Vec3D &orient);
   void AdjustCamera();
@@ -88,29 +82,28 @@ protected:
   static GLuint s_fontBase;
 
 protected:
-
-  double m_fov;  ///< Length of an axis
-  int m_width;       ///< Width of the window in pixel
-  int m_height;      ///< Height of the window in pixel
+  double m_fov; ///< Length of an axis
+  int m_width;  ///< Width of the window in pixel
+  int m_height; ///< Height of the window in pixel
   int m_fps;
   int m_idxSnapshot;
 
   Vec3D m_camPos;    ///< Position of the camera
   Vec3D m_camLookAt; ///< Point atwhich the camera is aimed
-  Vec3D m_camOrient; ///< orientation of the camera (rotation as it aims at its target)
+  Vec3D m_camOrient; ///< orientation of the camera (rotation as it aims at its
+                     ///< target)
 
   SDL_Surface *m_pScreen;
   GLuint m_fontBase;
   GLuint m_texStar;
 
   // function pointer for point sprite extension
-  PFNGLPOINTPARAMETERFARBPROC  glPointParameterfARB;
+  PFNGLPOINTPARAMETERFARBPROC glPointParameterfARB;
   PFNGLPOINTPARAMETERFVARBPROC glPointParameterfvARB;
 
   volatile bool m_bRunning;
 
 private:
-
   void InitGL();
   void InitPointSpriteExtension();
 };
