@@ -19,7 +19,7 @@
 /** \brief Main window of th n-body simulation. */
 class NBodyWnd : public SDLWindow {
 public:
-  NBodyWnd(int sz, std::string caption);
+  NBodyWnd(const int sz_w, const int sz_h, const std::string caption);
   virtual ~NBodyWnd();
 
   virtual void Render();

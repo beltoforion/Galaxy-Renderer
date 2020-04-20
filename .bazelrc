@@ -1,4 +1,4 @@
 
-build:common --copt='-std=c++11' --copt='-Wall'
+build:common --copt='-std=c++14' --copt='-Wall'
 build:native-opt -c opt --config=common --copt='-O3' --copt='-ffast-math' --copt='-march=native' --copt='-mtune=native'
 build:debug -c dbg --config=common --copt='-O0' --copt='-g0'

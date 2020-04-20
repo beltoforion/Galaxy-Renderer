@@ -24,8 +24,8 @@
 #endif
 
 //------------------------------------------------------------------------------
-NBodyWnd::NBodyWnd(int sz, std::string caption)
-    : SDLWindow(sz, sz, 35000.0, caption), m_camOrient(0), m_starRenderType(1),
+NBodyWnd::NBodyWnd(const int sz_w, const int sz_h, const std::string caption)
+    : SDLWindow(sz_w, sz_h, 35000.0, caption), m_camOrient(0), m_starRenderType(1),
       m_flags(dspSTARS | dspAXIS | dspHELP | dspDUST | dspH2),
       m_bDumpImage(false), m_galaxy(), m_colNum(200), m_t0(1000), m_t1(10000),
       m_dt((m_t1 - m_t0) / m_colNum) {
