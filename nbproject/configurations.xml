@@ -68,7 +68,7 @@
         </ccTool>
         <linkerTool>
           <linkerLibItems>
-            <linkerOptionItem>`pkg-config --libs SDL_ttf`</linkerOptionItem>
+            <linkerOptionItem>`sdl-config --libs`</linkerOptionItem>
             <linkerOptionItem>`pkg-config --libs x11`</linkerOptionItem>
             <linkerOptionItem>`pkg-config --libs glu`</linkerOptionItem>
             <linkerOptionItem>`pkg-config --libs gl`</linkerOptionItem>
@@ -150,7 +150,7 @@
         </asmTool>
         <linkerTool>
           <linkerLibItems>
-            <linkerOptionItem>`pkg-config --libs SDL_ttf`</linkerOptionItem>
+            <linkerOptionItem>`sdl-config --libs`</linkerOptionItem>
             <linkerOptionItem>`pkg-config --libs gl`</linkerOptionItem>
             <linkerOptionItem>`pkg-config --libs x11`</linkerOptionItem>
             <linkerOptionItem>`pkg-config --libs glu`</linkerOptionItem>

@@ -64,7 +64,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=`pkg-config --libs SDL_ttf` `pkg-config --libs x11` `pkg-config --libs glu` `pkg-config --libs gl`  
+LDLIBSOPTIONS=`sdl-config --libs` `pkg-config --libs x11` `pkg-config --libs glu` `pkg-config --libs gl`  
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -77,67 +77,67 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/galaxy-renderer: ${OBJECTFILES}
 ${OBJECTDIR}/Constants.o: Constants.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Constants.o Constants.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Constants.o Constants.cpp
 
 ${OBJECTDIR}/CumulativeDistributionFunction.o: CumulativeDistributionFunction.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CumulativeDistributionFunction.o CumulativeDistributionFunction.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CumulativeDistributionFunction.o CumulativeDistributionFunction.cpp
 
 ${OBJECTDIR}/FastMath.o: FastMath.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/FastMath.o FastMath.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/FastMath.o FastMath.cpp
 
 ${OBJECTDIR}/Galaxy.o: Galaxy.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Galaxy.o Galaxy.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Galaxy.o Galaxy.cpp
 
 ${OBJECTDIR}/GalaxyProp.o: GalaxyProp.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GalaxyProp.o GalaxyProp.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GalaxyProp.o GalaxyProp.cpp
 
 ${OBJECTDIR}/NBodyWnd.o: NBodyWnd.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NBodyWnd.o NBodyWnd.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NBodyWnd.o NBodyWnd.cpp
 
 ${OBJECTDIR}/OrbitCalculator.o: OrbitCalculator.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/OrbitCalculator.o OrbitCalculator.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/OrbitCalculator.o OrbitCalculator.cpp
 
 ${OBJECTDIR}/SDLWnd.o: SDLWnd.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SDLWnd.o SDLWnd.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SDLWnd.o SDLWnd.cpp
 
 ${OBJECTDIR}/Star.o: Star.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Star.o Star.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Star.o Star.cpp
 
 ${OBJECTDIR}/Types.o: Types.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Types.o Types.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Types.o Types.cpp
 
 ${OBJECTDIR}/Vector.o: Vector.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Vector.o Vector.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Vector.o Vector.cpp
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 ${OBJECTDIR}/specrend.o: specrend.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g `pkg-config --cflags SDL_ttf` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/specrend.o specrend.cpp
+	$(COMPILE.cc) -g `sdl-config --cflags` `pkg-config --cflags x11` `pkg-config --cflags glu` `pkg-config --cflags gl`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/specrend.o specrend.cpp
 
 # Subprojects
 .build-subprojects:
