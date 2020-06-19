@@ -6,7 +6,7 @@ article at beltoforion.de about Simulating a Galaxy with the density wave thoery
 For more Details please read the Articles.
 
 English Article:
-https://beltoforion.de/article.php?a=spiral_galaxy_renderer
+https://beltoforion.de/en/spiral_galaxy_renderer
 
 German Article:
 https://beltoforion.de/de/rendern_von_spiralgalaxien
