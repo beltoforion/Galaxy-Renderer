@@ -1,4 +1,4 @@
-![titleimage](https://beltoforion.de/en/spiral_galaxy_renderer/images/link.jpg)
+![titleimage](https://beltoforion.de/en/spiral_galaxy_renderer/images/step6.jpg)
 
 # Galaxy-Renderer
 
