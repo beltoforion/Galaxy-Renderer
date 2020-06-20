@@ -1,3 +1,5 @@
+![titleimage](https://beltoforion.de/en/spiral_galaxy_renderer/images/link.jpg)
+
 # Galaxy-Renderer
 
 A Program for modelling a rotating galaxy based on the density wave theory. This archive contains the source code for an 
