@@ -1,5 +1,3 @@
-![titleimage](https://beltoforion.de/en/spiral_galaxy_renderer/images/step6.jpg)
-
 # Galaxy-Renderer
 
 A Program for modelling a rotating galaxy based on the density wave theory. This archive contains the source code for an 
@@ -13,3 +11,4 @@ https://beltoforion.de/en/spiral_galaxy_renderer
 German Article:
 https://beltoforion.de/de/rendern_von_spiralgalaxien
 
+![titleimage](https://beltoforion.de/en/spiral_galaxy_renderer/images/step6.jpg)
