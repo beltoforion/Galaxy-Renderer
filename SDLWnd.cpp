@@ -225,7 +225,7 @@ void SDLWindow::InitGL()
 
 	tex = SDL_LoadBMP("particle.bmp");
 	if (!tex)
-		throw std::runtime_error("can't load star texture (particle.bmp).");
+		throw std::runtime_error("Can't load star texture (particle.bmp).");
 
 	// Check that the image's width is a power of 2
 	if (tex->w & (tex->w - 1))
