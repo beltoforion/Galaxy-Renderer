@@ -1,2 +1,0 @@
-C:\Users\user\Documents\GitHub\Galaxy-Renderer\vsproject\Debug\Galaxy-Renderer.exe
-C:\Users\user\Documents\GitHub\Galaxy-Renderer\vsproject\Debug\Galaxy-Renderer.pdb
