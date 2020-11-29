@@ -1,6 +1,5 @@
 #include "Star.h"
 
-#include "OrbitCalculator.h"
 #include "Constants.h"
 #include <cmath>
 

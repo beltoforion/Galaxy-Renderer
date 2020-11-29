@@ -9,7 +9,6 @@
 
 #include "Constants.h"
 #include "specrend.h"
-#include "FastMath.h"
 #include "Star.h"
 
 

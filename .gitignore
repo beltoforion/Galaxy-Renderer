@@ -1,6 +1,8 @@
 vsproject/x64/Debug/*
 vsproject/x64/Release/*
 vsproject/packages/*
+vsproject/Debug/*
+vsproject/Release/*
 vsproject/ipch/*
 vsproject/.vs/*
 vsproject/.nuget/*
