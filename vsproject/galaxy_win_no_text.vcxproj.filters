@@ -67,14 +67,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\particle.bmp">
-      <Filter>Ressourcendateien</Filter>
-    </Image>
-    <Image Include="..\star.bmp">
-      <Filter>Ressourcendateien</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
 </Project>
