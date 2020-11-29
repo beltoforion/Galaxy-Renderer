@@ -1,22 +1,45 @@
 #include "Star.h"
 
-#include <cmath>
-#include "Constants.h"
 #include "OrbitCalculator.h"
+#include "Constants.h"
+#include <cmath>
 
-using namespace std;
 
-//------------------------------------------------------------------------
 Star::Star()
-  :m_theta(0)
-  ,m_a(0)
-  ,m_b(0)
-  ,m_center(0,0)
+	: m_theta(0)
+	, m_velTheta(0)
+	, m_angle(0)
+	, m_a(0)
+	, m_b(0)
+	, m_temp(0)
+	, m_mag(0)
+	, m_center(0, 0)
+	, m_vel(0, 0)
+	, m_pos(0, 0)
 {}
 
-//-----------------------------------------------------------------------
-const Vec2D& Star::CalcXY(int pertN, double pertAmp)
+
+void Star::CalcXY(int pertN, double pertAmp)
 {
-    m_pos = OrbitCalculator::Compute(m_angle, m_a, m_b, m_theta, m_center, pertN, pertAmp);
-    return m_pos;
+	double beta = -m_angle;
+	double alpha = m_theta * Constant::DEG_TO_RAD;
+
+	// temporaries to save cpu time
+	double cosalpha = cos(alpha);
+	double sinalpha = sin(alpha);
+	double cosbeta = cos(beta);
+	double sinbeta = sin(beta);
+
+	Vec2D pos = Vec2D(
+		m_center.x + (m_a * cosalpha * cosbeta - m_b * sinalpha * sinbeta),
+		m_center.y + (m_a * cosalpha * sinbeta + m_b * sinalpha * cosbeta));
+
+	// Add small perturbations to create more spiral arms
+	if (pertAmp > 0 && pertN > 0)
+	{
+		pos.x += (m_a / pertAmp) * sin(alpha * 2 * pertN);
+		pos.y += (m_a / pertAmp) * cos(alpha * 2 * pertN);
+	}
+
+	m_pos = pos;
 }

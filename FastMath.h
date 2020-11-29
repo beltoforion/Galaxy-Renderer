@@ -1,22 +1,16 @@
-#ifndef _FAST_MATH_H
-#define _FAST_MATH_H
+#pragma once
 
-//------------------------------------------------------------------------------------
 #include <cmath>
 
-//--------------------------------------------------------------------------------
 double IntensityDisk(double r, double i0, double a);
 
-//--------------------------------------------------------------------------------
 // Intensitätsverteilung im Zentralbereich
 double IntensityBulge(double r, double i0, double k);
 
-//--------------------------------------------------------------------------------
 // Intensitätsverteilung Scheibe und Zentralbereich
 double Intensity(double r, double r_bulge, double i0, double a, double k);
 
 
-//------------------------------------------------------------------------------------
 /** \brief Fast math functions using table lookup or other optimizations. */
 class FastMath
 {
@@ -39,5 +33,3 @@ private:
   static double *s_sin;
   static double *s_cos;
 };
-
-#endif

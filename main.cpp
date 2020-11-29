@@ -1,26 +1,17 @@
-/*
- * File:   main.cpp
- * Author: user
- *
- * Created on 5. Juli 2009, 22:15
- */
-
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
 
- //------------------------------------------------------------------------------
 #include "NBodyWnd.h"
 
-using namespace std;
 
 void ShowHelp()
 {
 	printf("Keyboard commands\r\n");
 	printf("Camera\r\n");
 	printf("  1     - centric; fixed\r\n");
-//	printf("  2     - centric; rotating with core speed\r\n");
-//	printf("  3     - centric; rotating with speed of outer disc\r\n");
+	//	printf("  2     - centric; rotating with core speed\r\n");
+	//	printf("  3     - centric; rotating with speed of outer disc\r\n");
 	printf("Galaxy geometry\r\n");
 	printf("  q     - increase inner excentricity\r\n");
 	printf("  a     - decrease inner excentricity\r\n");
@@ -43,9 +34,9 @@ void ShowHelp()
 	printf("  F8    - Radii\r\n");
 	printf("  +     - Zoom in\r\n");
 	printf("  -     - Zoom out\r\n");
-        printf("  b     - Decrease Dust Render Size\r\n");
-        printf("  n     - Increase Dust Render Size\r\n");
-        printf("  m     - Toggle dark matter on/off\r\n");
+	printf("  b     - Decrease Dust Render Size\r\n");
+	printf("  n     - Increase Dust Render Size\r\n");
+	printf("  m     - Toggle dark matter on/off\r\n");
 	printf("Misc\r\n");
 	printf("  pause - halt simulation\r\n");
 	printf("  F12   - Write frames to TGA\r\n");
@@ -60,11 +51,10 @@ int main(int argc, char** argv)
 		ShowHelp();
 		NBodyWnd wndMain(1000, "Density wave simulation");
 
-		// Define simulation size
 		wndMain.Init(4000);
 		wndMain.MainLoop();
 	}
-	catch (std::exception & exc)
+	catch (std::exception& exc)
 	{
 		std::cout << "Fatal error: " << exc.what() << std::endl;
 	}

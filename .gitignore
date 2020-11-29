@@ -1,7 +1,14 @@
+vsproject/x64/Debug/*
+vsproject/x64/Release/*
+vsproject/packages/*
+vsproject/ipch/*
+vsproject/.vs/*
+vsproject/.nuget/*
 *.obj
-vsproject/galaxy_win_no_text.sdf
 *.tlog
 *.pdb
 *.ilk
-vsproject/x64/Debug/galaxy_win_no_text.log
 *.idb
+*.log
+*.ipch
+*.opendb
