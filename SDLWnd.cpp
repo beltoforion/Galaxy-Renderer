@@ -19,88 +19,26 @@
 #endif
 
 
-// static functions / variables
-GLuint SDLWindow::s_fontBase = 0;
-
-
 void SDLWindow::InitFont()
 {
-	_pFont = TTF_OpenFont("Sans.ttf", 24); 
-
-	//SDL_Color White = { 255, 255, 255 };
-	//SDL_Surface* surfaceMessage = TTF_RenderText_Solid(_pFont, "put your text here", White); // as TTF_RenderText_Solid could only be used on SDL_Surface then you have to create the surface first
-	//SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage); //now you can convert it into a texture
-	//SDL_Rect Message_rect; //create a rect
-
-	//Message_rect.x = 0;  //controls the rect's x coordinate 
-	//Message_rect.y = 0; // controls the rect's y coordinte
-	//Message_rect.w = 100; // controls the width of the rect
-	//Message_rect.h = 100; // controls the height of the rect
-
-	////Mind you that (0,0) is on the top left of the window/screen, think a rect as the text's box, that way it would be very simple to understand
-
-	////Now since it's a texture, you have to put RenderCopy in your game loop area, the area where the whole code executes
-
-	//SDL_RenderCopy(renderer, Message, nullptr, &Message_rect); //you put the renderer's name first, the Message, the crop size(you can ignore this if you don't want to dabble with cropping), and the rect which is the size and coordinate of your texture
-
-	////Don't forget to free your surface and texture
-	//SDL_FreeSurface(surfaceMessage);
-	//SDL_DestroyTexture(Message);
-
-#if !defined(_WIN32) && !defined(_WIN64)
-	Display* dpy;          /* Our current X display */
-	XFontStruct* fontInfo; /* Our font info */
-
-	/* Sotrage for 96 characters */
-	s_fontBase = glGenLists(96);
-
-	/* Get our current display long enough to get the fonts */
-	dpy = XOpenDisplay(nullptr);
-
-	/* Get the font information */
-	fontInfo = XLoadQueryFont(dpy, "-adobe-helvetica-medium-r-normal--18-*-*-*-p-*-iso8859-1");
-
-	/* If the above font didn't exist try one that should */
-	if (fontInfo == nullptr)
-	{
-		fontInfo = XLoadQueryFont(dpy, "fixed");
-
-		/* If that font doesn't exist, something is wrong */
-		if (fontInfo == nullptr)
-			throw std::runtime_error("no X font available?");
-	}
-
-	/* generate the list */
-	glXUseXFont(fontInfo->fid, 32, 96, s_fontBase);
-
-	/* Recover some memory */
-	XFreeFont(dpy, fontInfo);
-
-	/* close the display now that we're done with it */
-	XCloseDisplay(dpy);
-#endif
-}
-
-
-void SDLWindow::KillFont()
-{
-	glDeleteLists(s_fontBase, 96);
+	TTF_Init();
+	_pFont = TTF_OpenFont("arial.ttf", 12); 
+	if (_pFont == nullptr)
+		throw std::runtime_error(TTF_GetError());
 }
 
 
 void SDLWindow::TextOut(const char* fmt, ...)
 {
-	char text[256]; /* Holds our string */
-	va_list ap;     /* Pointer to our list of elements */
+/*
+	char text[256]; 
+	va_list ap;     
 
-	/* If there's no text, do nothing */
 	if (fmt == nullptr)
 		return;
 
-	/* Parses The String For Variables */
 	va_start(ap, fmt);
 
-	/* Converts Symbols To Actual Numbers */
 	vsprintf(text, fmt, ap);
 	va_end(ap);
 
@@ -108,12 +46,12 @@ void SDLWindow::TextOut(const char* fmt, ...)
 	glListBase(s_fontBase - 32);   // Sets base character to 32
 	glCallLists(strlen(text), GL_UNSIGNED_BYTE, text); // Draws the text
 	glPopAttrib();                 // Pops the Display List Bits
+*/
 }
 
 void SDLWindow::TextOut(int x, int y, const char* fmt, ...)
 {
-	Vec3D p = GetOGLPos(x, y);
-	glRasterPos2f((GLfloat)p.x, (GLfloat)p.y);
+	return;
 
 	char text[256];
 	va_list ap;
@@ -121,17 +59,54 @@ void SDLWindow::TextOut(int x, int y, const char* fmt, ...)
 	if (fmt == nullptr)
 		return;
 
-	/* Parses The String For Variables */
 	va_start(ap, fmt);
 
-	/* Converts Symbols To Actual Numbers */
 	vsprintf(text, fmt, ap);
 	va_end(ap);
 
-	glPushAttrib(GL_LIST_BIT);     // Pushes the Display List Bits
-	glListBase(s_fontBase - 32);   // Sets base character to 32
-	glCallLists(strlen(text), GL_UNSIGNED_BYTE, text); // Draws the text
-	glPopAttrib();                 // Pops the Display List Bits
+	Vec3D p = GetOGLPos(x, y);
+
+	auto *pSurface = TTF_RenderText_Solid(_pFont, text, { 255, 255,  255 });
+	if (pSurface == nullptr)
+		return;
+
+	SDL_Texture *pTexture = SDL_CreateTextureFromSurface(_pSdlRenderer, pSurface);
+	if (pTexture == nullptr)
+		return;
+
+//	glRasterPos2f((GLfloat)x, (GLfloat)y);
+
+	GLfloat xp = x, yp = y;
+	GLfloat w = 100, h = 20;
+	SDL_GL_BindTexture(pTexture, nullptr, nullptr);
+	
+	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glEnable(GL_TEXTURE_2D);       // point sprite texture support
+
+	// make a rectangle
+	glBegin(GL_QUADS);
+		glTexCoord2i(0, 0);
+		glVertex3f(xp, yp, 0);
+
+		glTexCoord2i(1, 0);
+		glVertex3f(xp + w, yp, 0);
+
+		glTexCoord2i(1, 1);
+		glVertex3f(xp + w, yp + h, 0);
+
+		glTexCoord2i(0, 1);
+		glVertex3f(xp, yp + h, 0);
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+	
+	SDL_GL_UnbindTexture(pTexture);
+
+	if (pSurface!=nullptr)
+		SDL_FreeSurface(pSurface);
+
+	if (pTexture!=nullptr)
+		SDL_DestroyTexture(pTexture);
 }
 
 /** \brief get opengl position from a screen position
@@ -170,7 +145,8 @@ SDLWindow::SDLWindow()
 	, _camPos(0, 0, 2)
 	, _camLookAt(0, 0, 0)
 	, _camOrient(0, 1, 0)
-	, _pScreen(nullptr)
+	, _pSdlWnd(nullptr)
+	, _pSdlRenderer(nullptr)
 	, m_fontBase(0)
 	, m_texStar(0)
 	, _bRunning(true)
@@ -179,9 +155,19 @@ SDLWindow::SDLWindow()
 
 SDLWindow::~SDLWindow()
 {
-	KillFont();
 	SDL_Quit();
 }
+
+/*
+void SDLWindow::Close()
+{
+	SDL_DestroyRenderer(_pSdlRenderer);
+	SDL_DestroyWindow(screen.window);
+	screen.renderer = NULL;
+	screen.window = NULL;
+	SDL_Quit();
+}
+*/
 
 void SDLWindow::Init(int width, int height, double axisLen, const std::string& caption)
 {
@@ -203,17 +189,17 @@ void SDLWindow::Init(int width, int height, double axisLen, const std::string& c
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-	_pScreen = SDL_CreateWindow(
+	_pSdlWnd = SDL_CreateWindow(
 		caption.c_str(),
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		width, height,
 		SDL_WINDOW_OPENGL);
-
-	if (!_pScreen)
+	if (!_pSdlWnd)
 		throw std::runtime_error(SDL_GetError());
 
-	_context = SDL_GL_CreateContext(_pScreen);
+	_pSdlRenderer = SDL_CreateRenderer(_pSdlWnd, -1, SDL_RENDERER_ACCELERATED);
+	_sdcGlContext = SDL_GL_CreateContext(_pSdlWnd);
 
 	glewInit();
 
@@ -356,11 +342,6 @@ void SDLWindow::MainLoop()
 			t1 = t2;
 		}
 	}
-}
-
-SDL_Window* SDLWindow::Surface()
-{
-	return _pScreen;
 }
 
 int SDLWindow::GetWidth() const

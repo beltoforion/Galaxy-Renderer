@@ -60,16 +60,14 @@ protected:
 	int GetFPS() const;
 	void ScaleAxis(double scale);
 	double GetFOV() const;
-	SDL_Window* Surface();
 	SDL_Event m_event;
 
 	void InitFont();
-	static void KillFont();
-	static void TextOut(const char* fmt, ...);
-	static void TextOut(int x, int y, const char* fmt, ...);
-	static Vec3D GetOGLPos(int x, int y);
+	
+	void TextOut(const char* fmt, ...);
+	void TextOut(int x, int y, const char* fmt, ...);
 
-	static GLuint s_fontBase;
+	static Vec3D GetOGLPos(int x, int y);
 
 	double _fov;		///< Length of an axis
 	
@@ -83,9 +81,11 @@ protected:
 	Vec3D _camLookAt;	///< Point atwhich the camera is aimed
 	Vec3D _camOrient;	///< orientation of the camera (rotation as it aims at its target)
 
-	TTF_Font* _pFont;
-	SDL_Window* _pScreen;
-	SDL_GLContext _context;
+	TTF_Font *_pFont;
+	SDL_Window *_pSdlWnd;
+	SDL_Renderer *_pSdlRenderer;
+	SDL_GLContext _sdcGlContext;
+
 
 	GLuint m_fontBase;
 	GLuint m_texStar;

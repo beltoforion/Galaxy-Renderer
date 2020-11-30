@@ -200,7 +200,7 @@ void GalaxyWnd::Render()
 	if (m_flags & dspHELP)
 		DrawHelp();
 
-	SDL_GL_SwapWindow(_pScreen);
+	SDL_GL_SwapWindow(_pSdlWnd);
 	SDL_Delay(1);
 }
 

@@ -129,7 +129,8 @@ xcopy /y /d $(SolutionDir)\..\star.bmp $(OutDir)</Command>
       <AdditionalLibraryDirectories>C:\Users\user\Documents\GitHub\Galaxy-Renderer\vsproject\dependencies\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y $(SolutionDir)..\assets\particle.bmp $(OutDir)</Command>
+      <Command>xcopy /Y $(SolutionDir)..\assets\particle.bmp $(OutDir)
+xcopy /Y $(SolutionDir)..\assets\arial.ttf $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -181,7 +182,8 @@ xcopy /y /d $(SolutionDir)\..\star.bmp $(OutDir)</Command>
       <AdditionalLibraryDirectories>C:\Users\user\Documents\GitHub\Galaxy-Renderer\vsproject\dependencies\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y $(SolutionDir)..\assets\particle.bmp $(OutDir)</Command>
+      <Command>xcopy /Y $(SolutionDir)..\assets\particle.bmp $(OutDir)
+xcopy /Y $(SolutionDir)..\assets\arial.ttf $(OutDir)</Command>
       <Message>Copying assets to output folder</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
