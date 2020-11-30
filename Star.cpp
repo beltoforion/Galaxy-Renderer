@@ -24,10 +24,10 @@ void Star::CalcXY(int pertN, double pertAmp)
 	double alpha = m_theta * Constant::DEG_TO_RAD;
 
 	// temporaries to save cpu time
-	double cosalpha = cos(alpha);
-	double sinalpha = sin(alpha);
-	double cosbeta = cos(beta);
-	double sinbeta = sin(beta);
+	double cosalpha = std::cos(alpha);
+	double sinalpha = std::sin(alpha);
+	double cosbeta = std::cos(beta);
+	double sinbeta = std::sin(beta);
 
 	Vec2D pos = Vec2D(
 		m_center.x + (m_a * cosalpha * cosbeta - m_b * sinalpha * sinbeta),

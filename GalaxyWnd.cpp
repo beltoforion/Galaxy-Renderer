@@ -1,10 +1,7 @@
-#include "NBodyWnd.h"
+#include "GalaxyWnd.h"
 #include <algorithm>
 #include <iostream>
 #include <cmath>
-#include <cassert>
-#include <limits>
-#include <omp.h>
 #include <stdexcept>
 
 #include "Constants.h"
@@ -12,8 +9,8 @@
 #include "Star.h"
 
 
-NBodyWnd::NBodyWnd(int sz, std::string caption)
-	:SDLWindow(sz, sz, 35000.0, caption)
+GalaxyWnd::GalaxyWnd()
+	: SDLWindow()
 	, m_camOrient(0)
 	, m_starRenderType(1)
 	, m_flags(dspSTARS | dspAXIS | dspHELP | dspDUST | dspH2)
@@ -35,9 +32,62 @@ NBodyWnd::NBodyWnd(int sz, std::string caption)
 	}
 }
 
-void NBodyWnd::Init(int num)
+void GalaxyWnd::InitGL()
 {
-	// OpenGL initialization
+	glShadeModel(GL_SMOOTH);
+	glClearColor(0.0f, 0.0f, 0.1f, 0.0f);  // black background
+	glViewport(0, 0, GetWidth(), GetHeight());
+
+	SDL_Surface* tex;
+
+	tex = SDL_LoadBMP("particle.bmp");
+	if (!tex)
+		throw std::runtime_error("Can't load star texture (particle.bmp).");
+
+	// Check that the image's width is a power of 2
+	if (tex->w & (tex->w - 1))
+		throw std::runtime_error("texture width is not a power of 2.");
+
+	// Also check if the height is a power of 2
+	if (tex->h & (tex->h - 1))
+		throw std::runtime_error("texture height is not a power of 2.");
+
+	// get the number of channels in the SDL surface
+	GLint  nOfColors = tex->format->BytesPerPixel;
+	GLenum texture_format;
+	if (nOfColors == 4)     // contains an alpha channel
+	{
+		texture_format = GL_RGBA;
+	}
+	else if (nOfColors == 3)     // no alpha channel
+	{
+		texture_format = GL_RGB;
+	}
+	else
+		throw std::runtime_error("image is not truecolor");
+
+	// Have OpenGL generate a texture object handle for us
+	glGenTextures(1, &m_texStar);
+
+	// Bind the texture object
+	glBindTexture(GL_TEXTURE_2D, m_texStar);
+
+	// Set the texture's stretching properties
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Edit the texture object's image data using the information SDL_Surface gives us
+	glTexImage2D(
+		GL_TEXTURE_2D,
+		0,
+		nOfColors,
+		tex->w,
+		tex->h,
+		0,
+		texture_format,
+		GL_UNSIGNED_BYTE,
+		tex->pixels);
+
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 	glEnable(GL_POINT_SPRITE);
@@ -53,8 +103,10 @@ void NBodyWnd::Init(int num)
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glewInit();
+}
 
+void GalaxyWnd::InitSimulation()
+{
 	m_galaxy.Reset(
 		13000,    // radius of the galaxy
 		4000,     // radius of the core
@@ -70,11 +122,10 @@ void NBodyWnd::Init(int num)
 		40,       // Amplitude damping factor of perturbation
 		100);      // dust render size in pixel
 
-
 	m_roi = m_galaxy.GetFarFieldRad() * 1.3;
 }
 
-void NBodyWnd::Render()
+void GalaxyWnd::Render()
 {
 	static long ct = 0;
 	if (!(m_flags & dspPAUSE))
@@ -88,40 +139,39 @@ void NBodyWnd::Render()
 	switch (m_camOrient)
 	{
 		// Default orientation
-	case 0: orient.x = 0;
-		orient.y = 1;
-		orient.z = 0;
-		break;
+		case 0: orient.x = 0;
+			orient.y = 1;
+			orient.z = 0;
+			break;
 
 		// Rotate with galaxy core
-	case 1:
-	{
-		Vec2D p = m_galaxy.GetStarPos(1);
-		orient.x = p.x;
-		orient.y = p.y;
-		orient.z = 0;
-	}
-	break;
+		case 1:
+		{
+			Vec2D p = m_galaxy.GetStarPos(1);
+			orient.x = p.x;
+			orient.y = p.y;
+			orient.z = 0;
+		}
+		break;
 
-	// Rotate with edge of disk
-	case 2:
-	{
-		Vec2D p = m_galaxy.GetStarPos(2);
-		orient.x = p.x;
-		orient.y = p.y;
-		orient.z = 0;
-	}
-	break;
+		// Rotate with edge of disk
+		case 2:
+		{
+			Vec2D p = m_galaxy.GetStarPos(2);
+			orient.x = p.x;
+			orient.y = p.y;
+			orient.z = 0;
+		}
+		break;
 	}
 
-	Vec3D lookAt(0, 0, 0),
-		pos(0, 0, 5000);
+	Vec3D lookAt(0, 0, 0);
+	Vec3D pos(0, 0, 5000);
+
 	SetCamera(pos, lookAt, orient);
 
 	if (!(m_flags & dspPAUSE))
-	{
 		m_galaxy.SingleTimeStep(100000); // time in years
-	}
 
 	if (m_flags & dspAXIS)
 		DrawAxis(Vec2D(0, 0));
@@ -150,12 +200,12 @@ void NBodyWnd::Render()
 	if (m_flags & dspHELP)
 		DrawHelp();
 
-	SDL_GL_SwapWindow(m_pScreen);
+	SDL_GL_SwapWindow(_pScreen);
 	SDL_Delay(1);
 }
 
 
-void NBodyWnd::DrawEllipsis(double a, double b, double angle)
+void GalaxyWnd::DrawEllipsis(double a, double b, double angle)
 {
 	const int steps = 100;
 	const double x = 0;
@@ -184,10 +234,11 @@ void NBodyWnd::DrawEllipsis(double a, double b, double angle)
 
 		glVertex3f(fx, fy, 0);
 	}
+
 	glEnd();
 }
 
-void NBodyWnd::DrawVelocity()
+void GalaxyWnd::DrawVelocity()
 {
 	Star* pStars = m_galaxy.GetStars();
 
@@ -238,7 +289,7 @@ void NBodyWnd::DrawVelocity()
 
 }
 
-void NBodyWnd::DrawDensityWaves(int num, double rad)
+void GalaxyWnd::DrawDensityWaves(int num, double rad)
 {
 	double dr = rad / num;
 
@@ -252,7 +303,7 @@ void NBodyWnd::DrawDensityWaves(int num, double rad)
 	}
 }
 
-void NBodyWnd::DrawStars()
+void GalaxyWnd::DrawStars()
 {
 	glBindTexture(GL_TEXTURE_2D, m_texStar);
 
@@ -319,7 +370,7 @@ void NBodyWnd::DrawStars()
 	glDisable(GL_TEXTURE_2D);
 }
 
-void NBodyWnd::DrawDust()
+void GalaxyWnd::DrawDust()
 {
 	glBindTexture(GL_TEXTURE_2D, m_texStar);
 
@@ -338,7 +389,7 @@ void NBodyWnd::DrawDust()
 	int num = m_galaxy.GetNumDust();
 
 	// size 70 looks ok when the fov is 28174
-	glPointSize(std::min((float)(m_galaxy.GetDustRenderSize() * 28174 / m_fov), maxSize));
+	glPointSize(std::min((float)(m_galaxy.GetDustRenderSize() * 28174 / _fov), maxSize));
 	glBegin(GL_POINTS);
 
 	for (int i = 0; i < num; ++i)
@@ -358,8 +409,7 @@ void NBodyWnd::DrawDust()
 	glDisable(GL_BLEND);
 }
 
-
-void NBodyWnd::DrawH2()
+void GalaxyWnd::DrawH2()
 {
 	glBindTexture(GL_TEXTURE_2D, m_texStar);
 
@@ -414,7 +464,7 @@ void NBodyWnd::DrawH2()
 	glDisable(GL_BLEND);
 }
 
-void NBodyWnd::DrawStat()
+void GalaxyWnd::DrawStat()
 {
 	double x0 = 10, y0 = 20, dy = 20;
 	int line = 0;
@@ -429,13 +479,13 @@ void NBodyWnd::DrawStat()
 	TextOut(x0, y0 + dy * line++, "ExOuter:     %2.2f", m_galaxy.GetExOuter());
 	TextOut(x0, y0 + dy * line++, "Sigma:       %2.2f", m_galaxy.GetSigma());
 	TextOut(x0, y0 + dy * line++, "AngOff:      %1.4f deg/pc", m_galaxy.GetAngularOffset());
-	TextOut(x0, y0 + dy * line++, "FoV:         %1.2f pc", m_fov);
+	TextOut(x0, y0 + dy * line++, "FoV:         %1.2f pc", _fov);
 	TextOut(x0, y0 + dy * line++, "Spiral Arms:");
 	TextOut(x0, y0 + dy * line++, "  Num pert:   %d", m_galaxy.GetPertN());
 	TextOut(x0, y0 + dy * line++, "  pertDamp:   %1.2f", m_galaxy.GetPertAmp());
 }
 
-void NBodyWnd::DrawGalaxyRadii()
+void GalaxyWnd::DrawGalaxyRadii()
 {
 	double r;
 
@@ -461,7 +511,7 @@ void NBodyWnd::DrawGalaxyRadii()
 	TextOut("Intergalactic medium");
 }
 
-void NBodyWnd::DrawHelp()
+void GalaxyWnd::DrawHelp()
 {
 	double x0 = 10, y0 = 20, dy = 20;
 	int line = 0;
@@ -510,7 +560,7 @@ void NBodyWnd::DrawHelp()
 	TextOut(x0, y0 + dy * line++, "  Keypad 0 - 4");
 }
 
-NBodyWnd::Color NBodyWnd::ColorFromTemperature(double temp) const
+GalaxyWnd::Color GalaxyWnd::ColorFromTemperature(double temp) const
 {
 	int idx = (temp - m_t0) / (m_t1 - m_t0) * m_colNum;
 	idx = std::min(m_colNum - 1, idx);
@@ -518,7 +568,7 @@ NBodyWnd::Color NBodyWnd::ColorFromTemperature(double temp) const
 	return m_col[idx];
 }
 
-void NBodyWnd::OnProcessEvents(Uint32 type)
+void GalaxyWnd::OnProcessEvents(Uint32 type)
 {
 	switch (type)
 	{

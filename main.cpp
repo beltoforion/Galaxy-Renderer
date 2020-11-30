@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <iostream>
 
-#include "NBodyWnd.h"
+#include "GalaxyWnd.h"
 
 
 void ShowHelp()
@@ -49,9 +49,8 @@ int main(int argc, char** argv)
 	try
 	{
 		ShowHelp();
-		NBodyWnd wndMain(1000, "Density wave simulation");
-
-		wndMain.Init(4000);
+		GalaxyWnd wndMain;
+		wndMain.Init(1000, 1000, 35000.0, "Rendering a Galaxy with Density Waves");
 		wndMain.MainLoop();
 	}
 	catch (std::exception& exc)

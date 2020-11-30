@@ -5,8 +5,6 @@
 #include <cmath>
 #include <stdexcept>
 
-using namespace std;
-
 
 CumulativeDistributionFunction::CumulativeDistributionFunction()
 	:m_pDistFun(nullptr)

@@ -8,19 +8,21 @@
 
 
 /** \brief Main window of th n-body simulation. */
-class NBodyWnd final : public SDLWindow
+class GalaxyWnd final : public SDLWindow
 {
 public:
 
-	NBodyWnd(int sz, std::string caption);
+	GalaxyWnd();
 
 	virtual void Render();
 	virtual void OnProcessEvents(Uint32 type);
 
-	void Init(int num);
+
+protected:
+	void InitGL() override;
+	void InitSimulation() override;
 
 private:
-
 	enum EDisp
 	{
 		dspNONE = 0,
@@ -44,7 +46,7 @@ private:
 		double b;
 	};
 
-	NBodyWnd(const NBodyWnd& orig);
+	GalaxyWnd(const GalaxyWnd& orig);
 
 	void DrawStars();
 	void DrawDust();

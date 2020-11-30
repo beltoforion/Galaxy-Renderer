@@ -3,10 +3,8 @@
 
 struct Vec2D final
 {
-public:
-
 	Vec2D(double a_x = 0, double a_y = 0)
-		:x(a_x)
+		: x(a_x)
 		, y(a_y)
 	{}
 
@@ -17,8 +15,6 @@ public:
 
 struct Vec3D final
 {
-public:
-
 	Vec3D(double a_x = 0, double a_y = 0, double a_z = 0)
 		: x(a_x)
 		, y(a_y)
@@ -40,7 +36,7 @@ public:
 
 	double m_theta;    // position auf der ellipse
 	double m_velTheta; // angular velocity
-	double m_angle;    // Schräglage der Ellipse
+	double m_angle;    // tilt of the ellipse
 	double m_a;        // kleine halbachse
 	double m_b;        // große halbachse
 	double m_temp;     // star temperature

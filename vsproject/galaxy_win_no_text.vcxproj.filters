@@ -27,9 +27,6 @@
     <ClInclude Include="..\Galaxy.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="..\NBodyWnd.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="..\SDLWnd.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -37,6 +34,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="..\Star.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GalaxyWnd.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,9 +53,6 @@
     <ClCompile Include="..\main.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="..\NBodyWnd.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="..\SDLWnd.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
@@ -63,6 +60,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="..\Star.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GalaxyWnd.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

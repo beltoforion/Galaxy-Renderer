@@ -11,7 +11,7 @@
 #include <SDL_ttf.h>
 
 #if defined(_WIN32) || defined(_WIN64)
-#pragma warning(disable:4244)
+
 #else
 #include <GL/gl.h>	// Header File For The OpenGL32 Library
 #include <GL/glu.h>	// Header File For The GLu32 Library
@@ -25,7 +25,7 @@ GLuint SDLWindow::s_fontBase = 0;
 
 void SDLWindow::InitFont()
 {
-//	_pFont = TTF_OpenFont("Sans.ttf", 24); 
+	_pFont = TTF_OpenFont("Sans.ttf", 24); 
 
 	//SDL_Color White = { 255, 255, 255 };
 	//SDL_Surface* surfaceMessage = TTF_RenderText_Solid(_pFont, "put your text here", White); // as TTF_RenderText_Solid could only be used on SDL_Surface then you have to create the surface first
@@ -160,21 +160,35 @@ Vec3D SDLWindow::GetOGLPos(int x, int y)
 }
 
 
-SDLWindow::SDLWindow(int width, int height, double axisLen, const std::string& caption)
-	:m_event()
-	, m_fov(axisLen)
+SDLWindow::SDLWindow()
+	: m_event()
+	, _fov(0)
 	, _width(0)
 	, _height(0)
-	, m_fps(0)
-	, m_idxSnapshot(0)
-	, m_camPos(0, 0, 2)
-	, m_camLookAt(0, 0, 0)
-	, m_camOrient(0, 1, 0)
-	, m_pScreen(nullptr)
+	, _caption()
+	, _fps(0)
+	, _camPos(0, 0, 2)
+	, _camLookAt(0, 0, 0)
+	, _camOrient(0, 1, 0)
+	, _pScreen(nullptr)
 	, m_fontBase(0)
 	, m_texStar(0)
-	, m_bRunning(true)
+	, _bRunning(true)
 {
+}
+
+SDLWindow::~SDLWindow()
+{
+	KillFont();
+	SDL_Quit();
+}
+
+void SDLWindow::Init(int width, int height, double axisLen, const std::string& caption)
+{
+	_fov = axisLen;
+	_width = width;
+	_height = height;
+
 	SDL_Init(SDL_INIT_VIDEO);
 	atexit(SDL_Quit);
 
@@ -189,120 +203,57 @@ SDLWindow::SDLWindow(int width, int height, double axisLen, const std::string& c
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-	m_pScreen = SDL_CreateWindow(
+	_pScreen = SDL_CreateWindow(
 		caption.c_str(),
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		width, height,
 		SDL_WINDOW_OPENGL);
 
-	if (!m_pScreen)
+	if (!_pScreen)
 		throw std::runtime_error(SDL_GetError());
 
-	m_context = SDL_GL_CreateContext(m_pScreen);
+	_context = SDL_GL_CreateContext(_pScreen);
 
-	_width = width;
-	_height = height;
+	glewInit();
 
+	InitFont();
 	InitGL();
-}
-
-SDLWindow::~SDLWindow()
-{
-	KillFont();
-	SDL_Quit();
-}
-
-void SDLWindow::InitGL()
-{
-	glShadeModel(GL_SMOOTH);
-	glClearColor(0.0f, 0.0f, 0.1f, 0.0f);  // black background
-	glViewport(0, 0, GetWidth(), GetHeight());
-
-	SDLWindow::InitFont();
-
-	SDL_Surface* tex;
-
-	tex = SDL_LoadBMP("particle.bmp");
-	if (!tex)
-		throw std::runtime_error("Can't load star texture (particle.bmp).");
-
-	// Check that the image's width is a power of 2
-	if (tex->w & (tex->w - 1))
-		throw std::runtime_error("texture width is not a power of 2.");
-
-	// Also check if the height is a power of 2
-	if (tex->h & (tex->h - 1))
-		throw std::runtime_error("texture height is not a power of 2.");
-
-	// get the number of channels in the SDL surface
-	GLint  nOfColors = tex->format->BytesPerPixel;
-	GLenum texture_format;
-	if (nOfColors == 4)     // contains an alpha channel
-	{
-		texture_format = GL_RGBA;
-	}
-	else if (nOfColors == 3)     // no alpha channel
-	{
-		texture_format = GL_RGB;
-	}
-	else
-		throw std::runtime_error("image is not truecolor");
-
-	// Have OpenGL generate a texture object handle for us
-	glGenTextures(1, &m_texStar);
-
-	// Bind the texture object
-	glBindTexture(GL_TEXTURE_2D, m_texStar);
-
-	// Set the texture's stretching properties
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Edit the texture object's image data using the information SDL_Surface gives us
-	glTexImage2D(GL_TEXTURE_2D,
-		0,
-		nOfColors,
-		tex->w,
-		tex->h,
-		0,
-		texture_format,
-		GL_UNSIGNED_BYTE,
-		tex->pixels);
+	InitSimulation();
 }
 
 void SDLWindow::ScaleAxis(double scale)
 {
-	m_fov *= scale;
+	_fov *= scale;
 	AdjustCamera();
 }
 
 const Vec3D& SDLWindow::GetCamPos() const
 {
-	return m_camPos;
+	return _camPos;
 }
 
 const Vec3D& SDLWindow::GetCamOrient() const
 {
-	return m_camOrient;
+	return _camOrient;
 }
 
 const Vec3D& SDLWindow::GetCamLookAt() const
 {
-	return m_camLookAt;
+	return _camLookAt;
 }
 
 void SDLWindow::SetCameraOrientation(const Vec3D& orient)
 {
-	m_camOrient = orient;
+	_camOrient = orient;
 	AdjustCamera();
 }
 
 void SDLWindow::SetCamera(const Vec3D& pos, const Vec3D& lookAt, const Vec3D& orient)
 {
-	m_camOrient = orient;
-	m_camPos = pos;
-	m_camLookAt = lookAt;
+	_camOrient = orient;
+	_camPos = pos;
+	_camLookAt = lookAt;
 	AdjustCamera();
 }
 
@@ -311,37 +262,37 @@ void SDLWindow::AdjustCamera()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	double l = m_fov / 2.0;
+	double l = _fov / 2.0;
 	glOrtho(-l, l, -l, l, -l, l);
 	gluLookAt(
-		m_camPos.x, m_camPos.y, m_camPos.z,
-		m_camLookAt.x, m_camLookAt.y, m_camLookAt.z,
-		m_camOrient.x, m_camOrient.y, m_camOrient.z);
+		_camPos.x, _camPos.y, _camPos.z,
+		_camLookAt.x, _camLookAt.y, _camLookAt.z,
+		_camOrient.x, _camOrient.y, _camOrient.z);
 	glMatrixMode(GL_MODELVIEW);
 }
 
 double SDLWindow::GetFOV() const
 {
-	return m_fov;
+	return _fov;
 }
 
 int SDLWindow::GetFPS() const
 {
-	return m_fps;
+	return _fps;
 }
 
 void SDLWindow::DrawAxis(const Vec2D& origin)
 {
 	glColor3f((GLfloat)0.3, (GLfloat)0.3, (GLfloat)0.3);
 
-	double s = std::pow(10, (int)(log10(m_fov / 2))),
-		l = m_fov / 100,
+	double s = std::pow(10, (int)(std::log10(_fov / 2))),
+		l = _fov / 100,
 		p = 0;
 
 	glPushMatrix();
 	glTranslated(origin.x, origin.y, 0);
 
-	for (int i = 0; p < m_fov; ++i)
+	for (int i = 0; p < _fov; ++i)
 	{
 		p += s;
 
@@ -371,10 +322,10 @@ void SDLWindow::DrawAxis(const Vec2D& origin)
 	}
 
 	glBegin(GL_LINES);
-	glVertex3f((GLfloat)-m_fov, 0, 0);
-	glVertex3f((GLfloat)m_fov, 0, 0);
-	glVertex3f(0, (GLfloat)-m_fov, 0);
-	glVertex3f(0, (GLfloat)m_fov, 0);
+	glVertex3f((GLfloat)-_fov, 0, 0);
+	glVertex3f((GLfloat)_fov, 0, 0);
+	glVertex3f(0, (GLfloat)-_fov, 0);
+	glVertex3f(0, (GLfloat)_fov, 0);
 	glEnd();
 
 	glPopMatrix();
@@ -390,7 +341,7 @@ void SDLWindow::MainLoop()
 	double dt = 0;
 	time_t t1(time(nullptr)), t2;
 
-	while (m_bRunning)
+	while (_bRunning)
 	{
 		Render();
 		PollEvents();
@@ -400,7 +351,7 @@ void SDLWindow::MainLoop()
 		dt = difftime(t2, t1);
 		if (dt > 1)
 		{
-			m_fps = (int)((double)ct / dt);
+			_fps = (int)((double)ct / dt);
 			ct = 0;
 			t1 = t2;
 		}
@@ -409,7 +360,7 @@ void SDLWindow::MainLoop()
 
 SDL_Window* SDLWindow::Surface()
 {
-	return m_pScreen;
+	return _pScreen;
 }
 
 int SDLWindow::GetWidth() const
@@ -424,7 +375,7 @@ int SDLWindow::GetHeight() const
 
 void SDLWindow::ExitMainLoop()
 {
-	m_bRunning = false;
+	_bRunning = false;
 }
 
 void SDLWindow::OnProcessEvents(Uint32 type)
@@ -446,4 +397,3 @@ void SDLWindow::PollEvents()
 		} // switch event type
 	}
 }
-

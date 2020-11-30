@@ -29,9 +29,8 @@
 class SDLWindow
 {
 public:
+	void Init(int width, int height, double axisLen, const std::string& caption);
 
-	SDLWindow(int width, int height, double axisLen, const std::string& caption);
-	virtual ~SDLWindow();
 	void MainLoop();
 	void ExitMainLoop();
 
@@ -41,6 +40,11 @@ public:
 	virtual void Render() = 0;
 
 protected:
+	SDLWindow();
+	virtual ~SDLWindow();
+
+	virtual void InitGL() = 0;
+	virtual void InitSimulation() = 0;
 
 	virtual void PollEvents();
 	virtual void OnProcessEvents(Uint32 type);
@@ -67,29 +71,24 @@ protected:
 
 	static GLuint s_fontBase;
 
-protected:
-
-	double m_fov;		///< Length of an axis
+	double _fov;		///< Length of an axis
 	
-	TTF_Font *_pFont;
+	std::string _caption;
+
 	int _width;			///< Width of the window in pixel
 	int _height;		///< Height of the window in pixel
-	int m_fps;
-	int m_idxSnapshot;
+	int _fps;
 
-	Vec3D m_camPos;    ///< Position of the camera
-	Vec3D m_camLookAt; ///< Point atwhich the camera is aimed
-	Vec3D m_camOrient; ///< orientation of the camera (rotation as it aims at its target)
+	Vec3D _camPos;		///< Position of the camera
+	Vec3D _camLookAt;	///< Point atwhich the camera is aimed
+	Vec3D _camOrient;	///< orientation of the camera (rotation as it aims at its target)
 
-	SDL_Window* m_pScreen;
-	SDL_GLContext m_context;
+	TTF_Font* _pFont;
+	SDL_Window* _pScreen;
+	SDL_GLContext _context;
 
 	GLuint m_fontBase;
 	GLuint m_texStar;
 
-	volatile bool m_bRunning;
-
-protected:
-
-	void InitGL();
+	volatile bool _bRunning;
 };

@@ -10,13 +10,8 @@
 #include "CumulativeDistributionFunction.h"
 
 
-double rnd_spread(double v, double o)
-{
-	return (v + (2 * o * (double)rand() / RAND_MAX - o));
-}
-
-
-Galaxy::Galaxy(double rad,
+Galaxy::Galaxy(
+	double rad,
 	double radCore,
 	double deltaAng,
 	double ex1,
@@ -24,7 +19,7 @@ Galaxy::Galaxy(double rad,
 	double velInner,
 	double velOuter,
 	int numStars)
-	:m_elEx1(ex1)
+	: m_elEx1(ex1)
 	, m_elEx2(ex2)
 	, m_velOrigin(30)
 	, m_velInner(velInner)
@@ -481,7 +476,8 @@ void Galaxy::SingleTimeStep(double time)
 		posOld = m_pStars[i].m_pos;
 		m_pStars[i].CalcXY(m_pertN, m_pertAmp);
 
-		Vec2D b = Vec2D(m_pStars[i].m_pos.x - posOld.x,
+		Vec2D b = Vec2D(
+			m_pStars[i].m_pos.x - posOld.x,
 			m_pStars[i].m_pos.y - posOld.y);
 		m_pStars[i].m_vel = b;
 	}
@@ -505,7 +501,7 @@ void Galaxy::SingleTimeStep(double time)
 const Vec2D& Galaxy::GetStarPos(int idx)
 {
 	if (idx >= m_numStars)
-		throw std::runtime_error("index out of bounds.");
+		throw std::runtime_error("Index out of bounds.");
 
 	return m_pStars[idx].m_pos; //GetPos();
 }
