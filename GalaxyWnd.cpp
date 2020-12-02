@@ -528,13 +528,20 @@ void GalaxyWnd::DrawHelp()
 	int line = 0;
 	Vec3D p;
 
-	glColor3f(1, 1, 1);
+	glColor3f(0.8, 0.8, 1);
+	double y = y0 - 60;
 	TextOut(_pFontCaption, x0, y0 - 60, "Spiral Galaxy Simulator");
+	TextOut(_pFont, x0, y0 - 15 , "Simulating a Galaxy with the Density Wave Theory - (C) 2020 Ingo Berg (beltoforion.de)");
+
+	glColor3f(1, 1, 1);
+	y0 = y0 + 20;
 	TextOut(_pFont, x0, y0 + dy * line++, "Keyboard commands");
 	TextOut(_pFont, x0, y0 + dy * line++, "Camera");
 	TextOut(_pFont, x0, y0 + dy * line++, "  1     - centric; fixed");
 	TextOut(_pFont, x0, y0 + dy * line++, "  2     - centric; rotating with core speed");
 	TextOut(_pFont, x0, y0 + dy * line++, "  3     - centric; rotating with speed of outer disc");
+	
+	y0 = y0 + 20;
 	TextOut(_pFont, x0, y0 + dy * line++, "Galaxy geometry");
 	TextOut(_pFont, x0, y0 + dy * line++, "  q     - increase inner excentricity");
 	TextOut(_pFont, x0, y0 + dy * line++, "  a     - decrease inner excentricity");
@@ -546,11 +553,15 @@ void GalaxyWnd::DrawHelp()
 	TextOut(_pFont, x0, y0 + dy * line++, "  f     - decrease core size");
 	TextOut(_pFont, x0, y0 + dy * line++, "  t     - increase galaxy size");
 	TextOut(_pFont, x0, y0 + dy * line++, "  g     - decrease galaxy size");
+	
+	y0 = y0 + 20;
 	TextOut(_pFont, x0, y0 + dy * line++, "Spiral Arms");
-	TextOut(_pFont, x0, y0 + dy * line++, "  Home  - increas  # orbit perturbations");
-	TextOut(_pFont, x0, y0 + dy * line++, "  End   - decrease # orbit perturbations");
+	TextOut(_pFont, x0, y0 + dy * line++, "  Home  - increase number of orbit perturbations");
+	TextOut(_pFont, x0, y0 + dy * line++, "  End   - decrease number of orbit perturbations");
 	TextOut(_pFont, x0, y0 + dy * line++, "  PG_UP - increase perturbation damping");
 	TextOut(_pFont, x0, y0 + dy * line++, "  PG_DN - decrease perturbation damping");
+	
+	y0 = y0 + 20;
 	TextOut(_pFont, x0, y0 + dy * line++, "Display features");
 	TextOut(_pFont, x0, y0 + dy * line++, "  F1    - Help screen");
 	TextOut(_pFont, x0, y0 + dy * line++, "  F2    - Galaxy data");
@@ -566,8 +577,11 @@ void GalaxyWnd::DrawHelp()
 	TextOut(_pFont, x0, y0 + dy * line++, "  n    - Increase Dust Render Size");
 	TextOut(_pFont, x0, y0 + dy * line++, "  m    - Toggle Dark Matter on/off");
 
+	y0 = y0 + 20;
 	TextOut(_pFont, x0, y0 + dy * line++, "Misc");
 	TextOut(_pFont, x0, y0 + dy * line++, "  pause - halt simulation");
+	
+	y0 = y0 + 20;
 	TextOut(_pFont, x0, y0 + dy * line++, "Predefined Galaxies");
 	TextOut(_pFont, x0, y0 + dy * line++, "  Keypad 0 - 4");
 }
@@ -647,7 +661,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			{
 				m_galaxy.SetCoreRad(m_galaxy.GetCoreRad() + 500);
 			}
-			std::cout << "Bulge radius " << m_galaxy.GetCoreRad() << "\n";
+//			std::cout << "Bulge radius " << m_galaxy.GetCoreRad() << "\n";
 			break;
 
 		case SDLK_m:
@@ -656,7 +670,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 		case SDLK_f:
 			m_galaxy.SetCoreRad(std::max(m_galaxy.GetCoreRad() - 500, 0.0));
-			std::cout << "Bulge radius " << m_galaxy.GetCoreRad() << "\n";
+//			std::cout << "Bulge radius " << m_galaxy.GetCoreRad() << "\n";
 			break;
 
 		case SDLK_t:
@@ -685,19 +699,19 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case  SDLK_F1:
-			std::cout << "Display:  help screen" << ((m_flags & dspHELP) ? "off" : "on") << "\n";
+//			std::cout << "Display:  help screen" << ((m_flags & dspHELP) ? "off" : "on") << "\n";
 			m_flags ^= dspHELP;
 			m_flags &= ~dspSTAT;
 			break;
 
 		case  SDLK_F2:
-			std::cout << "Display:  statistic" << ((m_flags & dspSTAT) ? "off" : "on") << "\n";
+//			std::cout << "Display:  statistic" << ((m_flags & dspSTAT) ? "off" : "on") << "\n";
 			m_flags ^= dspSTAT;
 			m_flags &= ~dspHELP;
 			break;
 
 		case  SDLK_F3:
-			std::cout << "Display:  Toggling stars " << ((m_flags & dspSTARS) ? "off" : "on") << "\n";
+//			std::cout << "Display:  Toggling stars " << ((m_flags & dspSTARS) ? "off" : "on") << "\n";
 			if (m_starRenderType == 2)
 			{
 				m_starRenderType = 0;
@@ -711,37 +725,37 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case  SDLK_F4:
-			std::cout << "Display:  Toggling dust " << ((m_flags & dspDUST) ? "off" : "on") << "\n";
+//			std::cout << "Display:  Toggling dust " << ((m_flags & dspDUST) ? "off" : "on") << "\n";
 			m_flags ^= dspDUST;
 			break;
 
 		case  SDLK_F5:
-			std::cout << "Display:  Toggling h2 regions " << ((m_flags & dspH2) ? "off" : "on") << "\n";
+//			std::cout << "Display:  Toggling h2 regions " << ((m_flags & dspH2) ? "off" : "on") << "\n";
 			m_flags ^= dspH2;
 			break;
 
 		case SDLK_F6:
-			std::cout << "Display:  Density waves axis " << ((m_flags & dspDENSITY_WAVES) ? "off" : "on") << "\n";
+//			std::cout << "Display:  Density waves axis " << ((m_flags & dspDENSITY_WAVES) ? "off" : "on") << "\n";
 			m_flags ^= dspDENSITY_WAVES;
 			break;
 
 		case SDLK_F7:
-			std::cout << "Display:  Axis" << ((m_flags & dspAXIS) ? "off" : "on") << "\n";
+//			std::cout << "Display:  Axis" << ((m_flags & dspAXIS) ? "off" : "on") << "\n";
 			m_flags ^= dspAXIS;
 			break;
 
 		case SDLK_F8:
-			std::cout << "Display:  Radii" << ((m_flags & dspRADII) ? "off" : "on") << "\n";
+//			std::cout << "Display:  Radii" << ((m_flags & dspRADII) ? "off" : "on") << "\n";
 			m_flags ^= dspRADII;
 			break;
 
 		case  SDLK_p:
-			std::cout << "Display:  Toggling Velocity graph " << ((m_flags & dspVELOCITY) ? "off" : "on") << "\n";
+//			std::cout << "Display:  Toggling Velocity graph " << ((m_flags & dspVELOCITY) ? "off" : "on") << "\n";
 			m_flags ^= dspVELOCITY;
 			break;
 
 		case  SDLK_PAUSE:
-			std::cout << "Simulation:  pause " << ((m_flags & dspPAUSE) ? "off" : "on") << "\n";
+//			std::cout << "Simulation:  pause " << ((m_flags & dspPAUSE) ? "off" : "on") << "\n";
 			m_flags ^= dspPAUSE;
 			break;
 

@@ -23,23 +23,23 @@
 
 void SDLWindow::TextOut(const char* fmt, ...)
 {
-/*
-	char text[256]; 
-	va_list ap;     
+	/*
+		char text[256];
+		va_list ap;
 
-	if (fmt == nullptr)
-		return;
+		if (fmt == nullptr)
+			return;
 
-	va_start(ap, fmt);
+		va_start(ap, fmt);
 
-	vsprintf(text, fmt, ap);
-	va_end(ap);
+		vsprintf(text, fmt, ap);
+		va_end(ap);
 
-	glPushAttrib(GL_LIST_BIT);     // Pushes the Display List Bits
-	glListBase(s_fontBase - 32);   // Sets base character to 32
-	glCallLists(strlen(text), GL_UNSIGNED_BYTE, text); // Draws the text
-	glPopAttrib();                 // Pops the Display List Bits
-*/
+		glPushAttrib(GL_LIST_BIT);     // Pushes the Display List Bits
+		glListBase(s_fontBase - 32);   // Sets base character to 32
+		glCallLists(strlen(text), GL_UNSIGNED_BYTE, text); // Draws the text
+		glPopAttrib();                 // Pops the Display List Bits
+	*/
 }
 
 unsigned int power_two_floor(unsigned int val) {
@@ -51,23 +51,23 @@ unsigned int power_two_floor(unsigned int val) {
 	return power * 2;
 }
 
-void SDLWindow::TextOut(TTF_Font *pFont, int x, int y, const char* fmt, ...)
+void SDLWindow::TextOut(TTF_Font* pFont, int x, int y, const char* fmt, ...)
 {
 	if (pFont == nullptr)
-		throw new std::exception("TextOut failed: font is null!");
+		throw new std::runtime_error("TextOut failed: font is null!");
+
+	if (fmt == nullptr)
+		throw new std::runtime_error("TextOut failed: bad format string!");
 
 	char text[256];
 	va_list ap;
-
-	if (fmt == nullptr)
-		return;
 
 	va_start(ap, fmt);
 
 	vsprintf(text, fmt, ap);
 	va_end(ap);
 
-	auto *pSurface = TTF_RenderText_Solid(pFont, text, { 255, 255, 255 });
+	auto* pSurface = TTF_RenderText_Blended(pFont, text, { 255, 255, 255 });
 	if (pSurface == nullptr)
 		return;
 
@@ -77,19 +77,17 @@ void SDLWindow::TextOut(TTF_Font *pFont, int x, int y, const char* fmt, ...)
 	glGenTextures(1, &texId);
 	glBindTexture(GL_TEXTURE_2D, texId);
 
+	SDL_Surface *s = nullptr;
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
 	// It seems textures must be powers of 2 in dimension: 
 	// https://stackoverflow.com/questions/30016083/sdl2-opengl-sdl2-ttf-displaying-text
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-	// Find the first power of two for OpenGL image 
+	// Create a surface to the correct size in RGB format, and copy the old image
 	int w = MathHelper::PowerTwoFloor(pSurface->w) << 1;
 	int h = MathHelper::PowerTwoFloor(pSurface->h) << 1;
-
-	// Create a surface to the correct size in RGB format, and copy the old image
-	SDL_Surface *s = SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-	SDL_BlitSurface(pSurface, NULL, s, NULL);
-
+	s = SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+	SDL_BlitSurface(pSurface, nullptr, s, nullptr);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
 
 	GLfloat xp = x;
@@ -98,7 +96,6 @@ void SDLWindow::TextOut(TTF_Font *pFont, int x, int y, const char* fmt, ...)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0, _width, _height, 0, 0, 1);
-	glColor4f(1, 1, 1, 1);
 
 	// make a rectangle
 	glBegin(GL_TRIANGLES);
@@ -121,8 +118,12 @@ void SDLWindow::TextOut(TTF_Font *pFont, int x, int y, const char* fmt, ...)
 	glDisable(GL_BLEND);
 
 	// cleanup
-	SDL_FreeSurface(s);
-	SDL_FreeSurface(pSurface);
+	if (s != nullptr)
+		SDL_FreeSurface(s);
+
+	if (pSurface != nullptr)
+		SDL_FreeSurface(pSurface);
+
 	glDeleteTextures(1, &texId);
 }
 
@@ -270,7 +271,7 @@ void SDLWindow::AdjustCamera()
 		_camLookAt.x, _camLookAt.y, _camLookAt.z,
 		_camOrient.x, _camOrient.y, _camOrient.z);
 
-//	glMatrixMode(GL_MODELVIEW);
+	//	glMatrixMode(GL_MODELVIEW);
 }
 
 double SDLWindow::GetFOV() const
