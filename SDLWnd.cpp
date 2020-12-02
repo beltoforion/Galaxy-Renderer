@@ -21,37 +21,8 @@
 #endif
 
 
-void SDLWindow::TextOut(const char* fmt, ...)
-{
-	/*
-		char text[256];
-		va_list ap;
 
-		if (fmt == nullptr)
-			return;
-
-		va_start(ap, fmt);
-
-		vsprintf(text, fmt, ap);
-		va_end(ap);
-
-		glPushAttrib(GL_LIST_BIT);     // Pushes the Display List Bits
-		glListBase(s_fontBase - 32);   // Sets base character to 32
-		glCallLists(strlen(text), GL_UNSIGNED_BYTE, text); // Draws the text
-		glPopAttrib();                 // Pops the Display List Bits
-	*/
-}
-
-unsigned int power_two_floor(unsigned int val) {
-	unsigned int power = 2, nextVal = power * 2;
-
-	while ((nextVal *= 2) <= val)
-		power *= 2;
-
-	return power * 2;
-}
-
-void SDLWindow::TextOut(TTF_Font* pFont, int x, int y, const char* fmt, ...)
+void SDLWindow::TextOut(TTF_Font* pFont, TextCoords coords, int x, int y, const char* fmt, ...)
 {
 	if (pFont == nullptr)
 		throw new std::runtime_error("TextOut failed: font is null!");
@@ -77,7 +48,7 @@ void SDLWindow::TextOut(TTF_Font* pFont, int x, int y, const char* fmt, ...)
 	glGenTextures(1, &texId);
 	glBindTexture(GL_TEXTURE_2D, texId);
 
-	SDL_Surface *s = nullptr;
+	SDL_Surface* s = nullptr;
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
@@ -90,28 +61,38 @@ void SDLWindow::TextOut(TTF_Font* pFont, int x, int y, const char* fmt, ...)
 	SDL_BlitSurface(pSurface, nullptr, s, nullptr);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
 
-	GLfloat xp = x;
-	GLfloat yp = y;
 
 	glMatrixMode(GL_PROJECTION);
+
+	if (coords == TextCoords::Model)
+	{
+		auto pos = GetWindowPos(x, y, 0);
+		x = pos.x;
+		y = pos.y;
+	}
+
+	GLfloat xp = (GLfloat)x;
+	GLfloat yp = (GLfloat)y;
+
+	glPushMatrix();
 	glLoadIdentity();
 	glOrtho(0, _width, _height, 0, 0, 1);
 
 	// make a rectangle
 	glBegin(GL_TRIANGLES);
-		glTexCoord2i(0, 0);
-		glVertex3f(xp, yp, 0);
-		glTexCoord2i(1, 0);
-		glVertex3f(xp + w, yp, 0);
-		glTexCoord2i(1, 1);
-		glVertex3f(xp + w, yp + h, 0);
+	glTexCoord2i(0, 0);
+	glVertex3f(xp, yp, 0);
+	glTexCoord2i(1, 0);
+	glVertex3f(xp + w, yp, 0);
+	glTexCoord2i(1, 1);
+	glVertex3f(xp + w, yp + h, 0);
 
-		glTexCoord2i(0, 0);
-		glVertex3f(xp, yp, 0);
-		glTexCoord2i(0, 1);
-		glVertex3f(xp, yp + h, 0);
-		glTexCoord2i(1, 1);
-		glVertex3f(xp + w, yp + h, 0);
+	glTexCoord2i(0, 0);
+	glVertex3f(xp, yp, 0);
+	glTexCoord2i(0, 1);
+	glVertex3f(xp, yp + h, 0);
+	glTexCoord2i(1, 1);
+	glVertex3f(xp + w, yp + h, 0);
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);
@@ -125,6 +106,7 @@ void SDLWindow::TextOut(TTF_Font* pFont, int x, int y, const char* fmt, ...)
 		SDL_FreeSurface(pSurface);
 
 	glDeleteTextures(1, &texId);
+	glPopMatrix();
 }
 
 /** \brief get opengl position from a screen position
@@ -150,6 +132,21 @@ Vec3D SDLWindow::GetOGLPos(int x, int y)
 	gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
 
 	return Vec3D(posX, posY, posZ);
+}
+
+Vec2D SDLWindow::GetWindowPos(GLfloat x, GLfloat y, GLfloat z)
+{
+	GLdouble modelview[16];
+	GLdouble projection[16];
+	GLdouble screen[3];
+	GLint viewport[4];
+
+	glGetDoublev(GL_PROJECTION_MATRIX, projection);
+	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	gluProject(x, y, z,	modelview, projection, viewport, screen + 0, screen + 1, screen + 2);
+
+	return Vec2D(screen[0], screen[1]);
 }
 
 
@@ -180,8 +177,8 @@ void SDLWindow::Close()
 {
 	SDL_DestroyRenderer(_pSdlRenderer);
 	SDL_DestroyWindow(screen.window);
-	screen.renderer = NULL;
-	screen.window = NULL;
+	screen.renderer = nullptr;
+	screen.window = nullptr;
 	SDL_Quit();
 }
 */
@@ -284,55 +281,6 @@ int SDLWindow::GetFPS() const
 	return _fps;
 }
 
-void SDLWindow::DrawAxis(const Vec2D& origin)
-{
-	glColor3f((GLfloat)0.3, (GLfloat)0.3, (GLfloat)0.3);
-
-	double s = std::pow(10, (int)(std::log10(_fov / 2))),
-		l = _fov / 100,
-		p = 0;
-
-	glPushMatrix();
-	glTranslated(origin.x, origin.y, 0);
-
-	for (int i = 0; p < _fov; ++i)
-	{
-		p += s;
-
-		if (i % 2 == 0)
-		{
-			glRasterPos2f(p - l, -4 * l);
-			TextOut("%2.0f", p);
-		}
-		else
-		{
-			glRasterPos2f(p - l, 2 * l);
-			TextOut("%2.0f", p);
-		}
-
-		glBegin(GL_LINES);
-		glVertex3f(p, -l, 0);
-		glVertex3f(p, l, 0);
-
-		glVertex3f(-p, -l, 0);
-		glVertex3f(-p, 0, 0);
-		glVertex3f(-l, p, 0);
-		glVertex3f(0, p, 0);
-		glVertex3f(-l, -p, 0);
-		glVertex3f(0, -p, 0);
-		glEnd();
-
-	}
-
-	glBegin(GL_LINES);
-	glVertex3f((GLfloat)-_fov, 0, 0);
-	glVertex3f((GLfloat)_fov, 0, 0);
-	glVertex3f(0, (GLfloat)-_fov, 0);
-	glVertex3f(0, (GLfloat)_fov, 0);
-	glEnd();
-
-	glPopMatrix();
-}
 
 /** \brief Main render loop
 

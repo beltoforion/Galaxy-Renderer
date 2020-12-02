@@ -345,9 +345,10 @@ void GalaxyWnd::DrawStars()
 		const Color& col = ColorFromTemperature(pStars[i].m_temp);
 		if (m_starRenderType == 1)
 		{
-			glColor3f(col.r * pStars[i].m_mag,
-				col.g * pStars[i].m_mag,
-				col.b * pStars[i].m_mag);
+			glColor3f(
+				(GLfloat)col.r * pStars[i].m_mag,
+				(GLfloat)col.g * pStars[i].m_mag,
+				(GLfloat)col.b * pStars[i].m_mag);
 		}
 		glVertex3f(pos.x, pos.y, 0.0f);
 
@@ -365,20 +366,18 @@ void GalaxyWnd::DrawStars()
 		const Color& col = ColorFromTemperature(pStars[i].m_temp);
 		if (m_starRenderType == 1)
 		{
-			glColor3f(0.2 + col.r * pStars[i].m_mag,
-				0.2 + col.g * pStars[i].m_mag,
-				0.2 + col.b * pStars[i].m_mag);
+			glColor3f(
+				0.2f + col.r * pStars[i].m_mag,
+				0.2f + col.g * pStars[i].m_mag,
+				0.2f + col.b * pStars[i].m_mag);
 		}
 		glVertex3f(pos.x, pos.y, 0.0f);
 
 	}
 	glEnd();
 
-//	glDisable(GL_POINT_SPRITE_ARB);
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
-
-//	glDeleteTextures(1, &m_texStar);
 }
 
 void GalaxyWnd::DrawDust()
@@ -481,19 +480,19 @@ void GalaxyWnd::DrawStat()
 	int line = 0;
 
 	glColor3f(1, 1, 1);
-	TextOut(_pFont, x0, y0 + dy * line++, "FPS:      %d", GetFPS());
-	TextOut(_pFont, x0, y0 + dy * line++, "Time:     %2.2e y", m_galaxy.GetTime());
-	TextOut(_pFont, x0, y0 + dy * line++, "RadCore:     %d pc", (int)m_galaxy.GetCoreRad());
-	TextOut(_pFont, x0, y0 + dy * line++, "RadGalaxy:   %d pc", (int)m_galaxy.GetRad());
-	TextOut(_pFont, x0, y0 + dy * line++, "RadFarField: %d pc", (int)m_galaxy.GetFarFieldRad());
-	TextOut(_pFont, x0, y0 + dy * line++, "ExInner:     %2.2f", m_galaxy.GetExInner());
-	TextOut(_pFont, x0, y0 + dy * line++, "ExOuter:     %2.2f", m_galaxy.GetExOuter());
-	TextOut(_pFont, x0, y0 + dy * line++, "Sigma:       %2.2f", m_galaxy.GetSigma());
-	TextOut(_pFont, x0, y0 + dy * line++, "AngOff:      %1.4f deg/pc", m_galaxy.GetAngularOffset());
-	TextOut(_pFont, x0, y0 + dy * line++, "FoV:         %1.2f pc", _fov);
-	TextOut(_pFont, x0, y0 + dy * line++, "Spiral Arms:");
-	TextOut(_pFont, x0, y0 + dy * line++, "  Num pert:   %d", m_galaxy.GetPertN());
-	TextOut(_pFont, x0, y0 + dy * line++, "  pertDamp:   %1.2f", m_galaxy.GetPertAmp());
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "FPS:      %d", GetFPS());
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Time:     %2.2e y", m_galaxy.GetTime());
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "RadCore:     %d pc", (int)m_galaxy.GetCoreRad());
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "RadGalaxy:   %d pc", (int)m_galaxy.GetRad());
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "RadFarField: %d pc", (int)m_galaxy.GetFarFieldRad());
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "ExInner:     %2.2f", m_galaxy.GetExInner());
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "ExOuter:     %2.2f", m_galaxy.GetExOuter());
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Sigma:       %2.2f", m_galaxy.GetSigma());
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "AngOff:      %1.4f deg/pc", m_galaxy.GetAngularOffset());
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "FoV:         %1.2f pc", _fov);
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Spiral Arms:");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  Num pert:   %d", m_galaxy.GetPertN());
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  pertDamp:   %1.2f", m_galaxy.GetPertAmp());
 }
 
 void GalaxyWnd::DrawGalaxyRadii()
@@ -505,21 +504,66 @@ void GalaxyWnd::DrawGalaxyRadii()
 	if (r > 0)
 	{
 		DrawEllipsis(r, r, 0);
-		glRasterPos2f(0, r + 500);
-		TextOut("Core");
+		TextOut(_pFont, TextCoords::Model, 0, r + 500, "Core");
 	}
 
 	glColor3f(0, 1, 0);
 	r = m_galaxy.GetRad();
 	DrawEllipsis(r, r, 0);
-	glRasterPos2f(0, r + 500);
-	TextOut("Disk");
+	TextOut(_pFont, TextCoords::Model, 0, r + 500, "Disk");
 
 	glColor3f(1, 0, 0);
 	r = m_galaxy.GetFarFieldRad();
 	DrawEllipsis(r, r, 0);
-	glRasterPos2f(0, r + 500);
-	TextOut("Intergalactic medium");
+	TextOut(_pFont, TextCoords::Model, 0, r + 500, "Intergalactic medium");
+}
+
+void GalaxyWnd::DrawAxis(const Vec2D& origin)
+{
+	glColor3f((GLfloat)0.3, (GLfloat)0.3, (GLfloat)0.3);
+
+	GLfloat s = (GLfloat)std::pow(10, (int)(std::log10(_fov / 2)));
+	GLfloat l = _fov / 100, p = 0;
+
+	glPushMatrix();
+	glTranslated(origin.x, origin.y, 0);
+
+	for (int i = 0; p < _fov; ++i)
+	{
+		p += s;
+
+		if (i % 2 == 0)
+		{
+			TextOut(_pFont, TextCoords::Model, p - l, -4 * l, "%2.0f", p);
+		}
+		else
+		{
+			glRasterPos2f(p - l, 2 * l);
+			TextOut(_pFont, TextCoords::Model, p - l, 2 * l, "%2.0f", p);
+		}
+
+		glBegin(GL_LINES);
+		glVertex3f(p, -l, 0);
+		glVertex3f(p, l, 0);
+
+		glVertex3f(-p, -l, 0);
+		glVertex3f(-p, 0, 0);
+		glVertex3f(-l, p, 0);
+		glVertex3f(0, p, 0);
+		glVertex3f(-l, -p, 0);
+		glVertex3f(0, -p, 0);
+		glEnd();
+
+	}
+
+	glBegin(GL_LINES);
+	glVertex3f((GLfloat)-_fov, 0, 0);
+	glVertex3f((GLfloat)_fov, 0, 0);
+	glVertex3f(0, (GLfloat)-_fov, 0);
+	glVertex3f(0, (GLfloat)_fov, 0);
+	glEnd();
+
+	glPopMatrix();
 }
 
 void GalaxyWnd::DrawHelp()
@@ -530,60 +574,60 @@ void GalaxyWnd::DrawHelp()
 
 	glColor3f(0.8, 0.8, 1);
 	double y = y0 - 60;
-	TextOut(_pFontCaption, x0, y0 - 60, "Spiral Galaxy Simulator");
-	TextOut(_pFont, x0, y0 - 15 , "Simulating a Galaxy with the Density Wave Theory - (C) 2020 Ingo Berg (beltoforion.de)");
+	TextOut(_pFontCaption, TextCoords::Window, x0, y0 - 60, "Spiral Galaxy Simulator");
+	TextOut(_pFont, TextCoords::Window, x0, y0 - 15 , "Simulating a Galaxy with the Density Wave Theory - (C) 2020 Ingo Berg (beltoforion.de)");
 
 	glColor3f(1, 1, 1);
 	y0 = y0 + 20;
-	TextOut(_pFont, x0, y0 + dy * line++, "Keyboard commands");
-	TextOut(_pFont, x0, y0 + dy * line++, "Camera");
-	TextOut(_pFont, x0, y0 + dy * line++, "  1     - centric; fixed");
-	TextOut(_pFont, x0, y0 + dy * line++, "  2     - centric; rotating with core speed");
-	TextOut(_pFont, x0, y0 + dy * line++, "  3     - centric; rotating with speed of outer disc");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Keyboard commands");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Camera");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  1     - centric; fixed");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  2     - centric; rotating with core speed");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  3     - centric; rotating with speed of outer disc");
 	
 	y0 = y0 + 20;
-	TextOut(_pFont, x0, y0 + dy * line++, "Galaxy geometry");
-	TextOut(_pFont, x0, y0 + dy * line++, "  q     - increase inner excentricity");
-	TextOut(_pFont, x0, y0 + dy * line++, "  a     - decrease inner excentricity");
-	TextOut(_pFont, x0, y0 + dy * line++, "  w     - increase outer excentricity");
-	TextOut(_pFont, x0, y0 + dy * line++, "  s     - decrease outer excentricity");
-	TextOut(_pFont, x0, y0 + dy * line++, "  e     - increase angular shift of orbits");
-	TextOut(_pFont, x0, y0 + dy * line++, "  d     - decrease angular shift of orbits");
-	TextOut(_pFont, x0, y0 + dy * line++, "  r     - increase core size");
-	TextOut(_pFont, x0, y0 + dy * line++, "  f     - decrease core size");
-	TextOut(_pFont, x0, y0 + dy * line++, "  t     - increase galaxy size");
-	TextOut(_pFont, x0, y0 + dy * line++, "  g     - decrease galaxy size");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Galaxy geometry");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  q     - increase inner excentricity");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  a     - decrease inner excentricity");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  w     - increase outer excentricity");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  s     - decrease outer excentricity");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  e     - increase angular shift of orbits");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  d     - decrease angular shift of orbits");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  r     - increase core size");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  f     - decrease core size");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  t     - increase galaxy size");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  g     - decrease galaxy size");
 	
 	y0 = y0 + 20;
-	TextOut(_pFont, x0, y0 + dy * line++, "Spiral Arms");
-	TextOut(_pFont, x0, y0 + dy * line++, "  Home  - increase number of orbit perturbations");
-	TextOut(_pFont, x0, y0 + dy * line++, "  End   - decrease number of orbit perturbations");
-	TextOut(_pFont, x0, y0 + dy * line++, "  PG_UP - increase perturbation damping");
-	TextOut(_pFont, x0, y0 + dy * line++, "  PG_DN - decrease perturbation damping");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Spiral Arms");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  Home  - increase number of orbit perturbations");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  End   - decrease number of orbit perturbations");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  PG_UP - increase perturbation damping");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  PG_DN - decrease perturbation damping");
 	
 	y0 = y0 + 20;
-	TextOut(_pFont, x0, y0 + dy * line++, "Display features");
-	TextOut(_pFont, x0, y0 + dy * line++, "  F1    - Help screen");
-	TextOut(_pFont, x0, y0 + dy * line++, "  F2    - Galaxy data");
-	TextOut(_pFont, x0, y0 + dy * line++, "  F3    - Stars (on/off)");
-	TextOut(_pFont, x0, y0 + dy * line++, "  F4    - Dust (on/off)");
-	TextOut(_pFont, x0, y0 + dy * line++, "  F5    - H2 Regions (on/off)");
-	TextOut(_pFont, x0, y0 + dy * line++, "  F6    - Density waves (Star orbits)");
-	TextOut(_pFont, x0, y0 + dy * line++, "  F7    - Axis");
-	TextOut(_pFont, x0, y0 + dy * line++, "  F8    - Radii");
-	TextOut(_pFont, x0, y0 + dy * line++, "  +    - Zoom in");
-	TextOut(_pFont, x0, y0 + dy * line++, "  -    - Zoom out");
-	TextOut(_pFont, x0, y0 + dy * line++, "  b    - Decrease Dust Render Size");
-	TextOut(_pFont, x0, y0 + dy * line++, "  n    - Increase Dust Render Size");
-	TextOut(_pFont, x0, y0 + dy * line++, "  m    - Toggle Dark Matter on/off");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Display features");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F1    - Help screen");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F2    - Galaxy data");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F3    - Stars (on/off)");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F4    - Dust (on/off)");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F5    - H2 Regions (on/off)");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F6    - Density waves (Star orbits)");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F7    - Axis");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F8    - Radii");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  +    - Zoom in");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  -    - Zoom out");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  b    - Decrease Dust Render Size");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  n    - Increase Dust Render Size");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  m    - Toggle Dark Matter on/off");
 
 	y0 = y0 + 20;
-	TextOut(_pFont, x0, y0 + dy * line++, "Misc");
-	TextOut(_pFont, x0, y0 + dy * line++, "  pause - halt simulation");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Misc");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  pause - halt simulation");
 	
 	y0 = y0 + 20;
-	TextOut(_pFont, x0, y0 + dy * line++, "Predefined Galaxies");
-	TextOut(_pFont, x0, y0 + dy * line++, "  Keypad 0 - 4");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Predefined Galaxies");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  Keypad 0 - 4");
 }
 
 GalaxyWnd::Color GalaxyWnd::ColorFromTemperature(double temp) const

@@ -40,6 +40,12 @@ public:
 	virtual void Render() = 0;
 
 protected:
+	enum class TextCoords
+	{
+		Model,
+		Window
+	};
+
 	SDLWindow();
 	virtual ~SDLWindow();
 
@@ -56,16 +62,15 @@ protected:
 	void SetCameraOrientation(const Vec3D& orientation);
 	void SetCamera(const Vec3D& pos, const Vec3D& lookAt, const Vec3D& orient);
 	void AdjustCamera();
-	void DrawAxis(const Vec2D& origin);
 	int GetFPS() const;
 	void ScaleAxis(double scale);
 	double GetFOV() const;
 	SDL_Event m_event;
 
-	void TextOut(const char* fmt, ...);
-	void TextOut(TTF_Font *pFont, int x, int y, const char* fmt, ...);
+	void TextOut(TTF_Font *pFont, TextCoords coords, int x, int y, const char* fmt, ...);
 
 	static Vec3D GetOGLPos(int x, int y);
+	static Vec2D GetWindowPos(GLfloat x, GLfloat y, GLfloat z);
 
 	double _fov;		///< Length of an axis
 	

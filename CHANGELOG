@@ -11,7 +11,7 @@ History:
 Rev 1.1.0 2020-12-02
 --------------------
 Changes:
-   * removed NetBeans project filed
+   * removed NetBeans project 
    * Visual Studio Project updated to SDL2
    * Added perturbation to the ellipsis to create more diverse spiral arm patterns
 

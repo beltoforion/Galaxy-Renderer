@@ -48,7 +48,6 @@ private:
 	};
 
 	GalaxyWnd(const GalaxyWnd& orig);
-	void InitFont();
 
 	void DrawStars();
 	void DrawDust();
@@ -56,7 +55,7 @@ private:
 	void DrawStat();
 	void DrawHelp();
 	void DrawGalaxyRadii();
-	void DrawCenterOfMass();
+	void DrawAxis(const Vec2D& origin);
 	void DrawDensityWaves(int num, double rad);
 	void DrawVelocity();
 	void DrawEllipsis(double a, double b, double angle);
