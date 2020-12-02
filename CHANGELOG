@@ -1,0 +1,20 @@
+Galaxy-Renderer 
+Copyright (C) 2004 - 2020 Ingo Berg
+
+=======================================================================
+    https://beltoforion.de/en/spiral_galaxy_renderer
+=======================================================================
+
+History:
+--------
+
+Rev 1.1.0 2020-12-02
+--------------------
+Changes:
+   * removed NetBeans project filed
+   * Visual Studio Project updated to SDL2
+   * Added perturbation to the ellipsis to create more diverse spiral arm patterns
+
+Rev 1.0.0 2012-08-23
+--------------------
+   * initial Release
