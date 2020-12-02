@@ -1,3 +1,7 @@
+[![GitHub issues](https://img.shields.io/github/issues/beltoforion/Galaxy-Renderer.svg?maxAge=360)](https://github.com/beltoforion/Galaxy-Renderer/issues)
+[![Version](https://img.shields.io/github/release/beltoforion/Galaxy-Renderer.svg?maxAge=360)](https://github.com/beltoforion/Galaxy-Renderer/releases/tag/v1.0)
+[![Github All Releases](https://img.shields.io/github/downloads/beltoforion/Galaxy-Renderer/total.svg)](https://github.com/beltoforion/Galaxy-Renderer/releases/tag/v1.0)
+
 # Spiral Galaxy Renderer
 
 A Program for modelling a rotating galaxy based on the density wave theory. This archive contains the source code for an 
