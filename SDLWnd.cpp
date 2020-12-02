@@ -10,6 +10,8 @@
 
 #include <SDL_ttf.h>
 
+#include "MathHelper.h"
+
 #if defined(_WIN32) || defined(_WIN64)
 
 #else
@@ -17,15 +19,6 @@
 #include <GL/glu.h>	// Header File For The GLu32 Library
 #include <GL/glx.h> 
 #endif
-
-
-void SDLWindow::InitFont()
-{
-	TTF_Init();
-	_pFont = TTF_OpenFont("arial.ttf", 12); 
-	if (_pFont == nullptr)
-		throw std::runtime_error(TTF_GetError());
-}
 
 
 void SDLWindow::TextOut(const char* fmt, ...)
@@ -49,9 +42,19 @@ void SDLWindow::TextOut(const char* fmt, ...)
 */
 }
 
-void SDLWindow::TextOut(int x, int y, const char* fmt, ...)
+unsigned int power_two_floor(unsigned int val) {
+	unsigned int power = 2, nextVal = power * 2;
+
+	while ((nextVal *= 2) <= val)
+		power *= 2;
+
+	return power * 2;
+}
+
+void SDLWindow::TextOut(TTF_Font *pFont, int x, int y, const char* fmt, ...)
 {
-	return;
+	if (pFont == nullptr)
+		throw new std::exception("TextOut failed: font is null!");
 
 	char text[256];
 	va_list ap;
@@ -64,49 +67,63 @@ void SDLWindow::TextOut(int x, int y, const char* fmt, ...)
 	vsprintf(text, fmt, ap);
 	va_end(ap);
 
-	Vec3D p = GetOGLPos(x, y);
-
-	auto *pSurface = TTF_RenderText_Solid(_pFont, text, { 255, 255,  255 });
+	auto *pSurface = TTF_RenderText_Solid(pFont, text, { 255, 255, 255 });
 	if (pSurface == nullptr)
 		return;
 
-	SDL_Texture *pTexture = SDL_CreateTextureFromSurface(_pSdlRenderer, pSurface);
-	if (pTexture == nullptr)
-		return;
+	GLuint texId;
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glGenTextures(1, &texId);
+	glBindTexture(GL_TEXTURE_2D, texId);
 
-//	glRasterPos2f((GLfloat)x, (GLfloat)y);
+	// It seems textures must be powers of 2 in dimension: 
+	// https://stackoverflow.com/questions/30016083/sdl2-opengl-sdl2-ttf-displaying-text
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-	GLfloat xp = x, yp = y;
-	GLfloat w = 100, h = 20;
-	SDL_GL_BindTexture(pTexture, nullptr, nullptr);
-	
-	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	glEnable(GL_TEXTURE_2D);       // point sprite texture support
+	// Find the first power of two for OpenGL image 
+	int w = MathHelper::PowerTwoFloor(pSurface->w) << 1;
+	int h = MathHelper::PowerTwoFloor(pSurface->h) << 1;
+
+	// Create a surface to the correct size in RGB format, and copy the old image
+	SDL_Surface *s = SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+	SDL_BlitSurface(pSurface, NULL, s, NULL);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
+
+	GLfloat xp = x;
+	GLfloat yp = y;
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, _width, _height, 0, 0, 1);
+	glColor4f(1, 1, 1, 1);
 
 	// make a rectangle
-	glBegin(GL_QUADS);
+	glBegin(GL_TRIANGLES);
 		glTexCoord2i(0, 0);
 		glVertex3f(xp, yp, 0);
-
 		glTexCoord2i(1, 0);
 		glVertex3f(xp + w, yp, 0);
-
 		glTexCoord2i(1, 1);
 		glVertex3f(xp + w, yp + h, 0);
 
+		glTexCoord2i(0, 0);
+		glVertex3f(xp, yp, 0);
 		glTexCoord2i(0, 1);
 		glVertex3f(xp, yp + h, 0);
+		glTexCoord2i(1, 1);
+		glVertex3f(xp + w, yp + h, 0);
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);
-	
-	SDL_GL_UnbindTexture(pTexture);
+	glDisable(GL_BLEND);
 
-	if (pSurface!=nullptr)
-		SDL_FreeSurface(pSurface);
-
-	if (pTexture!=nullptr)
-		SDL_DestroyTexture(pTexture);
+	// cleanup
+	SDL_FreeSurface(s);
+	SDL_FreeSurface(pSurface);
+	glDeleteTextures(1, &texId);
 }
 
 /** \brief get opengl position from a screen position
@@ -147,8 +164,7 @@ SDLWindow::SDLWindow()
 	, _camOrient(0, 1, 0)
 	, _pSdlWnd(nullptr)
 	, _pSdlRenderer(nullptr)
-	, m_fontBase(0)
-	, m_texStar(0)
+	, _texStar(0)
 	, _bRunning(true)
 {
 }
@@ -203,7 +219,6 @@ void SDLWindow::Init(int width, int height, double axisLen, const std::string& c
 
 	glewInit();
 
-	InitFont();
 	InitGL();
 	InitSimulation();
 }
@@ -254,7 +269,8 @@ void SDLWindow::AdjustCamera()
 		_camPos.x, _camPos.y, _camPos.z,
 		_camLookAt.x, _camLookAt.y, _camLookAt.z,
 		_camOrient.x, _camOrient.y, _camOrient.z);
-	glMatrixMode(GL_MODELVIEW);
+
+//	glMatrixMode(GL_MODELVIEW);
 }
 
 double SDLWindow::GetFOV() const

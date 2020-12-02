@@ -2,7 +2,7 @@
 
 
 /** \brief A class to store relevant constants. */
-class Constant
+class MathHelper
 {
 public:
 
@@ -17,4 +17,16 @@ public:
 
 	/** \brief Radian to deg conversion faktor. */
 	static const double RAD_TO_DEG;
+
+	static inline unsigned int PowerTwoFloor(unsigned int val)
+	{
+		unsigned int power = 2, nextVal = power * 2;
+
+		while ((nextVal *= 2) <= val)
+		{
+			power = power << 1; // *= 2;
+		}
+
+		return power << 1; // power * 2;
+	}
 };

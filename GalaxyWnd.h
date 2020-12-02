@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <fstream>
+#include <SDL_ttf.h>
 
 #include "SDLWnd.h"
 #include "Galaxy.h"
@@ -47,6 +48,7 @@ private:
 	};
 
 	GalaxyWnd(const GalaxyWnd& orig);
+	void InitFont();
 
 	void DrawStars();
 	void DrawDust();
@@ -71,4 +73,7 @@ private:
 	int m_colNum;
 	double m_t0, m_t1, m_dt;
 	Color m_col[200];
+
+	TTF_Font* _pFont;
+	TTF_Font* _pFontCaption;
 };

@@ -5,7 +5,7 @@
 #include <cmath>
 #include <iostream>
 
-#include "Constants.h"
+#include "MathHelper.h"
 #include "Star.h"
 #include "CumulativeDistributionFunction.h"
 
@@ -363,8 +363,8 @@ double Galaxy::GetOrbitalVelocity(double rad) const
 	}
 
 	// Calculate velocity in degree per year
-	double u = 2 * M_PI * rad * Constant::PC_TO_KM;        // Umfang in km
-	double time = u / (vel_kms * Constant::SEC_PER_YEAR);  // Umlaufzeit in Jahren
+	double u = 2 * M_PI * rad * MathHelper::PC_TO_KM;        // Umfang in km
+	double time = u / (vel_kms * MathHelper::SEC_PER_YEAR);  // Umlaufzeit in Jahren
 
 	return 360.0 / time;                                   // Grad pro Jahr
 }
@@ -495,7 +495,6 @@ void Galaxy::SingleTimeStep(double time)
 		posOld = m_pDust[i].m_pos;
 		m_pH2[i].CalcXY(m_pertN, m_pertAmp);
 	}
-
 }
 
 const Vec2D& Galaxy::GetStarPos(int idx)

@@ -4,7 +4,7 @@
 #include <cmath>
 #include <stdexcept>
 
-#include "Constants.h"
+#include "MathHelper.h"
 #include "specrend.h"
 #include "Star.h"
 
@@ -34,8 +34,18 @@ GalaxyWnd::GalaxyWnd()
 
 void GalaxyWnd::InitGL()
 {
+	// Font initialization
+	TTF_Init();
+	_pFont = TTF_OpenFont("arial.ttf", 17);
+	if (_pFont == nullptr)
+		throw std::runtime_error(TTF_GetError());
+
+	_pFontCaption = TTF_OpenFont("arial.ttf", 40);
+	if (_pFont == nullptr)
+		throw std::runtime_error(TTF_GetError());
+
+	// GL initialization
 	glShadeModel(GL_SMOOTH);
-	glClearColor(0.0f, 0.0f, 0.1f, 0.0f);  // black background
 	glViewport(0, 0, GetWidth(), GetHeight());
 
 	SDL_Surface* tex;
@@ -67,10 +77,10 @@ void GalaxyWnd::InitGL()
 		throw std::runtime_error("image is not truecolor");
 
 	// Have OpenGL generate a texture object handle for us
-	glGenTextures(1, &m_texStar);
+	glGenTextures(1, &_texStar);
 
 	// Bind the texture object
-	glBindTexture(GL_TEXTURE_2D, m_texStar);
+	glBindTexture(GL_TEXTURE_2D, _texStar);
 
 	// Set the texture's stretching properties
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -96,9 +106,8 @@ void GalaxyWnd::InitGL()
 	glLineWidth(1);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//  glEnable(GL_POINT_SPRITE);
 	glDisable(GL_DEPTH_TEST);
-	glClearColor(0.0f, 0.0f, 0.03f, 0.0f);  // black background
+	glClearColor(0.0f, .0f, 0.1f, 0.0f);
 	SetCameraOrientation(Vec3D(0, 1, 0));
 
 	glMatrixMode(GL_MODELVIEW);
@@ -139,7 +148,8 @@ void GalaxyWnd::Render()
 	switch (m_camOrient)
 	{
 		// Default orientation
-		case 0: orient.x = 0;
+		case 0: 
+			orient.x = 0;
 			orient.y = 1;
 			orient.z = 0;
 			break;
@@ -147,7 +157,7 @@ void GalaxyWnd::Render()
 		// Rotate with galaxy core
 		case 1:
 		{
-			Vec2D p = m_galaxy.GetStarPos(1);
+			auto &p = m_galaxy.GetStarPos(1);
 			orient.x = p.x;
 			orient.y = p.y;
 			orient.z = 0;
@@ -157,7 +167,7 @@ void GalaxyWnd::Render()
 		// Rotate with edge of disk
 		case 2:
 		{
-			Vec2D p = m_galaxy.GetStarPos(2);
+			auto &p = m_galaxy.GetStarPos(2);
 			orient.x = p.x;
 			orient.y = p.y;
 			orient.z = 0;
@@ -212,7 +222,7 @@ void GalaxyWnd::DrawEllipsis(double a, double b, double angle)
 	const double y = 0;
 
 	// Angle is given by Degree Value
-	double beta = -angle * Constant::DEG_TO_RAD; //(Math.PI/180) converts Degree Value into Radians
+	double beta = -angle * MathHelper::DEG_TO_RAD; //(Math.PI/180) converts Degree Value into Radians
 	double sinbeta = sin(beta);
 	double cosbeta = cos(beta);
 
@@ -222,7 +232,7 @@ void GalaxyWnd::DrawEllipsis(double a, double b, double angle)
 	Vec2D vecNull;
 	for (int i = 0; i < 361; i += 360 / steps)
 	{
-		double alpha = i * Constant::DEG_TO_RAD;
+		double alpha = i * MathHelper::DEG_TO_RAD;
 		double sinalpha = sin(alpha);
 		double cosalpha = cos(alpha);
 
@@ -242,7 +252,7 @@ void GalaxyWnd::DrawVelocity()
 {
 	Star* pStars = m_galaxy.GetStars();
 
-	double dt_in_sec = m_galaxy.GetTimeStep() * Constant::SEC_PER_YEAR;
+	double dt_in_sec = m_galaxy.GetTimeStep() * MathHelper::SEC_PER_YEAR;
 	glPointSize(1);
 	glColor3f(0.5, 0.7, 0.5);
 	glBegin(GL_POINTS);
@@ -254,7 +264,7 @@ void GalaxyWnd::DrawVelocity()
 		// umrechnen in km/s
 		double v = sqrt(vel.x * vel.x + vel.y * vel.y);   // pc / timestep
 		v /= dt_in_sec;          // v in pc/sec
-		v *= Constant::PC_TO_KM; // v in km/s
+		v *= MathHelper::PC_TO_KM; // v in km/s
 
 		glVertex3f(r, v * 10, 0.0f);
 	}
@@ -299,13 +309,13 @@ void GalaxyWnd::DrawDensityWaves(int num, double rad)
 		glColor3f(1, 1, 1);
 		DrawEllipsis(r,
 			r * m_galaxy.GetExcentricity(r),
-			Constant::RAD_TO_DEG * m_galaxy.GetAngularOffset(r));
+			MathHelper::RAD_TO_DEG * m_galaxy.GetAngularOffset(r));
 	}
 }
 
 void GalaxyWnd::DrawStars()
 {
-	glBindTexture(GL_TEXTURE_2D, m_texStar);
+	glBindTexture(GL_TEXTURE_2D, _texStar);
 
 	float maxSize = 0.0f;
 	glGetFloatv(GL_POINT_SIZE_MAX, &maxSize);
@@ -317,7 +327,6 @@ void GalaxyWnd::DrawStars()
 	glEnable(GL_TEXTURE_2D);       // point sprite texture support
 	glEnable(GL_BLEND);            // soft blending of point sprites
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
 
 	int num = m_galaxy.GetNumStars();
 	Star* pStars = m_galaxy.GetStars();
@@ -365,14 +374,16 @@ void GalaxyWnd::DrawStars()
 	}
 	glEnd();
 
-	glDisable(GL_POINT_SPRITE_ARB);
+//	glDisable(GL_POINT_SPRITE_ARB);
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
+
+//	glDeleteTextures(1, &m_texStar);
 }
 
 void GalaxyWnd::DrawDust()
 {
-	glBindTexture(GL_TEXTURE_2D, m_texStar);
+	glBindTexture(GL_TEXTURE_2D, _texStar);
 
 	float maxSize = 0.0f;
 	glGetFloatv(GL_POINT_SIZE_MAX_ARB, &maxSize);
@@ -411,7 +422,7 @@ void GalaxyWnd::DrawDust()
 
 void GalaxyWnd::DrawH2()
 {
-	glBindTexture(GL_TEXTURE_2D, m_texStar);
+	glBindTexture(GL_TEXTURE_2D, _texStar);
 
 	float maxSize = 0.0f;
 	glGetFloatv(GL_POINT_SIZE_MAX_ARB, &maxSize);
@@ -470,19 +481,19 @@ void GalaxyWnd::DrawStat()
 	int line = 0;
 
 	glColor3f(1, 1, 1);
-	TextOut(x0, y0 + dy * line++, "FPS:      %d", GetFPS());
-	TextOut(x0, y0 + dy * line++, "Time:     %2.2e y", m_galaxy.GetTime());
-	TextOut(x0, y0 + dy * line++, "RadCore:     %d pc", (int)m_galaxy.GetCoreRad());
-	TextOut(x0, y0 + dy * line++, "RadGalaxy:   %d pc", (int)m_galaxy.GetRad());
-	TextOut(x0, y0 + dy * line++, "RadFarField: %d pc", (int)m_galaxy.GetFarFieldRad());
-	TextOut(x0, y0 + dy * line++, "ExInner:     %2.2f", m_galaxy.GetExInner());
-	TextOut(x0, y0 + dy * line++, "ExOuter:     %2.2f", m_galaxy.GetExOuter());
-	TextOut(x0, y0 + dy * line++, "Sigma:       %2.2f", m_galaxy.GetSigma());
-	TextOut(x0, y0 + dy * line++, "AngOff:      %1.4f deg/pc", m_galaxy.GetAngularOffset());
-	TextOut(x0, y0 + dy * line++, "FoV:         %1.2f pc", _fov);
-	TextOut(x0, y0 + dy * line++, "Spiral Arms:");
-	TextOut(x0, y0 + dy * line++, "  Num pert:   %d", m_galaxy.GetPertN());
-	TextOut(x0, y0 + dy * line++, "  pertDamp:   %1.2f", m_galaxy.GetPertAmp());
+	TextOut(_pFont, x0, y0 + dy * line++, "FPS:      %d", GetFPS());
+	TextOut(_pFont, x0, y0 + dy * line++, "Time:     %2.2e y", m_galaxy.GetTime());
+	TextOut(_pFont, x0, y0 + dy * line++, "RadCore:     %d pc", (int)m_galaxy.GetCoreRad());
+	TextOut(_pFont, x0, y0 + dy * line++, "RadGalaxy:   %d pc", (int)m_galaxy.GetRad());
+	TextOut(_pFont, x0, y0 + dy * line++, "RadFarField: %d pc", (int)m_galaxy.GetFarFieldRad());
+	TextOut(_pFont, x0, y0 + dy * line++, "ExInner:     %2.2f", m_galaxy.GetExInner());
+	TextOut(_pFont, x0, y0 + dy * line++, "ExOuter:     %2.2f", m_galaxy.GetExOuter());
+	TextOut(_pFont, x0, y0 + dy * line++, "Sigma:       %2.2f", m_galaxy.GetSigma());
+	TextOut(_pFont, x0, y0 + dy * line++, "AngOff:      %1.4f deg/pc", m_galaxy.GetAngularOffset());
+	TextOut(_pFont, x0, y0 + dy * line++, "FoV:         %1.2f pc", _fov);
+	TextOut(_pFont, x0, y0 + dy * line++, "Spiral Arms:");
+	TextOut(_pFont, x0, y0 + dy * line++, "  Num pert:   %d", m_galaxy.GetPertN());
+	TextOut(_pFont, x0, y0 + dy * line++, "  pertDamp:   %1.2f", m_galaxy.GetPertAmp());
 }
 
 void GalaxyWnd::DrawGalaxyRadii()
@@ -513,51 +524,52 @@ void GalaxyWnd::DrawGalaxyRadii()
 
 void GalaxyWnd::DrawHelp()
 {
-	double x0 = 10, y0 = 20, dy = 20;
+	double x0 = 10, y0 = 60, dy = 20;
 	int line = 0;
 	Vec3D p;
 
 	glColor3f(1, 1, 1);
-	TextOut(x0, y0 + dy * line++, "Keyboard commands");
-	TextOut(x0, y0 + dy * line++, "Camera");
-	TextOut(x0, y0 + dy * line++, "  1     - centric; fixed");
-	TextOut(x0, y0 + dy * line++, "  2     - centric; rotating with core speed");
-	TextOut(x0, y0 + dy * line++, "  3     - centric; rotating with speed of outer disc");
-	TextOut(x0, y0 + dy * line++, "Galaxy geometry");
-	TextOut(x0, y0 + dy * line++, "  q     - increase inner excentricity");
-	TextOut(x0, y0 + dy * line++, "  a     - decrease inner excentricity");
-	TextOut(x0, y0 + dy * line++, "  w     - increase outer excentricity");
-	TextOut(x0, y0 + dy * line++, "  s     - decrease outer excentricity");
-	TextOut(x0, y0 + dy * line++, "  e     - increase angular shift of orbits");
-	TextOut(x0, y0 + dy * line++, "  d     - decrease angular shift of orbits");
-	TextOut(x0, y0 + dy * line++, "  r     - increase core size");
-	TextOut(x0, y0 + dy * line++, "  f     - decrease core size");
-	TextOut(x0, y0 + dy * line++, "  t     - increase galaxy size");
-	TextOut(x0, y0 + dy * line++, "  g     - decrease galaxy size");
-	TextOut(x0, y0 + dy * line++, "Spiral Arms");
-	TextOut(x0, y0 + dy * line++, "  Home  - increas  # orbit perturbations");
-	TextOut(x0, y0 + dy * line++, "  End   - decrease # orbit perturbations");
-	TextOut(x0, y0 + dy * line++, "  PG_UP - increase perturbation damping");
-	TextOut(x0, y0 + dy * line++, "  PG_DN - decrease perturbation damping");
-	TextOut(x0, y0 + dy * line++, "Display features");
-	TextOut(x0, y0 + dy * line++, "  F1    - Help screen");
-	TextOut(x0, y0 + dy * line++, "  F2    - Galaxy data");
-	TextOut(x0, y0 + dy * line++, "  F3    - Stars (on/off)");
-	TextOut(x0, y0 + dy * line++, "  F4    - Dust (on/off)");
-	TextOut(x0, y0 + dy * line++, "  F5    - H2 Regions (on/off)");
-	TextOut(x0, y0 + dy * line++, "  F6    - Density waves (Star orbits)");
-	TextOut(x0, y0 + dy * line++, "  F7    - Axis");
-	TextOut(x0, y0 + dy * line++, "  F8    - Radii");
-	TextOut(x0, y0 + dy * line++, "  +    - Zoom in");
-	TextOut(x0, y0 + dy * line++, "  -    - Zoom out");
-	TextOut(x0, y0 + dy * line++, "  b    - Decrease Dust Render Size");
-	TextOut(x0, y0 + dy * line++, "  n    - Increase Dust Render Size");
-	TextOut(x0, y0 + dy * line++, "  m    - Toggle Dark Matter on/off");
+	TextOut(_pFontCaption, x0, y0 - 60, "Spiral Galaxy Simulator");
+	TextOut(_pFont, x0, y0 + dy * line++, "Keyboard commands");
+	TextOut(_pFont, x0, y0 + dy * line++, "Camera");
+	TextOut(_pFont, x0, y0 + dy * line++, "  1     - centric; fixed");
+	TextOut(_pFont, x0, y0 + dy * line++, "  2     - centric; rotating with core speed");
+	TextOut(_pFont, x0, y0 + dy * line++, "  3     - centric; rotating with speed of outer disc");
+	TextOut(_pFont, x0, y0 + dy * line++, "Galaxy geometry");
+	TextOut(_pFont, x0, y0 + dy * line++, "  q     - increase inner excentricity");
+	TextOut(_pFont, x0, y0 + dy * line++, "  a     - decrease inner excentricity");
+	TextOut(_pFont, x0, y0 + dy * line++, "  w     - increase outer excentricity");
+	TextOut(_pFont, x0, y0 + dy * line++, "  s     - decrease outer excentricity");
+	TextOut(_pFont, x0, y0 + dy * line++, "  e     - increase angular shift of orbits");
+	TextOut(_pFont, x0, y0 + dy * line++, "  d     - decrease angular shift of orbits");
+	TextOut(_pFont, x0, y0 + dy * line++, "  r     - increase core size");
+	TextOut(_pFont, x0, y0 + dy * line++, "  f     - decrease core size");
+	TextOut(_pFont, x0, y0 + dy * line++, "  t     - increase galaxy size");
+	TextOut(_pFont, x0, y0 + dy * line++, "  g     - decrease galaxy size");
+	TextOut(_pFont, x0, y0 + dy * line++, "Spiral Arms");
+	TextOut(_pFont, x0, y0 + dy * line++, "  Home  - increas  # orbit perturbations");
+	TextOut(_pFont, x0, y0 + dy * line++, "  End   - decrease # orbit perturbations");
+	TextOut(_pFont, x0, y0 + dy * line++, "  PG_UP - increase perturbation damping");
+	TextOut(_pFont, x0, y0 + dy * line++, "  PG_DN - decrease perturbation damping");
+	TextOut(_pFont, x0, y0 + dy * line++, "Display features");
+	TextOut(_pFont, x0, y0 + dy * line++, "  F1    - Help screen");
+	TextOut(_pFont, x0, y0 + dy * line++, "  F2    - Galaxy data");
+	TextOut(_pFont, x0, y0 + dy * line++, "  F3    - Stars (on/off)");
+	TextOut(_pFont, x0, y0 + dy * line++, "  F4    - Dust (on/off)");
+	TextOut(_pFont, x0, y0 + dy * line++, "  F5    - H2 Regions (on/off)");
+	TextOut(_pFont, x0, y0 + dy * line++, "  F6    - Density waves (Star orbits)");
+	TextOut(_pFont, x0, y0 + dy * line++, "  F7    - Axis");
+	TextOut(_pFont, x0, y0 + dy * line++, "  F8    - Radii");
+	TextOut(_pFont, x0, y0 + dy * line++, "  +    - Zoom in");
+	TextOut(_pFont, x0, y0 + dy * line++, "  -    - Zoom out");
+	TextOut(_pFont, x0, y0 + dy * line++, "  b    - Decrease Dust Render Size");
+	TextOut(_pFont, x0, y0 + dy * line++, "  n    - Increase Dust Render Size");
+	TextOut(_pFont, x0, y0 + dy * line++, "  m    - Toggle Dark Matter on/off");
 
-	TextOut(x0, y0 + dy * line++, "Misc");
-	TextOut(x0, y0 + dy * line++, "  pause - halt simulation");
-	TextOut(x0, y0 + dy * line++, "Predefined Galaxies");
-	TextOut(x0, y0 + dy * line++, "  Keypad 0 - 4");
+	TextOut(_pFont, x0, y0 + dy * line++, "Misc");
+	TextOut(_pFont, x0, y0 + dy * line++, "  pause - halt simulation");
+	TextOut(_pFont, x0, y0 + dy * line++, "Predefined Galaxies");
+	TextOut(_pFont, x0, y0 + dy * line++, "  Keypad 0 - 4");
 }
 
 GalaxyWnd::Color GalaxyWnd::ColorFromTemperature(double temp) const
@@ -658,6 +670,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 		case SDLK_b:
 			m_galaxy.SetDustRenderSize(m_galaxy.GetDustRenderSize() - 5);
 			break;
+
 		case SDLK_n:
 			m_galaxy.SetDustRenderSize(m_galaxy.GetDustRenderSize() + 5);
 			break;

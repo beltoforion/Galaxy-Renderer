@@ -191,7 +191,7 @@ xcopy /Y $(SolutionDir)..\assets\arial.ttf $(OutDir)</Command>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Constants.h" />
+    <ClInclude Include="..\MathHelper.h" />
     <ClInclude Include="..\CumulativeDistributionFunction.h" />
     <ClInclude Include="..\Galaxy.h" />
     <ClInclude Include="..\GalaxyWnd.h" />

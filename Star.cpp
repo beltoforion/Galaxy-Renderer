@@ -1,6 +1,6 @@
 #include "Star.h"
 
-#include "Constants.h"
+#include "MathHelper.h"
 #include <cmath>
 
 
@@ -21,7 +21,7 @@ Star::Star()
 void Star::CalcXY(int pertN, double pertAmp)
 {
 	double beta = -m_angle;
-	double alpha = m_theta * Constant::DEG_TO_RAD;
+	double alpha = m_theta * MathHelper::DEG_TO_RAD;
 
 	// temporaries to save cpu time
 	double cosalpha = std::cos(alpha);
