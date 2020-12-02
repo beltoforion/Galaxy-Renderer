@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 	{
 //		ShowHelp();
 		GalaxyWnd wndMain;
-		wndMain.Init(1000, 1000, 35000.0, "Rendering a Galaxy with Density Waves");
+		wndMain.Init(1500, 1000, 35000.0, "Rendering a Galaxy with Density Waves");
 		wndMain.MainLoop();
 	}
 	catch (std::exception& exc)

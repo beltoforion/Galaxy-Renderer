@@ -209,6 +209,7 @@ void SDLWindow::Init(int width, int height, double axisLen, const std::string& c
 		SDL_WINDOWPOS_UNDEFINED,
 		width, height,
 		SDL_WINDOW_OPENGL);
+
 	if (!_pSdlWnd)
 		throw std::runtime_error(SDL_GetError());
 
@@ -262,7 +263,11 @@ void SDLWindow::AdjustCamera()
 	glLoadIdentity();
 
 	double l = _fov / 2.0;
-	glOrtho(-l, l, -l, l, -l, l);
+	double aspect = (double)_width / _height;
+//	glOrtho(-l, l, -l, l, -l, l);
+	glOrtho(-l* aspect, l * aspect, -l, l, -l, l);
+
+
 	gluLookAt(
 		_camPos.x, _camPos.y, _camPos.z,
 		_camLookAt.x, _camLookAt.y, _camLookAt.z,
