@@ -8,4 +8,4 @@ For more Details please read the Articles.
 * https://beltoforion.de/en/spiral_galaxy_renderer [english]
 * https://beltoforion.de/de/rendern_von_spiralgalaxien [german]
 
-![titleimage](https://beltoforion.de/en/spiral_galaxy_renderer/images/step6.jpg)
+![titleimage](https://beltoforion.de/en/spiral_galaxy_renderer/images/github_title_galaxy_simulator.jpg)
