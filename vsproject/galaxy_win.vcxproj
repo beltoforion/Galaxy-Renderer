@@ -130,7 +130,8 @@ xcopy /y /d $(SolutionDir)\..\star.bmp $(OutDir)</Command>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y $(SolutionDir)..\assets\particle.bmp $(OutDir)
-xcopy /Y $(SolutionDir)..\assets\arial.ttf $(OutDir)</Command>
+xcopy /Y $(SolutionDir)..\assets\arial.ttf $(OutDir)
+xcopy /Y $(SolutionDir)..\assets\consola.ttf $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -183,7 +184,8 @@ xcopy /y /d $(SolutionDir)\..\star.bmp $(OutDir)</Command>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y $(SolutionDir)..\assets\particle.bmp $(OutDir)
-xcopy /Y $(SolutionDir)..\assets\arial.ttf $(OutDir)</Command>
+xcopy /Y $(SolutionDir)..\assets\arial.ttf $(OutDir)
+xcopy /Y $(SolutionDir)..\assets\consola.ttf $(OutDir)</Command>
       <Message>Copying assets to output folder</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>

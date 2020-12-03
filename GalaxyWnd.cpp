@@ -13,8 +13,8 @@ GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
 	, m_camOrient(0)
 	, m_starRenderType(1)
-	, m_flags(dspSTARS | dspAXIS | dspHELP | dspDUST | dspH2)
-	, m_galaxy()
+	, m_flags((int)DisplayItem::STARS | (int)DisplayItem::AXIS | (int)DisplayItem::HELP | (int)DisplayItem::DUST | (int)DisplayItem::H2)
+	, _galaxy()
 	, m_colNum(200)
 	, m_t0(1000)
 	, m_t1(10000)
@@ -36,12 +36,16 @@ void GalaxyWnd::InitGL()
 {
 	// Font initialization
 	TTF_Init();
+	_pSmallFont = TTF_OpenFont("consola.ttf", 14);
+	if (_pSmallFont == nullptr)
+		throw std::runtime_error(TTF_GetError());
+
 	_pFont = TTF_OpenFont("arial.ttf", 17);
 	if (_pFont == nullptr)
 		throw std::runtime_error(TTF_GetError());
 
 	_pFontCaption = TTF_OpenFont("arial.ttf", 40);
-	if (_pFont == nullptr)
+	if (_pFontCaption == nullptr)
 		throw std::runtime_error(TTF_GetError());
 
 	// GL initialization
@@ -116,7 +120,7 @@ void GalaxyWnd::InitGL()
 
 void GalaxyWnd::InitSimulation()
 {
-	m_galaxy.Reset(
+	_galaxy.Reset(
 		13000,    // radius of the galaxy
 		4000,     // radius of the core
 		0.0004,   // angluar offset of the density wave per parsec of radius
@@ -131,13 +135,13 @@ void GalaxyWnd::InitSimulation()
 		40,       // Amplitude damping factor of perturbation
 		100);      // dust render size in pixel
 
-	m_roi = m_galaxy.GetFarFieldRad() * 1.3;
+	m_roi = _galaxy.GetFarFieldRad() * 1.3;
 }
 
 void GalaxyWnd::Render()
 {
 	static long ct = 0;
-	if (!(m_flags & dspPAUSE))
+	if (!(m_flags & (int)DisplayItem::PAUSE))
 	{
 		++ct;
 	}
@@ -148,31 +152,31 @@ void GalaxyWnd::Render()
 	switch (m_camOrient)
 	{
 		// Default orientation
-		case 0: 
-			orient.x = 0;
-			orient.y = 1;
-			orient.z = 0;
-			break;
+	case 0:
+		orient.x = 0;
+		orient.y = 1;
+		orient.z = 0;
+		break;
 
 		// Rotate with galaxy core
-		case 1:
-		{
-			auto &p = m_galaxy.GetStarPos(1);
-			orient.x = p.x;
-			orient.y = p.y;
-			orient.z = 0;
-		}
-		break;
+	case 1:
+	{
+		auto& p = _galaxy.GetStarPos(1);
+		orient.x = p.x;
+		orient.y = p.y;
+		orient.z = 0;
+	}
+	break;
 
-		// Rotate with edge of disk
-		case 2:
-		{
-			auto &p = m_galaxy.GetStarPos(2);
-			orient.x = p.x;
-			orient.y = p.y;
-			orient.z = 0;
-		}
-		break;
+	// Rotate with edge of disk
+	case 2:
+	{
+		auto& p = _galaxy.GetStarPos(2);
+		orient.x = p.x;
+		orient.y = p.y;
+		orient.z = 0;
+	}
+	break;
 	}
 
 	Vec3D lookAt(0, 0, 0);
@@ -180,42 +184,43 @@ void GalaxyWnd::Render()
 
 	SetCamera(pos, lookAt, orient);
 
-	if (!(m_flags & dspPAUSE))
-		m_galaxy.SingleTimeStep(100000); // time in years
+	if (!(m_flags & (int)DisplayItem::PAUSE))
+		_galaxy.SingleTimeStep(100000); // time in years
 
-	if (m_flags & dspAXIS)
+	if (m_flags & (int)DisplayItem::AXIS)
 		DrawAxis(Vec2D(0, 0));
 
-	if (m_flags & dspDENSITY_WAVES)
-		DrawDensityWaves(50, m_galaxy.GetFarFieldRad());
 
-	if (m_flags & dspSTAT)
-		DrawStat();
-
-	if (m_flags & dspDUST)
+	if (m_flags & (int)DisplayItem::DUST)
 		DrawDust();
 
-	if (m_flags & dspH2)
+	if (m_flags & (int)DisplayItem::H2)
 		DrawH2();
 
-	if (m_flags & dspSTARS)
+	if (m_flags & (int)DisplayItem::STARS)
 		DrawStars();
 
-	if (m_flags & dspRADII)
+	if (m_flags & (int)DisplayItem::DENSITY_WAVES)
+	{
+		DrawDensityWaves(50, _galaxy.GetFarFieldRad());
 		DrawGalaxyRadii();
+	}
 
-	if (m_flags & dspVELOCITY)
+	if (m_flags & (int)DisplayItem::VELOCITY)
 		DrawVelocity();
 
-	if (m_flags & dspHELP)
+	if (m_flags & (int)DisplayItem::HELP)
+	{
+		DrawStat();
 		DrawHelp();
+	}
 
 	SDL_GL_SwapWindow(_pSdlWnd);
 	SDL_Delay(1);
 }
 
 
-void GalaxyWnd::DrawEllipsis(double a, double b, double angle)
+void GalaxyWnd::DrawEllipsis(double a, double b, double angle, GLfloat width)
 {
 	const int steps = 100;
 	const double x = 0;
@@ -226,6 +231,9 @@ void GalaxyWnd::DrawEllipsis(double a, double b, double angle)
 	double sinbeta = sin(beta);
 	double cosbeta = cos(beta);
 
+	glEnable(GL_BLEND);            // soft blending of point sprites
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glLineWidth(width);
 	glBegin(GL_LINE_STRIP);
 
 	Vec2D pos;
@@ -239,24 +247,25 @@ void GalaxyWnd::DrawEllipsis(double a, double b, double angle)
 		GLfloat fx = x + (a * cosalpha * cosbeta - b * sinalpha * sinbeta);
 		GLfloat fy = y + (a * cosalpha * sinbeta + b * sinalpha * cosbeta);
 
-		fx += (a / m_galaxy.GetPertAmp()) * sin(alpha * 2 * m_galaxy.GetPertN());
-		fy += (a / m_galaxy.GetPertAmp()) * cos(alpha * 2 * m_galaxy.GetPertN());
+		fx += (a / _galaxy.GetPertAmp()) * sin(alpha * 2 * _galaxy.GetPertN());
+		fy += (a / _galaxy.GetPertAmp()) * cos(alpha * 2 * _galaxy.GetPertN());
 
 		glVertex3f(fx, fy, 0);
 	}
 
 	glEnd();
+	glDisable(GL_BLEND);
 }
 
 void GalaxyWnd::DrawVelocity()
 {
-	Star* pStars = m_galaxy.GetStars();
+	Star* pStars = _galaxy.GetStars();
 
-	double dt_in_sec = m_galaxy.GetTimeStep() * MathHelper::SEC_PER_YEAR;
+	double dt_in_sec = _galaxy.GetTimeStep() * MathHelper::SEC_PER_YEAR;
 	glPointSize(1);
 	glColor3f(0.5, 0.7, 0.5);
 	glBegin(GL_POINTS);
-	for (int i = 0; i < m_galaxy.GetNumStars(); ++i)
+	for (int i = 0; i < _galaxy.GetNumStars(); ++i)
 	{
 		const Vec2D& vel = pStars[i].m_vel;
 		double r = pStars[i].m_a; //(pStars[i].m_a + pStars[i].m_b)/2;
@@ -305,11 +314,13 @@ void GalaxyWnd::DrawDensityWaves(int num, double rad)
 
 	for (int i = 0; i <= num; ++i)
 	{
-		double r = (i + 1) * dr;
-		glColor3f(1, 1, 1);
-		DrawEllipsis(r,
-			r * m_galaxy.GetExcentricity(r),
-			MathHelper::RAD_TO_DEG * m_galaxy.GetAngularOffset(r));
+		double r = dr * (i + 1);
+		glColor4f(0.8, 0.8, 0.8, 0.5);
+		DrawEllipsis(
+			r,
+			r * _galaxy.GetExcentricity(r),
+			MathHelper::RAD_TO_DEG * _galaxy.GetAngularOffset(r), 
+			1);
 	}
 }
 
@@ -328,8 +339,8 @@ void GalaxyWnd::DrawStars()
 	glEnable(GL_BLEND);            // soft blending of point sprites
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	int num = m_galaxy.GetNumStars();
-	Star* pStars = m_galaxy.GetStars();
+	int num = _galaxy.GetNumStars();
+	Star* pStars = _galaxy.GetStars();
 
 
 	glPointSize(3); //4
@@ -395,11 +406,11 @@ void GalaxyWnd::DrawDust()
 	glEnable(GL_BLEND);            // soft blending of point sprites
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	const Star* pDust = m_galaxy.GetDust();
-	int num = m_galaxy.GetNumDust();
+	const Star* pDust = _galaxy.GetDust();
+	int num = _galaxy.GetNumDust();
 
 	// size 70 looks ok when the fov is 28174
-	glPointSize(std::min((float)(m_galaxy.GetDustRenderSize() * 28174 / _fov), maxSize));
+	glPointSize(std::min((float)(_galaxy.GetDustRenderSize() * 28174 / _fov), maxSize));
 	glBegin(GL_POINTS);
 
 	for (int i = 0; i < num; ++i)
@@ -435,8 +446,8 @@ void GalaxyWnd::DrawH2()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 
-	Star* pH2 = m_galaxy.GetH2();
-	int num = m_galaxy.GetNumH2();
+	Star* pH2 = _galaxy.GetH2();
+	int num = _galaxy.GetNumH2();
 
 	for (int i = 0; i < num; ++i)
 	{
@@ -476,51 +487,50 @@ void GalaxyWnd::DrawH2()
 
 void GalaxyWnd::DrawStat()
 {
-	double x0 = 10, y0 = 20, dy = 20;
+	double x0 = _width - 230, y0 = _height -260, dy = TTF_FontHeight(_pSmallFont) + 4;
 	int line = 0;
 
-	glColor3f(1, 1, 1);
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "FPS:      %d", GetFPS());
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Time:     %2.2e y", m_galaxy.GetTime());
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "RadCore:     %d pc", (int)m_galaxy.GetCoreRad());
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "RadGalaxy:   %d pc", (int)m_galaxy.GetRad());
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "RadFarField: %d pc", (int)m_galaxy.GetFarFieldRad());
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "ExInner:     %2.2f", m_galaxy.GetExInner());
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "ExOuter:     %2.2f", m_galaxy.GetExOuter());
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Sigma:       %2.2f", m_galaxy.GetSigma());
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "AngOff:      %1.4f deg/pc", m_galaxy.GetAngularOffset());
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "FoV:         %1.2f pc", _fov);
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Spiral Arms:");
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  Num pert:   %d", m_galaxy.GetPertN());
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  pertDamp:   %1.2f", m_galaxy.GetPertAmp());
+	glColor4f(0.7, 0.7, 0.7, 0.7);
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "FPS:      %d", GetFPS());
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "Time:     %2.2e y", _galaxy.GetTime());
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "RadCore:     %d pc", (int)_galaxy.GetCoreRad());
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "RadGalaxy:   %d pc", (int)_galaxy.GetRad());
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "RadFarField: %d pc", (int)_galaxy.GetFarFieldRad());
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "ExInner:     %2.2f", _galaxy.GetExInner());
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "ExOuter:     %2.2f", _galaxy.GetExOuter());
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "Sigma:       %2.2f", _galaxy.GetSigma());
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "AngOff:      %1.4f deg/pc", _galaxy.GetAngularOffset());
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "FoV:         %1.2f pc", _fov);
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "Spiral Arms:");
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  Num pert:   %d", _galaxy.GetPertN());
+	TextOut(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  pertDamp:   %1.2f", _galaxy.GetPertAmp());
 }
 
 void GalaxyWnd::DrawGalaxyRadii()
 {
-	double r;
-
-	glColor3f(1, 1, 0);
-	r = m_galaxy.GetCoreRad();
+	glColor4f(1, 1, 0, 0.6);
+	double r = _galaxy.GetCoreRad();
 	if (r > 0)
 	{
-		DrawEllipsis(r, r, 0);
+		DrawEllipsis(r, r, 0, 3);
 		TextOut(_pFont, TextCoords::Model, 0, r + 500, "Core");
 	}
 
-	glColor3f(0, 1, 0);
-	r = m_galaxy.GetRad();
-	DrawEllipsis(r, r, 0);
+	glColor4f(0, 1, 0, 0.6);
+	r = _galaxy.GetRad();
+	DrawEllipsis(r, r, 0, 3);
 	TextOut(_pFont, TextCoords::Model, 0, r + 500, "Disk");
 
-	glColor3f(1, 0, 0);
-	r = m_galaxy.GetFarFieldRad();
-	DrawEllipsis(r, r, 0);
+	glColor4f(1, 0, 0, 0.6);
+	r = _galaxy.GetFarFieldRad();
+	DrawEllipsis(r, r, 0, 3);
 	TextOut(_pFont, TextCoords::Model, 0, r + 500, "Intergalactic medium");
 }
 
 void GalaxyWnd::DrawAxis(const Vec2D& origin)
 {
 	glColor3f((GLfloat)0.3, (GLfloat)0.3, (GLfloat)0.3);
+	glLineWidth(1);
 
 	GLfloat s = (GLfloat)std::pow(10, (int)(std::log10(_fov / 2)));
 	GLfloat l = _fov / 100, p = 0;
@@ -607,14 +617,12 @@ void GalaxyWnd::DrawHelp()
 	
 	y0 = y0 + 20;
 	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Display features");
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F1    - Help screen");
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F2    - Galaxy data");
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F3    - Stars (on/off)");
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F4    - Dust (on/off)");
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F5    - H2 Regions (on/off)");
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F6    - Density waves (Star orbits)");
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F7    - Axis");
-	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F8    - Radii");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F1   - Help screen");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F2   - Toggle Axis");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F3   - Stars (on/off)");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F4   - Dust (on/off)");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F5   - H2 Regions (on/off)");
+	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  F6   - Density waves (Star orbits)");
 	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  +    - Zoom in");
 	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  -    - Zoom out");
 	TextOut(_pFont, TextCoords::Window, x0, y0 + dy * line++, "  b    - Decrease Dust Render Size");
@@ -649,19 +657,19 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 		switch (m_event.key.keysym.sym)
 		{
 		case SDLK_END:
-			m_galaxy.SetPertN(m_galaxy.GetPertN() - 1);
+			_galaxy.SetPertN(_galaxy.GetPertN() - 1);
 			break;
 
 		case SDLK_HOME:
-			m_galaxy.SetPertN(m_galaxy.GetPertN() + 1);
+			_galaxy.SetPertN(_galaxy.GetPertN() + 1);
 			break;
 
 		case SDLK_PAGEDOWN:
-			m_galaxy.SetPertAmp(m_galaxy.GetPertAmp() - 10);
+			_galaxy.SetPertAmp(_galaxy.GetPertAmp() - 10);
 			break;
 
 		case SDLK_PAGEUP:
-			m_galaxy.SetPertAmp(m_galaxy.GetPertAmp() + 10);
+			_galaxy.SetPertAmp(_galaxy.GetPertAmp() + 10);
 			break;
 
 		case SDLK_1:
@@ -677,134 +685,112 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case SDLK_q:
-			m_galaxy.SetExInner(m_galaxy.GetExInner() + 0.05);
+			_galaxy.SetExInner(_galaxy.GetExInner() + 0.05);
 			break;
 
 		case SDLK_a:
-			m_galaxy.SetExInner(std::max(m_galaxy.GetExInner() - 0.05, 0.0));
+			_galaxy.SetExInner(std::max(_galaxy.GetExInner() - 0.05, 0.0));
 			break;
 
 		case SDLK_w:
-			m_galaxy.SetExOuter(m_galaxy.GetExOuter() + 0.05);
+			_galaxy.SetExOuter(_galaxy.GetExOuter() + 0.05);
 			break;
 
 		case SDLK_s:
-			m_galaxy.SetExOuter(std::max(m_galaxy.GetExOuter() - 0.05, 0.0));
+			_galaxy.SetExOuter(std::max(_galaxy.GetExOuter() - 0.05, 0.0));
 			break;
 
 		case SDLK_e:
-			m_galaxy.SetAngularOffset(m_galaxy.GetAngularOffset() + 0.00005);
+			_galaxy.SetAngularOffset(_galaxy.GetAngularOffset() + 0.00005);
 			break;
 
 		case SDLK_d:
-			m_galaxy.SetAngularOffset(m_galaxy.GetAngularOffset() - 0.00005);
+			_galaxy.SetAngularOffset(_galaxy.GetAngularOffset() - 0.00005);
 			break;
 
 		case SDLK_r:
-			if (m_galaxy.GetRad() > m_galaxy.GetCoreRad() + 500)
+			if (_galaxy.GetRad() > _galaxy.GetCoreRad() + 500)
 			{
-				m_galaxy.SetCoreRad(m_galaxy.GetCoreRad() + 500);
+				_galaxy.SetCoreRad(_galaxy.GetCoreRad() + 500);
 			}
-//			std::cout << "Bulge radius " << m_galaxy.GetCoreRad() << "\n";
 			break;
 
 		case SDLK_m:
-			m_galaxy.ToggleDarkMatter();
+			_galaxy.ToggleDarkMatter();
 			break;
 
 		case SDLK_f:
-			m_galaxy.SetCoreRad(std::max(m_galaxy.GetCoreRad() - 500, 0.0));
-//			std::cout << "Bulge radius " << m_galaxy.GetCoreRad() << "\n";
+			_galaxy.SetCoreRad(std::max(_galaxy.GetCoreRad() - 500, 0.0));
 			break;
 
 		case SDLK_t:
-			m_galaxy.SetRad(m_galaxy.GetRad() + 1000);
+			_galaxy.SetRad(_galaxy.GetRad() + 1000);
 			break;
 
 		case SDLK_g:
-			m_galaxy.SetRad(std::max(m_galaxy.GetRad() - 1000, 0.0));
+			_galaxy.SetRad(std::max(_galaxy.GetRad() - 1000, 0.0));
 			break;
 
 		case SDLK_b:
-			m_galaxy.SetDustRenderSize(m_galaxy.GetDustRenderSize() - 5);
+			_galaxy.SetDustRenderSize(_galaxy.GetDustRenderSize() - 5);
 			break;
 
 		case SDLK_n:
-			m_galaxy.SetDustRenderSize(m_galaxy.GetDustRenderSize() + 5);
+			_galaxy.SetDustRenderSize(_galaxy.GetDustRenderSize() + 5);
 			break;
 
 		case SDLK_z:
 		case SDLK_y:
-			m_galaxy.SetSigma(m_galaxy.GetSigma() + 0.05);
+			_galaxy.SetSigma(_galaxy.GetSigma() + 0.05);
 			break;
 
 		case SDLK_h:
-			m_galaxy.SetSigma(std::max(m_galaxy.GetSigma() - 0.05, 0.05));
+			_galaxy.SetSigma(std::max(_galaxy.GetSigma() - 0.05, 0.05));
 			break;
 
 		case  SDLK_F1:
-//			std::cout << "Display:  help screen" << ((m_flags & dspHELP) ? "off" : "on") << "\n";
-			m_flags ^= dspHELP;
-			m_flags &= ~dspSTAT;
+			m_flags ^= (int)DisplayItem::HELP;
 			break;
 
-		case  SDLK_F2:
-//			std::cout << "Display:  statistic" << ((m_flags & dspSTAT) ? "off" : "on") << "\n";
-			m_flags ^= dspSTAT;
-			m_flags &= ~dspHELP;
+		case SDLK_F2:
+			m_flags ^= (int)DisplayItem::AXIS;
 			break;
 
 		case  SDLK_F3:
-//			std::cout << "Display:  Toggling stars " << ((m_flags & dspSTARS) ? "off" : "on") << "\n";
 			if (m_starRenderType == 2)
 			{
 				m_starRenderType = 0;
-				m_flags &= ~dspSTARS;
+				m_flags &= ~(int)DisplayItem::STARS;
 			}
 			else
 			{
 				m_starRenderType++;
-				m_flags |= dspSTARS;
+				m_flags |= (int)DisplayItem::STARS;
 			}
 			break;
 
 		case  SDLK_F4:
-//			std::cout << "Display:  Toggling dust " << ((m_flags & dspDUST) ? "off" : "on") << "\n";
-			m_flags ^= dspDUST;
+			m_flags ^= (int)DisplayItem::DUST;
 			break;
 
 		case  SDLK_F5:
-//			std::cout << "Display:  Toggling h2 regions " << ((m_flags & dspH2) ? "off" : "on") << "\n";
-			m_flags ^= dspH2;
+			m_flags ^= (int)DisplayItem::H2;
 			break;
 
 		case SDLK_F6:
-//			std::cout << "Display:  Density waves axis " << ((m_flags & dspDENSITY_WAVES) ? "off" : "on") << "\n";
-			m_flags ^= dspDENSITY_WAVES;
-			break;
-
-		case SDLK_F7:
-//			std::cout << "Display:  Axis" << ((m_flags & dspAXIS) ? "off" : "on") << "\n";
-			m_flags ^= dspAXIS;
-			break;
-
-		case SDLK_F8:
-//			std::cout << "Display:  Radii" << ((m_flags & dspRADII) ? "off" : "on") << "\n";
-			m_flags ^= dspRADII;
+			m_flags ^= (int)DisplayItem::DENSITY_WAVES;
 			break;
 
 		case  SDLK_p:
-//			std::cout << "Display:  Toggling Velocity graph " << ((m_flags & dspVELOCITY) ? "off" : "on") << "\n";
-			m_flags ^= dspVELOCITY;
+			m_flags ^= (int)DisplayItem::VELOCITY;
 			break;
 
 		case  SDLK_PAUSE:
-//			std::cout << "Simulation:  pause " << ((m_flags & dspPAUSE) ? "off" : "on") << "\n";
-			m_flags ^= dspPAUSE;
+			m_flags ^= (int)DisplayItem::PAUSE;
 			break;
 
 		case SDLK_KP_1:
-			m_galaxy.Reset(
+			_galaxy.Reset(
 				12000,    // radius of the galaxy
 				4000,     // radius of the core
 				0.0004,   // angluar offset of the density wave per parsec of radius
@@ -817,7 +803,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case SDLK_KP_2:
-			m_galaxy.Reset(
+			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				4000,     // radius of the core
 				0.0004,   // angluar offset of the density wave per parsec of radius
@@ -829,7 +815,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				30000, true, 0, 0, 70);   // total number of stars
 			break;
 		case SDLK_KP_3:
-			m_galaxy.Reset(
+			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				4000,     // radius of the core
 				0.0004,   // angluar offset of the density wave per parsec of radius
@@ -843,7 +829,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 			// Typ Sa
 		case SDLK_KP_4:
-			m_galaxy.Reset(
+			_galaxy.Reset(
 				20000,    // radius of the galaxy
 				4000,     // radius of the core
 				0.0004,   // angluar offset of the density wave per parsec of radius
@@ -857,7 +843,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 			// Typ SBb
 		case SDLK_KP_5:
-			m_galaxy.Reset(
+			_galaxy.Reset(
 				15000,    // radius of the galaxy
 				4000,     // radius of the core
 				0.0003,   // angluar offset of the density wave per parsec of radius
@@ -871,7 +857,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 			// zum debuggen
 		case SDLK_KP_6:
-			m_galaxy.Reset(
+			_galaxy.Reset(
 				15000,    // radius of the galaxy
 				4000,     // radius of the core
 				0.0003,   // angluar offset of the density wave per parsec of radius
@@ -885,7 +871,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 			// für Wikipedia: realistische Rotationskurve
 		case SDLK_KP_7:
-			m_galaxy.Reset(
+			_galaxy.Reset(
 				12000,    // radius of the galaxy
 				2000,     // radius of the core
 				0.0004,   // angluar offset of the density wave per parsec of radius
@@ -900,7 +886,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 
 		case SDLK_KP_8:
-			m_galaxy.Reset(
+			_galaxy.Reset(
 				12000,    // radius of the galaxy
 				2000,     // radius of the core
 				0.0004,   // angluar offset of the density wave per parsec of radius
@@ -915,7 +901,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 
 		case SDLK_KP_0:
-			m_galaxy.Reset(
+			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				4000,     // radius of the core
 				0.0004,   // angluar offset of the density wave per parsec of radius
@@ -924,11 +910,27 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0.5,
 				200,      // orbital velocity at the edge of the core
 				300,      // orbital velovity at the edge of the disk
-				50000,    // total number of stars
+				30000,    // total number of stars
 				true,     // has dark matter
 				2,        // Perturbations per full ellipse
 				40,       // Amplitude damping factor of perturbation
-				80);      // dust render size in pixel
+				100);      // dust render size in pixel
+
+
+			//_galaxy.Reset(
+			//	13000,    // radius of the galaxy
+			//	4000,     // radius of the core
+			//	0.0004,   // angluar offset of the density wave per parsec of radius
+			//	0.85,     // excentricity at the edge of the core
+			//	0.95,      // excentricity at the edge of the disk
+			//	0.5,
+			//	200,      // orbital velocity at the edge of the core
+			//	300,      // orbital velovity at the edge of the disk
+			//	50000,    // total number of stars
+			//	true,     // has dark matter
+			//	2,        // Perturbations per full ellipse
+			//	40,       // Amplitude damping factor of perturbation
+			//	80);      // dust render size in pixel
 			break;
 
 		case SDLK_PLUS:

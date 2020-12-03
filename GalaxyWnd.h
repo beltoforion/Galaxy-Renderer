@@ -24,20 +24,18 @@ protected:
 	void InitSimulation() override;
 
 private:
-	enum EDisp
+	enum class DisplayItem : int
 	{
-		dspNONE = 0,
-		dspAXIS = 1 << 0,
-		dspSTARS = 1 << 1,
-		dspSTAT = 1 << 2,
-		dspPAUSE = 1 << 3,
-		dspHELP = 1 << 4,
-		dspROI = 1 << 5,
-		dspDENSITY_WAVES = 1 << 6,
-		dspRADII = 1 << 7,
-		dspVELOCITY = 1 << 8,
-		dspDUST = 1 << 9,
-		dspH2 = 1 << 10
+		NONE          = 0,
+		AXIS          = 0b000000001,
+		STARS         = 0b000000010,
+		PAUSE         = 0b000000100,
+		HELP          = 0b000001000,
+		ROI           = 0b000010000,
+		DENSITY_WAVES = 0b000100000,
+		VELOCITY      = 0b001000000,
+		DUST          = 0b010000000,
+		H2            = 0b100000000
 	};
 
 	struct Color
@@ -58,7 +56,7 @@ private:
 	void DrawAxis(const Vec2D& origin);
 	void DrawDensityWaves(int num, double rad);
 	void DrawVelocity();
-	void DrawEllipsis(double a, double b, double angle);
+	void DrawEllipsis(double a, double b, double angle, GLfloat width = 2);
 	Color ColorFromTemperature(double temp) const;
 
 	int m_camOrient;    ///< Index of the camera orientation to use
@@ -66,13 +64,14 @@ private:
 	double m_roi;       ///< Radius of the region of interest
 	uint32_t m_flags;   ///< The display flags
 
-	Galaxy m_galaxy;
+	Galaxy _galaxy;
 
 	// Star color management
 	int m_colNum;
 	double m_t0, m_t1, m_dt;
 	Color m_col[200];
 
-	TTF_Font* _pFont;
-	TTF_Font* _pFontCaption;
+	TTF_Font *_pSmallFont;
+	TTF_Font *_pFont;
+	TTF_Font *_pFontCaption;
 };
