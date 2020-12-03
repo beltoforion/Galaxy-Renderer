@@ -27,10 +27,8 @@ struct Vec3D final
 };
 
 
-class Star final
+struct Star final
 {
-public:
-
 	Star();
 	void CalcXY(int pertN, double pertAmp);
 

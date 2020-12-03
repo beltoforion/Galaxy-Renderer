@@ -1,7 +1,6 @@
 #pragma once
 
-#include <stdint.h>
-#include <fstream>
+#include <cstdint>
 #include <SDL_ttf.h>
 
 #include "SDLWnd.h"
@@ -24,7 +23,7 @@ protected:
 	void InitSimulation() override;
 
 private:
-	enum class DisplayItem : int
+	enum class DisplayItem : uint32_t
 	{
 		NONE          = 0,
 		AXIS          = 0b000000001,
@@ -59,17 +58,17 @@ private:
 	void DrawEllipsis(double a, double b, double angle, GLfloat width = 2);
 	Color ColorFromTemperature(double temp) const;
 
-	int m_camOrient;    ///< Index of the camera orientation to use
-	int m_starRenderType;
-	double m_roi;       ///< Radius of the region of interest
-	uint32_t m_flags;   ///< The display flags
+	int _camOrient;    ///< Index of the camera orientation to use
+	int _starRenderType;
+	double _roi;       ///< Radius of the region of interest
+	uint32_t _flags;   ///< The display flags
 
 	Galaxy _galaxy;
 
 	// Star color management
-	int m_colNum;
-	double m_t0, m_t1, m_dt;
-	Color m_col[200];
+	int _colNum;
+	double _t0, _t1, _dt;
+	Color _col[200];
 
 	TTF_Font *_pSmallFont;
 	TTF_Font *_pFont;
