@@ -67,7 +67,7 @@ protected:
 	double GetFOV() const;
 	SDL_Event m_event;
 
-	void TextOut(TTF_Font *pFont, TextCoords coords, int x, int y, const char* fmt, ...);
+	void DrawText(TTF_Font *pFont, TextCoords coords, int x, int y, const char* fmt, ...);
 
 	static Vec3D GetOGLPos(int x, int y);
 	static Vec2D GetWindowPos(GLfloat x, GLfloat y, GLfloat z);

@@ -22,7 +22,7 @@
 
 
 
-void SDLWindow::TextOut(TTF_Font* pFont, TextCoords coords, int x, int y, const char* fmt, ...)
+void SDLWindow::DrawText(TTF_Font* pFont, TextCoords coords, int x, int y, const char* fmt, ...)
 {
 	if (pFont == nullptr)
 		throw new std::runtime_error("TextOut failed: font is null!");

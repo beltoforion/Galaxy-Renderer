@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "Star.h"
 
 
@@ -14,8 +15,6 @@ public:
 		double deltaAng = 0.019,
 		double ex1 = 0.8,
 		double ex2 = 1,
-		double velInner = 200,
-		double velOuter = 300,
 		int numStars = 20000);
 	~Galaxy();
 
@@ -26,8 +25,6 @@ public:
 		double ex1,
 		double ex2,
 		double sigma,
-		double velInner,
-		double velOuter,
 		int numStars,
 		bool hasDarkMatter,
 		int pertN,
@@ -82,47 +79,48 @@ public:
 
 private:
 
+	Galaxy(const Galaxy& obj);
+	Galaxy& operator=(const Galaxy& obj);
+
 	void InitStars(double sigma);
 
 	// Parameters needed for defining the general structure of the galaxy
 
-	double m_elEx1;          ///< Excentricity of the innermost ellipse
-	double m_elEx2;          ///< Excentricity of the outermost ellipse
+	double _elEx1;          ///< Excentricity of the innermost ellipse
+	double _elEx2;          ///< Excentricity of the outermost ellipse
 
-	double m_velOrigin;      ///< Velovity at the innermost core in km/s
-	double m_velInner;       ///< Velocity at the core edge in km/s
-	double m_velOuter;       ///< Velocity at the edge of the disk in km/s
+	double _velOrigin;      ///< Velovity at the innermost core in km/s
 
-	double m_angleOffset;    ///< Angular offset per parsec
+	double _angleOffset;    ///< Angular offset per parsec
 
-	double m_radCore;        ///< Radius of the inner core
-	double m_radGalaxy;      ///< Radius of the galaxy
-	double m_radFarField;    ///< The radius after which all density waves must have circular shape
-	double m_sigma;          ///< Distribution of stars
-	double m_velAngle;       ///< Angular velocity of the density waves
+	double _radCore;        ///< Radius of the inner core
+	double _radGalaxy;      ///< Radius of the galaxy
+	double _radFarField;    ///< The radius after which all density waves must have circular shape
+	double _sigma;          ///< Distribution of stars
+	double _velAngle;       ///< Angular velocity of the density waves
 
-	double m_dustRenderSize;
+	double _dustRenderSize;
 
-	int m_numStars;          ///< Total number of stars
-	int m_numDust;           ///< Number of Dust Particles
-	int m_numH2;             ///< Number of H2 Regions
+	int _numStars;          ///< Total number of stars
+	int _numDust;           ///< Number of Dust Particles
+	int _numH2;             ///< Number of H2 Regions
 
-	int m_pertN;
-	double m_pertAmp;
+	int _pertN;
+	double _pertAmp;
 
-	double m_time;
-	double m_timeStep;
+	double _time;
+	double _timeStep;
 
-	bool m_bHasDarkMatter;
+	bool _hasDarkMatter;
 
 public:
 
-	int m_numberByRad[100];  ///< Historgramm showing distribution of stars
+	int _numberByRad[100];  ///< Historgramm showing distribution of stars
 
 private:
 
-	Vec2D m_pos;             ///< Center of the galaxy
-	Star* m_pStars;          ///< Pointer to an array of star data
-	Star* m_pDust;           ///< Pointer to an array of dusty areas
-	Star* m_pH2;
+	Vec2D _pos;             ///< Center of the galaxy
+	Star *_pStars;          ///< Pointer to an array of star data
+	Star* _pDust;           ///< Pointer to an array of dusty areas
+	Star* _pH2;
 };
