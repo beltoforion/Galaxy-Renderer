@@ -18,6 +18,9 @@ public:
 	/** \brief Radian to deg conversion faktor. */
 	static const double RAD_TO_DEG;
 
+	/** \brief Constant of gravity. */
+	static const double CONTANT_OF_GRAVITY;
+
 	static inline unsigned int PowerTwoFloor(unsigned int val)
 	{
 		unsigned int power = 2, nextVal = power * 2;

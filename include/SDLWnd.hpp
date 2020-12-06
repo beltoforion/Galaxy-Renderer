@@ -7,8 +7,6 @@
 #endif
 
 #if defined(_WIN32) || defined(_WIN64)
-// i don't support on screen text output on windows for the time being.
-	#define GLEW_STATIC
 	#include <gl/glew.h>
 	#include <SDL.h>
 	#include <SDL_opengl.h> 
@@ -22,7 +20,7 @@
 	#include <SDL/SDL_opengl.h> // opengl support
 #endif
 
-#include "Star.h"
+#include "Star.hpp"
 
 
 /** \brief Basic infrastructure for grafical output using SDL/OpenGL */
@@ -37,8 +35,6 @@ public:
 	int GetWidth() const;
 	int GetHeight() const;
 	
-	virtual void Render() = 0;
-
 protected:
 	enum class TextCoords
 	{
@@ -48,6 +44,9 @@ protected:
 
 	SDLWindow();
 	virtual ~SDLWindow();
+
+	virtual void Render() = 0;
+	virtual void Update() = 0;
 
 	virtual void InitGL() = 0;
 	virtual void InitSimulation() = 0;

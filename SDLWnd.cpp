@@ -1,4 +1,4 @@
-#include "SDLWnd.h"
+#include "SDLWnd.hpp"
 
 #include <stdexcept>
 #include <iostream>
@@ -10,7 +10,7 @@
 
 #include <SDL_ttf.h>
 
-#include "MathHelper.h"
+#include "MathHelper.hpp"
 
 #if defined(_WIN32) || defined(_WIN64)
 
@@ -199,9 +199,9 @@ void SDLWindow::Init(int width, int height, double axisLen, const std::string& c
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
 
 	_pSdlWnd = SDL_CreateWindow(
 		caption.c_str(),
@@ -299,6 +299,7 @@ void SDLWindow::MainLoop()
 
 	while (_bRunning)
 	{
+		Update();
 		Render();
 		PollEvents();
 		++ct;

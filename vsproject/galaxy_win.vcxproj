@@ -118,9 +118,9 @@ xcopy /y /d $(SolutionDir)\..\star.bmp $(OutDir)</Command>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\include;$(SolutionDir)\dependencies\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -171,9 +171,9 @@ xcopy /y /d $(SolutionDir)\..\star.bmp $(OutDir)</Command>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\include;$(SolutionDir)\dependencies\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -195,15 +195,6 @@ xcopy /Y $(SolutionDir)..\assets\consola.ttf $(OutDir)</Command>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\MathHelper.h" />
-    <ClInclude Include="..\CumulativeDistributionFunction.h" />
-    <ClInclude Include="..\Galaxy.h" />
-    <ClInclude Include="..\GalaxyWnd.h" />
-    <ClInclude Include="..\SDLWnd.h" />
-    <ClInclude Include="..\specrend.h" />
-    <ClInclude Include="..\Star.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\CumulativeDistributionFunction.cpp" />
     <ClCompile Include="..\Galaxy.cpp" />
     <ClCompile Include="..\main.cpp" />
@@ -212,9 +203,20 @@ xcopy /Y $(SolutionDir)..\assets\consola.ttf $(OutDir)</Command>
     <ClCompile Include="..\SDLWnd.cpp" />
     <ClCompile Include="..\specrend.cpp" />
     <ClCompile Include="..\Star.cpp" />
+    <ClCompile Include="..\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\CumulativeDistributionFunction.hpp" />
+    <ClInclude Include="..\include\Galaxy.hpp" />
+    <ClInclude Include="..\include\GalaxyWnd.hpp" />
+    <ClInclude Include="..\include\MathHelper.hpp" />
+    <ClInclude Include="..\include\SDLWnd.hpp" />
+    <ClInclude Include="..\include\specrend.h" />
+    <ClInclude Include="..\include\Star.hpp" />
+    <ClInclude Include="..\include\VertexBuffer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

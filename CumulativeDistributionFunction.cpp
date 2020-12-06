@@ -1,4 +1,4 @@
-#include "CumulativeDistributionFunction.h"
+#include "CumulativeDistributionFunction.hpp"
 #include <cassert>
 #include <cstdlib>
 #include <cstdio>

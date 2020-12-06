@@ -1,11 +1,16 @@
-#include "GalaxyWnd.h"
+#include "GalaxyWnd.hpp"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <cstddef>
+#include <iostream>
 
-#include "MathHelper.h"
+#include "MathHelper.hpp"
 #include "specrend.h"
-#include "Star.h"
+#include "Star.hpp"
+
+// from WinUser.h
+//#undef DrawText
 
 
 GalaxyWnd::GalaxyWnd()
@@ -18,6 +23,8 @@ GalaxyWnd::GalaxyWnd()
 	, _t0(1000)
 	, _t1(10000)
 	, _dt((_t1 - _t0) / _colNum)
+	, _renderUpdateHint(ruhDENSITY_WAVES)
+	, _vertDensityWaves(4)
 {
 	double x, y, z;
 	for (int i = 0; i < _colNum; ++i)
@@ -29,6 +36,11 @@ GalaxyWnd::GalaxyWnd()
 		xyz_to_rgb(cs, x, y, z, &col.r, &col.g, &col.b);
 		norm_rgb(&col.r, &col.g, &col.b);
 	}
+}
+
+GalaxyWnd::~GalaxyWnd()
+{
+	_vertDensityWaves.Release();
 }
 
 void GalaxyWnd::InitGL()
@@ -101,16 +113,13 @@ void GalaxyWnd::InitGL()
 		GL_UNSIGNED_BYTE,
 		tex->pixels);
 
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_BLEND);
-	glEnable(GL_POINT_SPRITE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-	glLineWidth(1);
+	_vertDensityWaves.Initialize();
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
+
 	glDisable(GL_DEPTH_TEST);
 	glClearColor(0.0f, .0f, 0.1f, 0.0f);
+
 	SetCameraOrientation(Vec3D(0, 1, 0));
 
 	glMatrixMode(GL_MODELVIEW);
@@ -133,6 +142,42 @@ void GalaxyWnd::InitSimulation()
 		100);      // dust render size in pixel
 
 	_roi = _galaxy.GetFarFieldRad() * 1.3;
+}
+
+/** \brief Update the density wave vertex buffers
+*/
+void GalaxyWnd::UpdateDensityWaves()
+{
+	std::cout << "Density render update request received" << std::endl;
+
+	//
+	// First three ellipsis are the boundaries of core, galaxy and galactic medium
+	//
+
+	std::vector<VertexColor> vert;
+	std::vector<int> idx;
+
+	int pertNum = 0; // _galaxy.GetPertN();
+	double pertAmp = 0; //// _galaxy.GetPertAmp();
+	auto r = _galaxy.GetCoreRad();
+	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, 1, 1, 0);
+
+	r = _galaxy.GetRad();
+	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, 0, 1, 0);
+
+	r = _galaxy.GetFarFieldRad();
+	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, 1, 0, 0);
+
+	_vertDensityWaves.Update(vert, idx);
+	_renderUpdateHint &= ~ruhDENSITY_WAVES;
+}
+
+void GalaxyWnd::Update()
+{
+	if ((_renderUpdateHint & ruhDENSITY_WAVES) != 0)
+	{
+		UpdateDensityWaves();
+	}
 }
 
 void GalaxyWnd::Render()
@@ -216,6 +261,56 @@ void GalaxyWnd::Render()
 	SDL_Delay(1);
 }
 
+void GalaxyWnd::AddEllipsisVertices(
+	std::vector<VertexColor>& vert,
+	std::vector<int>& vertIdx,
+	double a,
+	double b,
+	double angle,
+	uint32_t pertNum,
+	double pertAmp,
+	float red,
+	float green,
+	float blue) const
+{
+	const int steps = 100;
+	const double x = 0;
+	const double y = 0;
+
+	// Angle is given by Degree Value
+	double beta = -angle * MathHelper::DEG_TO_RAD;
+	double sinbeta = sin(beta);
+	double cosbeta = cos(beta);
+
+	Vec2D pos;
+	Vec2D vecNull;
+
+	int firstPointIdx = vert.size();
+	for (int i = 0; i < 360; i += 360 / steps)
+	{
+		double alpha = i * MathHelper::DEG_TO_RAD;
+		double sinalpha = sin(alpha);
+		double cosalpha = cos(alpha);
+
+		GLfloat fx = x + (a * cosalpha * cosbeta - b * sinalpha * sinbeta);
+		GLfloat fy = y + (a * cosalpha * sinbeta + b * sinalpha * cosbeta);
+
+		if (pertNum > 0)
+		{
+			fx += (a / pertAmp) * sin(alpha * 2 * pertNum);
+			fy += (a / pertAmp) * cos(alpha * 2 * pertNum);
+		}
+
+		vertIdx.push_back(vert.size());
+
+		VertexColor vc = { fx, fy, 0, red, green, blue };
+		vert.push_back(vc);
+	}
+
+	// Close the loop and reset the element index array
+	vertIdx.push_back(firstPointIdx);
+	vertIdx.push_back(0xFFFF);
+}
 
 void GalaxyWnd::DrawEllipsis(double a, double b, double angle, GLfloat width)
 {
@@ -288,7 +383,7 @@ void GalaxyWnd::DrawDensityWaves(int num, double rad)
 		DrawEllipsis(
 			r,
 			r * _galaxy.GetExcentricity(r),
-			MathHelper::RAD_TO_DEG * _galaxy.GetAngularOffset(r), 
+			MathHelper::RAD_TO_DEG * _galaxy.GetAngularOffset(r),
 			1);
 	}
 }
@@ -416,7 +511,7 @@ void GalaxyWnd::DrawH2()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 
-	Star *pH2 = _galaxy.GetH2();
+	Star* pH2 = _galaxy.GetH2();
 	int num = _galaxy.GetNumH2();
 
 	for (int i = 0; i < num; ++i)
@@ -434,18 +529,18 @@ void GalaxyWnd::DrawH2()
 
 		glPointSize(2 * size);
 		glBegin(GL_POINTS);
-			const Color& col = ColorFromTemperature(pH2[k1].m_temp);
-			glColor3f(
-				col.r * pH2[i].m_mag * 2,
-				col.g * pH2[i].m_mag * 0.5,
-				col.b * pH2[i].m_mag * 0.5);
-			glVertex3f(p1.x, p1.y, 0.0f);
+		const Color& col = ColorFromTemperature(pH2[k1].m_temp);
+		glColor3f(
+			col.r * pH2[i].m_mag * 2,
+			col.g * pH2[i].m_mag * 0.5,
+			col.b * pH2[i].m_mag * 0.5);
+		glVertex3f(p1.x, p1.y, 0.0f);
 		glEnd();
 
 		glPointSize(size / 6);
-			glBegin(GL_POINTS);
-			glColor3f(1, 1, 1);
-			glVertex3f(p1.x, p1.y, 0.0f);
+		glBegin(GL_POINTS);
+		glColor3f(1, 1, 1);
+		glVertex3f(p1.x, p1.y, 0.0f);
 		glEnd();
 	}
 
@@ -463,10 +558,10 @@ void GalaxyWnd::DrawStat()
 	double dy2 = TTF_FontHeight(_pSmallFont) + 4;
 
 	glColor4f(0.7, 0.7, 0.7, 0.7);
-	double y = y0;    	DrawText(_pFont, TextCoords::Window, x0, y, "Simulation:"); 
+	double y = y0;	DrawText(_pFont, TextCoords::Window, x0, y, "Simulation:");
 	y += dy1;	DrawText(_pSmallFont, TextCoords::Window, x0, y, "  FPS:         %d", GetFPS());
 	y += dy2;	DrawText(_pSmallFont, TextCoords::Window, x0, y, "  Time:        %2.2e y", _galaxy.GetTime());
-	
+
 	y += dy2; DrawText(_pFont, TextCoords::Window, x0, y, "Geometry:");
 	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  RadCore:     %d pc", (int)_galaxy.GetCoreRad());
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  RadGalaxy:   %d pc", (int)_galaxy.GetRad());
@@ -476,7 +571,7 @@ void GalaxyWnd::DrawStat()
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  Sigma:       %2.2f", _galaxy.GetSigma());
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  AngOff:      %1.4f deg/pc", _galaxy.GetAngularOffset());
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  FoV:         %1.2f pc", _fov);
-	
+
 	y += dy2; DrawText(_pFont, TextCoords::Window, x0, y, "Spiral Arms:");
 	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  Num pert:  %d", _galaxy.GetPertN());
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  pertDamp:  %1.2f", _galaxy.GetPertAmp());
@@ -487,6 +582,19 @@ void GalaxyWnd::DrawStat()
 
 void GalaxyWnd::DrawGalaxyRadii()
 {
+//#define USE_VBO
+#if defined USE_VBO
+	_vertDensityWaves.Draw();
+
+	// Captions (immer noch im immediate mode!)
+	glColor3f(1, 1, 0);
+	DrawText(_pFont, TextCoords::Model, 0, _galaxy.GetCoreRad() + 500, "Core");
+	glColor3f(0, 1, 0);
+	DrawText(_pFont, TextCoords::Model, 0, _galaxy.GetRad() + 500, "Disk");
+	glColor3f(1, 0, 0);
+	DrawText(_pFont, TextCoords::Model, 0, _galaxy.GetFarFieldRad() + 500, "Intergalactic medium");
+#else
+	//  code for immediate drawing
 	glColor4f(1, 1, 0, 0.6);
 	double r = _galaxy.GetCoreRad();
 	if (r > 0)
@@ -504,6 +612,7 @@ void GalaxyWnd::DrawGalaxyRadii()
 	r = _galaxy.GetFarFieldRad();
 	DrawEllipsis(r, r, 0, 3);
 	DrawText(_pFont, TextCoords::Model, 0, r + 500, "Intergalactic medium");
+#endif
 }
 
 void GalaxyWnd::DrawAxis(const Vec2D& origin)
@@ -532,23 +641,23 @@ void GalaxyWnd::DrawAxis(const Vec2D& origin)
 		}
 
 		glBegin(GL_LINES);
-			glVertex3f(p, -l, 0);
-			glVertex3f(p, l, 0);
-			glVertex3f(-p, -l, 0);
-			glVertex3f(-p, 0, 0);
-			glVertex3f(-l, p, 0);
-			glVertex3f(0, p, 0);
-			glVertex3f(-l, -p, 0);
-			glVertex3f(0, -p, 0);
+		glVertex3f(p, -l, 0);
+		glVertex3f(p, l, 0);
+		glVertex3f(-p, -l, 0);
+		glVertex3f(-p, 0, 0);
+		glVertex3f(-l, p, 0);
+		glVertex3f(0, p, 0);
+		glVertex3f(-l, -p, 0);
+		glVertex3f(0, -p, 0);
 		glEnd();
 
 	}
 
 	glBegin(GL_LINES);
-		glVertex3f((GLfloat)-_fov, 0, 0);
-		glVertex3f((GLfloat)_fov, 0, 0);
-		glVertex3f(0, (GLfloat)-_fov, 0);
-		glVertex3f(0, (GLfloat)_fov, 0);
+	glVertex3f((GLfloat)-_fov, 0, 0);
+	glVertex3f((GLfloat)_fov, 0, 0);
+	glVertex3f(0, (GLfloat)-_fov, 0);
+	glVertex3f(0, (GLfloat)_fov, 0);
 	glEnd();
 
 	glPopMatrix();
@@ -563,7 +672,7 @@ void GalaxyWnd::DrawHelp()
 	glColor3f(0.8, 0.8, 1);
 	double y = y0 - 60;
 	DrawText(_pFontCaption, TextCoords::Window, x0, y0 - 60, "Spiral Galaxy Simulator");
-	DrawText(_pFont, TextCoords::Window, x0, y0 - 15 , "Simulating a Galaxy with the Density Wave Theory - (C) 2020 Ingo Berg (beltoforion.de)");
+	DrawText(_pFont, TextCoords::Window, x0, y0 - 15, "Simulating a Galaxy with the Density Wave Theory - (C) 2020 Ingo Berg (beltoforion.de)");
 
 	glColor3f(1, 1, 1);
 	y0 = y0 + 20;
@@ -572,7 +681,7 @@ void GalaxyWnd::DrawHelp()
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  1 - centric; fixed");
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  2 - centric; rotating with core speed");
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  3 - centric; rotating with speed of outer disc");
-	
+
 	y0 = y0 + 20;
 	DrawText(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Galaxy geometry");
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  q - increase inner excentricity");
@@ -585,14 +694,14 @@ void GalaxyWnd::DrawHelp()
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  f - decrease core size");
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  t - increase galaxy size");
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  g - decrease galaxy size");
-	
+
 	y0 = y0 + 20;
 	DrawText(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Spiral Arms");
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  Home  - increase number of orbit perturbations");
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  End   - decrease number of orbit perturbations");
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  PG_UP - increase perturbation damping");
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  PG_DN - decrease perturbation damping");
-	
+
 	y0 = y0 + 20;
 	DrawText(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Display features");
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  F1 - Help screen");
@@ -611,7 +720,7 @@ void GalaxyWnd::DrawHelp()
 	y0 = y0 + 20;
 	DrawText(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Misc");
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  pause - halt simulation");
-	
+
 	y0 = y0 + 20;
 	DrawText(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Predefined Galaxies");
 	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  Keypad 0 - 8");
@@ -665,26 +774,32 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 		case SDLK_q:
 			_galaxy.SetExInner(_galaxy.GetExInner() + 0.05);
+			_renderUpdateHint |= ruhDENSITY_WAVES;
 			break;
 
 		case SDLK_a:
 			_galaxy.SetExInner(std::max(_galaxy.GetExInner() - 0.05, 0.0));
+			_renderUpdateHint |= ruhDENSITY_WAVES;
 			break;
 
 		case SDLK_w:
 			_galaxy.SetExOuter(_galaxy.GetExOuter() + 0.05);
+			_renderUpdateHint |= ruhDENSITY_WAVES;
 			break;
 
 		case SDLK_s:
 			_galaxy.SetExOuter(std::max(_galaxy.GetExOuter() - 0.05, 0.0));
+			_renderUpdateHint |= ruhDENSITY_WAVES;
 			break;
 
 		case SDLK_e:
 			_galaxy.SetAngularOffset(_galaxy.GetAngularOffset() + 0.00005);
+			_renderUpdateHint |= ruhDENSITY_WAVES;
 			break;
 
 		case SDLK_d:
 			_galaxy.SetAngularOffset(_galaxy.GetAngularOffset() - 0.00005);
+			_renderUpdateHint |= ruhDENSITY_WAVES;
 			break;
 
 		case SDLK_r:
@@ -692,6 +807,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			{
 				_galaxy.SetCoreRad(_galaxy.GetCoreRad() + 500);
 			}
+			_renderUpdateHint |= ruhDENSITY_WAVES;
 			break;
 
 		case SDLK_m:
@@ -700,14 +816,17 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 		case SDLK_f:
 			_galaxy.SetCoreRad(std::max(_galaxy.GetCoreRad() - 500, 0.0));
+			_renderUpdateHint |= ruhDENSITY_WAVES;
 			break;
 
 		case SDLK_t:
 			_galaxy.SetRad(_galaxy.GetRad() + 1000);
+			_renderUpdateHint |= ruhDENSITY_WAVES;
 			break;
 
 		case SDLK_g:
 			_galaxy.SetRad(std::max(_galaxy.GetRad() - 1000, 0.0));
+			_renderUpdateHint |= ruhDENSITY_WAVES;
 			break;
 
 		case SDLK_b:
@@ -808,10 +927,10 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0.9,      // excentricity at the edge of the core
 				0.9,      // excentricity at the edge of the disk
 				0.5,
-				30000, 
-				true, 
-				0, 
-				0, 
+				30000,
+				true,
+				0,
+				0,
 				70);   // total number of stars
 			break;
 		case SDLK_KP_3:
@@ -822,10 +941,10 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				1.35,      // excentricity at the edge of the core
 				1.05,      // excentricity at the edge of the disk
 				0.5,
-				40000, 
-				true, 
-				0, 
-				0, 
+				40000,
+				true,
+				0,
+				0,
 				70);   // total number of stars
 			break;
 
@@ -838,10 +957,10 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0.75,      // excentricity at the edge of the core
 				1.0,      // excentricity at the edge of the disk
 				0.5,
-				40000, 
-				true, 
-				0, 
-				0, 
+				40000,
+				true,
+				0,
+				0,
 				70);   // total number of stars
 			break;
 
@@ -854,10 +973,10 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				1.45,     // excentricity at the edge of the core
 				1.0,      // excentricity at the edge of the disk
 				0.5,
-				40000, 
-				true, 
-				0, 
-				0, 
+				40000,
+				true,
+				0,
+				0,
 				70);   // total number of stars
 			break;
 
@@ -870,10 +989,10 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				1.45,     // excentricity at the edge of the core
 				1.0,      // excentricity at the edge of the disk
 				0.5,
-				40000, 
-				true, 
-				0, 
-				0, 
+				40000,
+				true,
+				0,
+				0,
 				70);   // total number of stars
 			break;
 

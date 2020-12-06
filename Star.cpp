@@ -1,6 +1,6 @@
-#include "Star.h"
+#include "Star.hpp"
 
-#include "MathHelper.h"
+#include "MathHelper.hpp"
 #include <cmath>
 
 

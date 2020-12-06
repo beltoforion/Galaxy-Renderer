@@ -1,13 +1,13 @@
-#include "Galaxy.h"
+#include "Galaxy.hpp"
 #include <algorithm>
 #include <cstdlib>
 #include <stdexcept>
 #include <cmath>
 #include <iostream>
 
-#include "MathHelper.h"
-#include "Star.h"
-#include "CumulativeDistributionFunction.h"
+#include "MathHelper.hpp"
+#include "Star.hpp"
+#include "CumulativeDistributionFunction.hpp"
 
 
 Galaxy::Galaxy(
@@ -246,7 +246,7 @@ double Galaxy::GetSigma() const
 
 void Galaxy::SetDustRenderSize(double sz)
 {
-	_dustRenderSize = std::max(sz, 1.0);
+	_dustRenderSize = std::min(200.0, std::max(sz, 1.0));
 }
 
 void Galaxy::SetSigma(double s)
@@ -325,16 +325,14 @@ double Galaxy::GetOrbitalVelocity(double rad) const
 		static double v(double r)
 		{
 			double MZ = 100;
-			double G = 6.672e-11;
-			return 20000 * sqrt(G * (MH(r) + MS(r) + MZ) / r);
+			return 20000 * sqrt(MathHelper::CONTANT_OF_GRAVITY * (MH(r) + MS(r) + MZ) / r);
 		}
 
 		// velocity curve without dark matter
 		static double vd(double r)
 		{
 			double MZ = 100;
-			double G = 6.672e-11;
-			return 20000 * sqrt(G * (MS(r) + MZ) / r);
+			return 20000 * sqrt(MathHelper::CONTANT_OF_GRAVITY * (MS(r) + MZ) / r);
 		}
 	};
 

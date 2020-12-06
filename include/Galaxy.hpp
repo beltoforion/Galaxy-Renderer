@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "Star.h"
+#include "Star.hpp"
 
 
 /** \brief A class to encapsulate the geometric details of a spiral galaxy. */
