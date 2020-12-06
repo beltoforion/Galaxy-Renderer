@@ -7,17 +7,98 @@ VertexBuffer::VertexBuffer(int lineWidth)
 	, _vao(0)
 	, _vert()
 	, _idx()
+	, _vertexShader(0)
+	, _fragmentShader(0)
+	, _shaderProgram(0)
 	, _lineWidth(lineWidth)
 {}
 
 VertexBuffer::~VertexBuffer()
 {}
 
+GLuint VertexBuffer::CreateShader(GLenum shaderType, const char **shaderSource)
+{
+	GLuint shader = glCreateShader(shaderType);
+	glShaderSource(shader, 1, shaderSource, nullptr);
+	glCompileShader(shader);
+	
+	GLint isCompiled = 0;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		// The maxLength includes the NULL character
+		std::vector<GLchar> infoLog(maxLength);
+		glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+
+		// We don't need the shader anymore.
+		glDeleteShader(shader);
+
+		throw std::runtime_error("VertecBuffer: Shader compilation failed!");
+	}
+
+	return shader;
+}
+
 void VertexBuffer::Initialize()
 {
 	glGenBuffers(1, &_vbo);
 	glGenBuffers(1, &_ibo);
 	glGenVertexArrays(1, &_vao);
+
+	const char *srcVertex =
+		"#version 330 core\n"
+		"layout(location = 0) in vec3 position;\n"
+		"layout(location = 1) in vec3 color;\n"
+		"out vec3 vertexColor;\n"
+		"void main()\n"
+		"{\n"
+		"	gl_Position =  vec4(position, 1);\n"
+//		"   gl_Position = gl_ModelViewProjectionMatrix * (vec4(1.0, 0.1, 1.0, 1.0) * gl_Vertex);\n"
+		"	vertexColor = color;\n"
+		"}\n";
+	_vertexShader = CreateShader(GL_VERTEX_SHADER, &srcVertex);
+
+	const char* srcFragment =
+		"#version 330 core\n"
+//		"out vec4 FragColor;\n"
+//		"in vec3 vertexColor;\n"
+		"void main()\n"
+		"{\n"
+//		"	gl_FragColor = vec4(vertexColor, 1.0);\n"
+		"	gl_FragColor = vec4(0.0, 1.0,+ 0.0, 1.0);\n"
+		"}\n";
+	_fragmentShader = CreateShader(GL_FRAGMENT_SHADER, &srcFragment);
+
+	_shaderProgram = glCreateProgram();
+	glAttachShader(_shaderProgram, _vertexShader);
+	glAttachShader(_shaderProgram, _fragmentShader);
+	glLinkProgram(_shaderProgram);
+
+	GLint isLinked = 0;
+	glGetProgramiv(_shaderProgram, GL_LINK_STATUS, (int*)&isLinked);
+	if (isLinked == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetProgramiv(_shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
+
+		// The maxLength includes the NULL character
+		std::vector<GLchar> infoLog(maxLength);
+		glGetProgramInfoLog(_shaderProgram, maxLength, &maxLength, &infoLog[0]);
+
+		// clean up
+		glDeleteProgram(_shaderProgram);
+		glDeleteShader(_vertexShader);
+		glDeleteShader(_fragmentShader);
+
+		throw std::runtime_error("VertexBuffer: shader program linking failed!");
+	}
+
+	// Always detach shaders after a successful link.
+	glDetachShader(_shaderProgram, _vertexShader);
+	glDetachShader(_shaderProgram, _fragmentShader);
 }
 
 void VertexBuffer::Release()
@@ -68,13 +149,14 @@ void VertexBuffer::Update(const std::vector<VertexColor>& vert, const std::vecto
 
 	auto error = glGetError();
 	if (error != GL_NO_ERROR)
-		throw new std::runtime_error("VertexBuffer: Cannot create vbo!");
+		throw std::runtime_error("VertexBuffer: Cannot create vbo!");
 
 	glBindVertexArray(0);
 }
 
 void VertexBuffer::Draw()
 {
+	glUseProgram(_shaderProgram);
 	glEnable(GL_PRIMITIVE_RESTART);
 	glPrimitiveRestartIndex(0xFFFF);
 
@@ -101,5 +183,6 @@ void VertexBuffer::Draw()
 #endif
 
 	glDisable(GL_PRIMITIVE_RESTART);
+	glUseProgram(0);
 }
 

@@ -16,10 +16,10 @@
 void SDLWindow::DrawText(TTF_Font* pFont, TextCoords coords, int x, int y, const char* fmt, ...)
 {
 	if (pFont == nullptr)
-		throw new std::runtime_error("TextOut failed: font is null!");
+		throw std::runtime_error("TextOut failed: font is null!");
 
 	if (fmt == nullptr)
-		throw new std::runtime_error("TextOut failed: bad format string!");
+		throw std::runtime_error("TextOut failed: bad format string!");
 
 	char text[256];
 	va_list ap;
@@ -208,6 +208,11 @@ void SDLWindow::Init(int width, int height, double axisLen, const std::string& c
 	_sdcGlContext = SDL_GL_CreateContext(_pSdlWnd);
 
 	glewInit();
+
+	std::cout << "OpenGL Version Information:" << glGetString(GL_VERSION) << std::endl;
+	std::cout << "- OpenGL:     " << glGetString(GL_VERSION) << std::endl;
+	std::cout << "- GLSL:       " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+	std::cout << "- Vendor/GPU: " << glGetString(GL_VENDOR) << "/" << glGetString(GL_RENDERER) << std::endl;
 
 	InitGL();
 	InitSimulation();

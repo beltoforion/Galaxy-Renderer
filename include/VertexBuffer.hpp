@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include <gl/glew.h>
 
@@ -42,5 +43,10 @@ private:
 	std::vector<VertexColor> _vert;
 	std::vector<int> _idx;
 
+	GLuint _vertexShader;
+	GLuint _fragmentShader;
+	GLuint _shaderProgram;
 	int _lineWidth;
+
+	GLuint CreateShader(GLenum shaderType, const char** shaderSource);
 };

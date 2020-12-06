@@ -988,11 +988,12 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				true,     // has dark matter
 				3,        // Perturbations per full ellipse
 				72,       // Amplitude damping factor of perturbation
-				85);      // dust render size in pixel
+				85,        // dust render size in pixel
+				[](double r) { return 2200 + r / 5; });     
 			_fov = 36982;
 			break;
 
-			// für Wikipedia: realistische Rotationskurve
+
 		case SDLK_KP_7:
 			_galaxy.Reset(
 				13000,    // radius of the galaxy
@@ -1004,7 +1005,8 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				true,     // has dark matter
 				1,        // Perturbations per full ellipse
 				20,       // Amplitude damping factor of perturbation
-				80);      // dust render size in pixel
+				80,
+				[](double r) { return 2800 + r / 5; });      // dust render size in pixel
 			_fov = 41091;
 			break;
 

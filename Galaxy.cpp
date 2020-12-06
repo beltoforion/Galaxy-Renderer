@@ -246,7 +246,7 @@ void Galaxy::InitStars()
 void Galaxy::SetColorFunction(double (*cf)(double))
 {
 	if (cf == nullptr)
-		throw new std::runtime_error("Galaxy: color function must not be null!");
+		throw std::runtime_error("Galaxy: color function must not be null!");
 
 	_colorFun = cf;
 	InitStars();
@@ -410,7 +410,7 @@ double Galaxy::GetPertAmp() const
 void Galaxy::SetPertN(int n)
 {
 	if (n < 0 || n>5)
-		throw new std::runtime_error("pertN must be greater than 0 and less than 6!");
+		throw std::runtime_error("pertN must be greater than 0 and less than 6!");
 
 	_pertN = n;
 }
