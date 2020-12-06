@@ -9,6 +9,7 @@
 #include "specrend.h"
 #include "Star.hpp"
 
+double GalaxyWnd::_temp = 4500;
 
 GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
@@ -564,7 +565,7 @@ void GalaxyWnd::DrawStat()
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  RadFarField: %d pc", (int)_galaxy.GetFarFieldRad());
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  ExInner:     %2.2f", _galaxy.GetExInner());
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  ExOuter:     %2.2f", _galaxy.GetExOuter());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  AngOff:      %1.4f deg/pc", _galaxy.GetAngularOffset());
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  AngOff:      %1.4g deg/pc", _galaxy.GetAngularOffset());
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  FoV:         %1.2f pc", _fov);
 
 	y += dy2; DrawText(_pFont, TextCoords::Window, x0, y, "Spiral Arms:");
@@ -788,12 +789,12 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case SDLK_e:
-			_galaxy.SetAngularOffset(_galaxy.GetAngularOffset() + 0.00005);
+			_galaxy.SetAngularOffset(_galaxy.GetAngularOffset() + 0.00002);
 			_renderUpdateHint |= ruhDENSITY_WAVES;
 			break;
 
 		case SDLK_d:
-			_galaxy.SetAngularOffset(_galaxy.GetAngularOffset() - 0.00005);
+			_galaxy.SetAngularOffset(std::max(_galaxy.GetAngularOffset() - 0.00002, 0.0));
 			_renderUpdateHint |= ruhDENSITY_WAVES;
 			break;
 
@@ -822,6 +823,20 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 		case SDLK_g:
 			_galaxy.SetRad(std::max(_galaxy.GetRad() - 1000, 0.0));
 			_renderUpdateHint |= ruhDENSITY_WAVES;
+			break;
+
+		case SDLK_z:
+			_temp += 100;
+			_temp = std::min(_temp, 15000.0);
+			std::cout << "Color is " << _temp << std::endl;
+			_galaxy.SetColorFunction([](double r) { return _temp + r / 4.5; });
+			break;
+
+		case SDLK_h:
+			_temp -= 100;
+			_temp = std::max(_temp, 500.0);
+			std::cout << "Color is " << _temp << std::endl;
+			_galaxy.SetColorFunction([](double r) { return _temp + r / 4.5; });
 			break;
 
 		case SDLK_b:
@@ -884,7 +899,8 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				true,     // has dark matter
 				2,        // Perturbations per full ellipse
 				40,       // Amplitude damping factor of perturbation
-				90);      // dust render size in pixel
+				90,
+				[](double r) { return 4200 + r / 5; });      // dust render size in pixel
 			_fov = 33960;
 			break;
 
@@ -899,7 +915,8 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				true,     // has dark matter
 				0,        // Perturbations per full ellipse
 				40,       // Amplitude damping factor of perturbation
-				100);      // dust render size in pixel
+				100,
+				[](double r) { return 4500 + r / 4.5; });      
 			_fov = 46585;
 			break;
 
@@ -960,19 +977,19 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				70);   // total number of stars
 			break;
 
-			// zum debuggen
 		case SDLK_KP_6:
 			_galaxy.Reset(
-				15000,    // radius of the galaxy
-				4000,     // radius of the core
-				0.0003,   // angluar offset of the density wave per parsec of radius
-				1.45,     // excentricity at the edge of the core
-				1.0,      // excentricity at the edge of the disk
-				40000,
-				true,
-				0,
-				0,
-				70);   // total number of stars
+				14000,    // radius of the galaxy
+				12500,     // radius of the core
+				0.0002,   // angluar offset of the density wave per parsec of radius
+				0.65,     // excentricity at the edge of the core
+				0.95,      // excentricity at the edge of the disk
+				40000,    // total number of stars
+				true,     // has dark matter
+				3,        // Perturbations per full ellipse
+				72,       // Amplitude damping factor of perturbation
+				85);      // dust render size in pixel
+			_fov = 36982;
 			break;
 
 			// für Wikipedia: realistische Rotationskurve

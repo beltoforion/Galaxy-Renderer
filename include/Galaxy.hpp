@@ -28,7 +28,8 @@ public:
 		bool hasDarkMatter,
 		int pertN,
 		double pertAmp,
-		double dustRenderSize);
+		double dustRenderSize,
+		double (*ColorFun)(double) = nullptr);
 
 	void Reset();
 
@@ -75,6 +76,7 @@ public:
 	void SetExInner(double ex);
 	void SetExOuter(double ex);
 	void SetDustRenderSize(double sz);
+	void SetColorFunction(double (*cf)(double)) noexcept(false);
 
 private:
 
@@ -110,6 +112,8 @@ private:
 	double _timeStep;
 
 	bool _hasDarkMatter;
+
+	double (*_colorFun)(double);
 
 public:
 

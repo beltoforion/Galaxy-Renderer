@@ -12,15 +12,6 @@
 
 #include "MathHelper.hpp"
 
-#if defined(_WIN32) || defined(_WIN64)
-
-#else
-#include <GL/gl.h>	// Header File For The OpenGL32 Library
-#include <GL/glu.h>	// Header File For The GLu32 Library
-#include <GL/glx.h> 
-#endif
-
-
 
 void SDLWindow::DrawText(TTF_Font* pFont, TextCoords coords, int x, int y, const char* fmt, ...)
 {

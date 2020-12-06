@@ -83,6 +83,7 @@ private:
 	// Star color management
 	int _colNum;
 	double _t0, _t1, _dt;
+	static double _temp;
 	Color _col[200];
 	
 	uint32_t _renderUpdateHint;
