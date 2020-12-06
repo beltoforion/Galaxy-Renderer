@@ -26,6 +26,7 @@ protected:
 	void InitSimulation() override;
 
 private:
+
 	enum class DisplayItem : uint32_t
 	{
 		NONE          = 0,

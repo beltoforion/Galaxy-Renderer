@@ -40,7 +40,7 @@ void VertexBuffer::Release()
 }
 
 
-void VertexBuffer::Update(const std::vector<VertexColor>& vert, const std::vector<int>& idx)
+void VertexBuffer::Update(const std::vector<VertexColor>& vert, const std::vector<int>& idx) 
 {
 	_vert = vert;
 	_idx = idx;
@@ -75,17 +75,31 @@ void VertexBuffer::Update(const std::vector<VertexColor>& vert, const std::vecto
 
 void VertexBuffer::Draw()
 {
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	glEnable(GL_PRIMITIVE_RESTART);
 	glPrimitiveRestartIndex(0xFFFF);
 
+#ifdef USE_VAO
 	glBindVertexArray(_vao);
 	glDrawElements(GL_LINE_STRIP, _idx.size(), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
+#else
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+
+	// assign the vertex shader attributes:   Attribute 0: Position
+	glEnableVertexAttribArray(attPosition);
+	glVertexAttribPointer(attPosition, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), 0);
+
+	// assign the vertex shader attributes:   Attribute 1: Color
+	glEnableVertexAttribArray(attColor);
+	glVertexAttribPointer(attColor, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(VertexColor, red)));
+
+	glDrawElements(GL_LINE_STRIP, _idx.size(), GL_UNSIGNED_INT, nullptr);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif
 
 	glDisable(GL_PRIMITIVE_RESTART);
-	//glDisable(GL_BLEND);
 }
 

@@ -9,9 +9,6 @@
 #include "specrend.h"
 #include "Star.hpp"
 
-// from WinUser.h
-//#undef DrawText
-
 
 GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
@@ -134,7 +131,6 @@ void GalaxyWnd::InitSimulation()
 		0.0004,   // angluar offset of the density wave per parsec of radius
 		0.85,     // excentricity at the edge of the core
 		0.95,      // excentricity at the edge of the disk
-		0.5,
 		30000,    // total number of stars
 		true,     // has dark matter
 		2,        // Perturbations per full ellipse
@@ -568,7 +564,6 @@ void GalaxyWnd::DrawStat()
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  RadFarField: %d pc", (int)_galaxy.GetFarFieldRad());
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  ExInner:     %2.2f", _galaxy.GetExInner());
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  ExOuter:     %2.2f", _galaxy.GetExOuter());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  Sigma:       %2.2f", _galaxy.GetSigma());
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  AngOff:      %1.4f deg/pc", _galaxy.GetAngularOffset());
 	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  FoV:         %1.2f pc", _fov);
 
@@ -582,8 +577,8 @@ void GalaxyWnd::DrawStat()
 
 void GalaxyWnd::DrawGalaxyRadii()
 {
-//#define USE_VBO
-#if defined USE_VBO
+//#define USE_VERTEX_BUFFER
+#if defined USE_VERTEX_BUFFER
 	_vertDensityWaves.Draw();
 
 	// Captions (immer noch im immediate mode!)
@@ -745,11 +740,11 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 		switch (m_event.key.keysym.sym)
 		{
 		case SDLK_END:
-			_galaxy.SetPertN(_galaxy.GetPertN() - 1);
+			_galaxy.SetPertN(std::max(_galaxy.GetPertN() - 1, 0));
 			break;
 
 		case SDLK_HOME:
-			_galaxy.SetPertN(_galaxy.GetPertN() + 1);
+			_galaxy.SetPertN(std::min(_galaxy.GetPertN() + 1, 5));
 			break;
 
 		case SDLK_PAGEDOWN:
@@ -837,15 +832,6 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			_galaxy.SetDustRenderSize(_galaxy.GetDustRenderSize() + 5);
 			break;
 
-		case SDLK_z:
-		case SDLK_y:
-			_galaxy.SetSigma(_galaxy.GetSigma() + 0.05);
-			break;
-
-		case SDLK_h:
-			_galaxy.SetSigma(std::max(_galaxy.GetSigma() - 0.05, 0.05));
-			break;
-
 		case  SDLK_F1:
 			_flags ^= (int)DisplayItem::HELP;
 			break;
@@ -894,7 +880,6 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0.0004,   // angluar offset of the density wave per parsec of radius
 				0.85,     // excentricity at the edge of the core
 				0.95,      // excentricity at the edge of the disk
-				0.5,
 				40000,    // total number of stars
 				true,     // has dark matter
 				2,        // Perturbations per full ellipse
@@ -910,7 +895,6 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0.0003,   // angluar offset of the density wave per parsec of radius
 				0.8,     // excentricity at the edge of the core
 				0.85,      // excentricity at the edge of the disk
-				0.5,
 				40000,    // total number of stars
 				true,     // has dark matter
 				0,        // Perturbations per full ellipse
@@ -926,7 +910,6 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0.0004,   // angluar offset of the density wave per parsec of radius
 				0.9,      // excentricity at the edge of the core
 				0.9,      // excentricity at the edge of the disk
-				0.5,
 				30000,
 				true,
 				0,
@@ -940,7 +923,6 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0.0004,   // angluar offset of the density wave per parsec of radius
 				1.35,      // excentricity at the edge of the core
 				1.05,      // excentricity at the edge of the disk
-				0.5,
 				40000,
 				true,
 				0,
@@ -948,20 +930,19 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				70);   // total number of stars
 			break;
 
-			// Typ Sa
 		case SDLK_KP_4:
 			_galaxy.Reset(
-				20000,    // radius of the galaxy
-				4000,     // radius of the core
-				0.0004,   // angluar offset of the density wave per parsec of radius
-				0.75,      // excentricity at the edge of the core
-				1.0,      // excentricity at the edge of the disk
-				0.5,
-				40000,
-				true,
-				0,
-				0,
-				70);   // total number of stars
+				13000,    // radius of the galaxy
+				4500,     // radius of the core
+				0.0002,   // angluar offset of the density wave per parsec of radius
+				0.65,     // excentricity at the edge of the core
+				0.95,      // excentricity at the edge of the disk
+				40000,    // total number of stars
+				true,     // has dark matter
+				3,        // Perturbations per full ellipse
+				72,       // Amplitude damping factor of perturbation
+				90);      // dust render size in pixel
+			_fov = 35000;
 			break;
 
 			// Typ SBb
@@ -972,7 +953,6 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0.0003,   // angluar offset of the density wave per parsec of radius
 				1.45,     // excentricity at the edge of the core
 				1.0,      // excentricity at the edge of the disk
-				0.5,
 				40000,
 				true,
 				0,
@@ -988,7 +968,6 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0.0003,   // angluar offset of the density wave per parsec of radius
 				1.45,     // excentricity at the edge of the core
 				1.0,      // excentricity at the edge of the disk
-				0.5,
 				40000,
 				true,
 				0,
@@ -1004,7 +983,6 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0.0004,   // angluar offset of the density wave per parsec of radius
 				1.1,     // excentricity at the edge of the core
 				1.0,      // excentricity at the edge of the disk
-				0.5,
 				40000,    // total number of stars
 				true,     // has dark matter
 				1,        // Perturbations per full ellipse
@@ -1021,7 +999,6 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0.0004,   // angluar offset of the density wave per parsec of radius
 				0.85,     // excentricity at the edge of the core
 				0.95,      // excentricity at the edge of the disk
-				0.5,
 				40000,    // total number of stars
 				true,     // has dark matter
 				1,        // Perturbations per full ellipse

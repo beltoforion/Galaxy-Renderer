@@ -24,7 +24,6 @@ public:
 		double deltaAng,
 		double ex1,
 		double ex2,
-		double sigma,
 		int numStars,
 		bool hasDarkMatter,
 		int pertN,
@@ -82,7 +81,7 @@ private:
 	Galaxy(const Galaxy& obj);
 	Galaxy& operator=(const Galaxy& obj);
 
-	void InitStars(double sigma);
+	void InitStars();
 
 	// Parameters needed for defining the general structure of the galaxy
 
@@ -96,7 +95,6 @@ private:
 	double _radCore;        ///< Radius of the inner core
 	double _radGalaxy;      ///< Radius of the galaxy
 	double _radFarField;    ///< The radius after which all density waves must have circular shape
-	double _sigma;          ///< Distribution of stars
 	double _velAngle;       ///< Angular velocity of the density waves
 
 	double _dustRenderSize;

@@ -19,7 +19,7 @@ public:
 
 	void Initialize();
 	void Release();
-	void Update(const std::vector<VertexColor>& vert, const std::vector<int>& idx);
+	void Update(const std::vector<VertexColor>& vert, const std::vector<int>& idx) noexcept(false);
 	void Draw();
 
 private:

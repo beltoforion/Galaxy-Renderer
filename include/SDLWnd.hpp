@@ -2,23 +2,10 @@
 
 #include <string>
 
-#if defined(_WIN32) || defined(_WIN64)
-#include <Windows.h>
-#endif
-
-#if defined(_WIN32) || defined(_WIN64)
-	#include <gl/glew.h>
-	#include <SDL.h>
-	#include <SDL_opengl.h> 
-	#include <SDL_ttf.h>
-#else
-	#include <GL/gl.h>	// Header File For The OpenGL32 Library
-	#include <GL/glext.h>
-	#include <GL/glu.h>	// Header File For The GLu32 Library
-	#include <SDL/SDL.h>
-	#include <SDL/SDL_gfxPrimitives.h>
-	#include <SDL/SDL_opengl.h> // opengl support
-#endif
+#include <gl/glew.h>
+#include <SDL.h>
+#include <SDL_opengl.h> 
+#include <SDL_ttf.h>
 
 #include "Star.hpp"
 

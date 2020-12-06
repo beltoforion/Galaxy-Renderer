@@ -23,7 +23,6 @@ Galaxy::Galaxy(
 	, _angleOffset(deltaAng)
 	, _radCore(radCore)
 	, _radGalaxy(rad)
-	, _sigma(0.45)
 	, _velAngle(0.000001)
 	, _numStars(numStars)
 	, _numDust(numStars)
@@ -51,7 +50,6 @@ void Galaxy::Reset()
 		_angleOffset,
 		_elEx1,
 		_elEx2,
-		_sigma,
 		_numStars,
 		_hasDarkMatter,
 		_pertN,
@@ -65,7 +63,6 @@ void Galaxy::Reset(
 	double deltaAng,
 	double ex1,
 	double ex2,
-	double sigma,
 	int numStars,
 	bool hasDarkMatter,
 	int pertN,
@@ -79,7 +76,6 @@ void Galaxy::Reset(
 	_radCore = radCore;
 	_radGalaxy = rad;
 	_radFarField = _radGalaxy * 2;  // there is no science behind this threshold it just looks nice
-	_sigma = sigma;
 	_numStars = numStars;
 	_numDust = numStars / 2;
 	_time = 0;
@@ -91,7 +87,7 @@ void Galaxy::Reset(
 	for (int i = 0; i < 100; ++i)
 		_numberByRad[i] = 0;
 
-	InitStars(_sigma);
+	InitStars();
 }
 
 void Galaxy::ToggleDarkMatter()
@@ -100,7 +96,7 @@ void Galaxy::ToggleDarkMatter()
 	Reset();
 }
 
-void Galaxy::InitStars(double sigma)
+void Galaxy::InitStars()
 {
 	delete[] _pDust;
 	_pDust = new Star[_numDust];
@@ -239,20 +235,9 @@ void Galaxy::InitStars(double sigma)
 	}
 }
 
-double Galaxy::GetSigma() const
-{
-	return _sigma;
-}
-
 void Galaxy::SetDustRenderSize(double sz)
 {
 	_dustRenderSize = std::min(200.0, std::max(sz, 1.0));
-}
-
-void Galaxy::SetSigma(double s)
-{
-	_sigma = s;
-	Reset();
 }
 
 Star* Galaxy::GetStars() const
@@ -407,7 +392,10 @@ double Galaxy::GetPertAmp() const
 
 void Galaxy::SetPertN(int n)
 {
-	_pertN = std::max(0, n);
+	if (n < 0 || n>5)
+		throw new std::runtime_error("pertN must be greater than 0 and less than 6!");
+
+	_pertN = n;
 }
 
 void Galaxy::SetPertAmp(double amp)
