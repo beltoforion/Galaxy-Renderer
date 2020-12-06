@@ -78,6 +78,8 @@ public:
 	void SetDustRenderSize(double sz);
 	void SetColorFunction(double (*cf)(double)) noexcept(false);
 
+	bool HasDarkMatter() const noexcept;
+
 private:
 
 	Galaxy(const Galaxy& obj);

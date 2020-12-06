@@ -96,6 +96,11 @@ void Galaxy::Reset(
 	InitStars();
 }
 
+bool Galaxy::HasDarkMatter() const noexcept
+{
+	return _hasDarkMatter;
+}
+
 void Galaxy::ToggleDarkMatter()
 {
 	_hasDarkMatter ^= true;

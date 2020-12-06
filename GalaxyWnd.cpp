@@ -9,7 +9,7 @@
 #include "specrend.h"
 #include "Star.hpp"
 
-double GalaxyWnd::_temp = 4500;
+double GalaxyWnd::_temp = 3700;
 
 GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
@@ -49,7 +49,7 @@ void GalaxyWnd::InitGL()
 	if (_pSmallFont == nullptr)
 		throw std::runtime_error(TTF_GetError());
 
-	_pFont = TTF_OpenFont("arial.ttf", 17);
+	_pFont = TTF_OpenFont("arial.ttf", 18);
 	if (_pFont == nullptr)
 		throw std::runtime_error(TTF_GetError());
 
@@ -250,7 +250,6 @@ void GalaxyWnd::Render()
 
 	if (_flags & (int)DisplayItem::HELP)
 	{
-		DrawStat();
 		DrawHelp();
 	}
 
@@ -547,35 +546,6 @@ void GalaxyWnd::DrawH2()
 	glDisable(GL_BLEND);
 }
 
-void GalaxyWnd::DrawStat()
-{
-	double x0 = _width - 250;
-	double y0 = _height - 350;
-	double dy1 = TTF_FontHeight(_pFont) + 4;
-	double dy2 = TTF_FontHeight(_pSmallFont) + 4;
-
-	glColor4f(0.7, 0.7, 0.7, 0.7);
-	double y = y0;	DrawText(_pFont, TextCoords::Window, x0, y, "Simulation:");
-	y += dy1;	DrawText(_pSmallFont, TextCoords::Window, x0, y, "  FPS:         %d", GetFPS());
-	y += dy2;	DrawText(_pSmallFont, TextCoords::Window, x0, y, "  Time:        %2.2e y", _galaxy.GetTime());
-
-	y += dy2; DrawText(_pFont, TextCoords::Window, x0, y, "Geometry:");
-	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  RadCore:     %d pc", (int)_galaxy.GetCoreRad());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  RadGalaxy:   %d pc", (int)_galaxy.GetRad());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  RadFarField: %d pc", (int)_galaxy.GetFarFieldRad());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  ExInner:     %2.2f", _galaxy.GetExInner());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  ExOuter:     %2.2f", _galaxy.GetExOuter());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  AngOff:      %1.4g deg/pc", _galaxy.GetAngularOffset());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  FoV:         %1.2f pc", _fov);
-
-	y += dy2; DrawText(_pFont, TextCoords::Window, x0, y, "Spiral Arms:");
-	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  Num pert:  %d", _galaxy.GetPertN());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  pertDamp:  %1.2f", _galaxy.GetPertAmp());
-
-	y += dy2; DrawText(_pFont, TextCoords::Window, x0, y, "Rendering:");
-	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "  Dust render size:  %2.2lf", _galaxy.GetDustRenderSize());
-}
-
 void GalaxyWnd::DrawGalaxyRadii()
 {
 //#define USE_VERTEX_BUFFER
@@ -668,58 +638,54 @@ void GalaxyWnd::DrawHelp()
 	glColor3f(0.8, 0.8, 1);
 	double y = y0 - 60;
 	DrawText(_pFontCaption, TextCoords::Window, x0, y0 - 60, "Spiral Galaxy Simulator");
-	DrawText(_pFont, TextCoords::Window, x0, y0 - 15, "Simulating a Galaxy with the Density Wave Theory - (C) 2020 Ingo Berg (beltoforion.de)");
 
-	glColor3f(1, 1, 1);
-	y0 = y0 + 20;
-	DrawText(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Keyboard commands");
-	DrawText(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Camera");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  1 - centric; fixed");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  2 - centric; rotating with core speed");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  3 - centric; rotating with speed of outer disc");
+	y0 = 60; // _height - 540;
+	double dy1 = TTF_FontHeight(_pFont) + 8;
+	double dy2 = TTF_FontHeight(_pSmallFont) + 6;
 
-	y0 = y0 + 20;
-	DrawText(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Galaxy geometry");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  q - increase inner excentricity");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  a - decrease inner excentricity");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  w - increase outer excentricity");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  s - decrease outer excentricity");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  e - increase angular shift of orbits");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  d - decrease angular shift of orbits");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  r - increase core size");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  f - decrease core size");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  t - increase galaxy size");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  g - decrease galaxy size");
+	glColor4f(1, 1, 1, 0.6);
+	y = y0;	DrawText(_pFont, TextCoords::Window, x0, y, "Simulation Controls:");
+	y += dy1;	DrawText(_pSmallFont, TextCoords::Window, x0, y, "FPS:  %d", GetFPS());
+	y += dy2;	DrawText(_pSmallFont, TextCoords::Window, x0, y, "Time: %2.2e y", _galaxy.GetTime());
 
-	y0 = y0 + 20;
-	DrawText(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Spiral Arms");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  Home  - increase number of orbit perturbations");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  End   - decrease number of orbit perturbations");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  PG_UP - increase perturbation damping");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  PG_DN - decrease perturbation damping");
+	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Geometry:");
+	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[r],[f] RadCore:     %d pc", (int)_galaxy.GetCoreRad());
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[t],[g] RadGalaxy:   %d pc", (int)_galaxy.GetRad());
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "        RadFarField: %d pc", (int)_galaxy.GetFarFieldRad());
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[q],[a] ExInner:     %2.2f", _galaxy.GetExInner());
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[w],[s] ExOuter:     %2.2f", _galaxy.GetExOuter());
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[e],[d] AngOff:      %1.4g deg/pc", _galaxy.GetAngularOffset());
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[+],[-] FoV:         %1.2f pc", _fov);
 
-	y0 = y0 + 20;
-	DrawText(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Display features");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  F1 - Help screen");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  F2 - Toggle Axis");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  F3 - Stars (on/off)");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  F4 - Dust (on/off)");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  F5 - H2 Regions (on/off)");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  F6 - Density waves (Star orbits)");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  +  - Zoom in");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  -  - Zoom out");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  b  - Decrease Dust Render Size");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  n  - Increase Dust Render Size");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  m  - Toggle Dark Matter on/off");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  v  - Display Velocity Curve");
+	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Spiral Arms:");
+	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[Home],[End]    Num pert:  %d", _galaxy.GetPertN());
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[PG_UP],[PG_DN] pertDamp:  %1.2f", _galaxy.GetPertAmp());
 
-	y0 = y0 + 20;
-	DrawText(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Misc");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  pause - halt simulation");
+	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Display Features:");
+	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[b],[n]  Dust render size:  %2.2lf", _galaxy.GetDustRenderSize());
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[F1] Help Screen");
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[F2] Toggle Axis");
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[F3] Toggle Stars");
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[F4] Toggle Dust");
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[F5] Toggle H2 Regions");
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[F6] Toggle Density Waves");
 
-	y0 = y0 + 20;
-	DrawText(_pFont, TextCoords::Window, x0, y0 + dy * line++, "Predefined Galaxies");
-	DrawText(_pSmallFont, TextCoords::Window, x0, y0 + dy * line++, "  Keypad 0 - 8");
+	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Physics:");
+	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[z],[h] Base Temp.:  %2.2lf K", _temp);
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[m] Toggle Dark Matter: %s", _galaxy.HasDarkMatter() ? "ON":"OFF");
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[v] Display Velocity Curve: %s", ((_flags & (int)DisplayItem::VELOCITY) != 0) ? "ON":"OFF");
+
+	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Predefined Galaxies:");
+	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[KP1] - [KP8] Predefined Galaxies");
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[Pause]       Halt simulation");
+
+	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Camera Control:");
+	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[1] fixed");
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[2] rotating with core");
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[3] rotating with outer disc");
+
+	glColor4f(0.8, 0.8, 0.8, 0.3);
+	DrawText(_pFont, TextCoords::Window, _width - 180, _height - 30, " (C) 2020 Ingo Berg");
 }
 
 GalaxyWnd::Color GalaxyWnd::ColorFromTemperature(double temp) const
@@ -889,6 +855,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case SDLK_KP_0:
+			_temp = 4000;
 			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				4000,     // radius of the core
@@ -900,11 +867,12 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				2,        // Perturbations per full ellipse
 				40,       // Amplitude damping factor of perturbation
 				90,
-				[](double r) { return 4200 + r / 5; });      // dust render size in pixel
+				[](double r) { return _temp + r / 5; });      // dust render size in pixel
 			_fov = 33960;
 			break;
 
 		case SDLK_KP_1:
+			_temp = 4500;
 			_galaxy.Reset(
 				16000,    // radius of the galaxy
 				4000,     // radius of the core
@@ -916,11 +884,12 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0,        // Perturbations per full ellipse
 				40,       // Amplitude damping factor of perturbation
 				100,
-				[](double r) { return 4500 + r / 4.5; });      
+				[](double r) { return _temp + r / 4.5; });
 			_fov = 46585;
 			break;
 
 		case SDLK_KP_2:
+			_temp = 4200;
 			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				4000,     // radius of the core
@@ -931,9 +900,11 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				true,
 				0,
 				0,
-				70);   // total number of stars
+				70,   // total number of stars
+				[](double r) { return _temp + r / 4.5; });
 			break;
 		case SDLK_KP_3:
+			_temp = 4500;
 			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				4000,     // radius of the core
@@ -944,10 +915,12 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				true,
 				0,
 				0,
-				70);   // total number of stars
+				70,   // total number of stars
+				[](double r) { return _temp + r / 4.5; });
 			break;
 
 		case SDLK_KP_4:
+			_temp = 4000;
 			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				4500,     // radius of the core
@@ -958,12 +931,14 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				true,     // has dark matter
 				3,        // Perturbations per full ellipse
 				72,       // Amplitude damping factor of perturbation
-				90);      // dust render size in pixel
+				90,      // dust render size in pixel
+				[](double r) { return _temp + r / 4.5; });
 			_fov = 35000;
 			break;
 
 			// Typ SBb
 		case SDLK_KP_5:
+			_temp = 4500;
 			_galaxy.Reset(
 				15000,    // radius of the galaxy
 				4000,     // radius of the core
@@ -974,10 +949,12 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				true,
 				0,
 				0,
-				70);   // total number of stars
+				70,   // total number of stars
+				[](double r) { return _temp + r / 5; });
 			break;
 
 		case SDLK_KP_6:
+			_temp = 2200;
 			_galaxy.Reset(
 				14000,    // radius of the galaxy
 				12500,     // radius of the core
@@ -989,12 +966,13 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				3,        // Perturbations per full ellipse
 				72,       // Amplitude damping factor of perturbation
 				85,        // dust render size in pixel
-				[](double r) { return 2200 + r / 5; });     
+				[](double r) { return _temp + r / 5; });
 			_fov = 36982;
 			break;
 
 
 		case SDLK_KP_7:
+			_temp = 2800;
 			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				1500,     // radius of the core
@@ -1006,12 +984,13 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				1,        // Perturbations per full ellipse
 				20,       // Amplitude damping factor of perturbation
 				80,
-				[](double r) { return 2800 + r / 5; });      // dust render size in pixel
+				[](double r) { return _temp + r / 5; });      // dust render size in pixel
 			_fov = 41091;
 			break;
 
 
 		case SDLK_KP_8:
+			_temp = 4500;
 			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				4000,     // radius of the core
@@ -1022,7 +1001,8 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				true,     // has dark matter
 				1,        // Perturbations per full ellipse
 				20,       // Amplitude damping factor of perturbation
-				80);      // dust render size in pixel
+				80,      // dust render size in pixel
+				[](double r) { return _temp + r / 5; });
 			_fov = 41091;
 			break;
 
