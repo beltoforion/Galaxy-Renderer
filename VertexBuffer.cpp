@@ -1,6 +1,9 @@
 #include "VertexBuffer.hpp"
 #include <stdexcept>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 VertexBuffer::VertexBuffer(int lineWidth)
 	: _vbo(0)
 	, _ibo(0)
@@ -33,10 +36,12 @@ GLuint VertexBuffer::CreateShader(GLenum shaderType, const char **shaderSource)
 		std::vector<GLchar> infoLog(maxLength);
 		glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
 
+		std::string msg(infoLog.data());
+
 		// We don't need the shader anymore.
 		glDeleteShader(shader);
 
-		throw std::runtime_error("VertecBuffer: Shader compilation failed!");
+		throw std::runtime_error(std::string("VertecBuffer: Shader compilation failed: ") + msg);
 	}
 
 	return shader;
@@ -50,25 +55,24 @@ void VertexBuffer::Initialize()
 
 	const char *srcVertex =
 		"#version 330 core\n"
+		"uniform mat4 projMat;\n"
+		"uniform mat4 viewMat;\n"
 		"layout(location = 0) in vec3 position;\n"
 		"layout(location = 1) in vec3 color;\n"
-		"out vec3 vertexColor;\n"
+		"out vec4 vertexColor;\n"
 		"void main()\n"
 		"{\n"
-		"	gl_Position =  vec4(position, 1);\n"
-//		"   gl_Position = gl_ModelViewProjectionMatrix * (vec4(1.0, 0.1, 1.0, 1.0) * gl_Vertex);\n"
-		"	vertexColor = color;\n"
+		"	gl_Position =  projMat * vec4(position, 1);\n"
+		"	vertexColor = vec4(color, 1);\n"
 		"}\n";
 	_vertexShader = CreateShader(GL_VERTEX_SHADER, &srcVertex);
 
 	const char* srcFragment =
 		"#version 330 core\n"
-//		"out vec4 FragColor;\n"
-//		"in vec3 vertexColor;\n"
+		"in vec4 vertexColor;\n"
 		"void main()\n"
 		"{\n"
-//		"	gl_FragColor = vec4(vertexColor, 1.0);\n"
-		"	gl_FragColor = vec4(0.0, 1.0,+ 0.0, 1.0);\n"
+		"	gl_FragColor = vertexColor;\n"
 		"}\n";
 	_fragmentShader = CreateShader(GL_FRAGMENT_SHADER, &srcFragment);
 
@@ -154,17 +158,26 @@ void VertexBuffer::Update(const std::vector<VertexColor>& vert, const std::vecto
 	glBindVertexArray(0);
 }
 
-void VertexBuffer::Draw()
+void VertexBuffer::Draw(glm::mat4 &matView, glm::mat4 &matProjection)
 {
 	glUseProgram(_shaderProgram);
+
+	GLuint viewMatIdx = glGetUniformLocation(_shaderProgram, "viewMat");
+	glUniformMatrix4fv(viewMatIdx, 1, GL_FALSE, glm::value_ptr(matView));
+
+	GLuint projMatIdx = glGetUniformLocation(_shaderProgram, "projMat");
+	glUniformMatrix4fv(projMatIdx, 1, GL_FALSE, glm::value_ptr(matProjection));
+
 	glEnable(GL_PRIMITIVE_RESTART);
 	glPrimitiveRestartIndex(0xFFFF);
 
-#ifdef USE_VAO
+	glLineWidth(2);
+
 	glBindVertexArray(_vao);
 	glDrawElements(GL_LINE_STRIP, _idx.size(), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
-#else
+
+/* alternative ohne vao
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
@@ -180,7 +193,7 @@ void VertexBuffer::Draw()
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-#endif
+*/
 
 	glDisable(GL_PRIMITIVE_RESTART);
 	glUseProgram(0);

@@ -3,6 +3,8 @@
 #include <string>
 
 #include <gl/glew.h>
+#include <glm/glm.hpp>
+
 #include <SDL.h>
 #include <SDL_opengl.h> 
 #include <SDL_ttf.h>
@@ -74,6 +76,8 @@ protected:
 	SDL_Renderer *_pSdlRenderer;
 	SDL_GLContext _sdcGlContext;
 
+	glm::mat4 _matProjection;
+	glm::mat4 _matView;
 
 	GLuint _texStar;
 

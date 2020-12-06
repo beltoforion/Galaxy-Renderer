@@ -4,6 +4,7 @@
 #include <string>
 
 #include <gl/glew.h>
+#include <glm/glm.hpp>
 
 
 struct VertexColor
@@ -21,7 +22,7 @@ public:
 	void Initialize();
 	void Release();
 	void Update(const std::vector<VertexColor>& vert, const std::vector<int>& idx) noexcept(false);
-	void Draw();
+	void Draw(glm::mat4& matView, glm::mat4& matProj);
 
 private:
 

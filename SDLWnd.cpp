@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include <SDL_ttf.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "MathHelper.hpp"
 
@@ -255,21 +256,30 @@ void SDLWindow::SetCamera(const Vec3D& pos, const Vec3D& lookAt, const Vec3D& or
 
 void SDLWindow::AdjustCamera()
 {
+	double l = _fov / 2.0;
+	double aspect = (double)_width / _height;
+
+	// new mvp matrices for glsl shaders via glm:
+	_matProjection = glm::ortho(
+		-l * aspect, l * aspect, 
+		-l, l, 
+		-l, l);
+	
+	glm::dvec3 camPos(_camPos.x, _camPos.y, _camPos.z);
+	glm::dvec3 camLookAt(_camLookAt.x, _camLookAt.y, _camLookAt.z);
+	glm::dvec3 camOrient(_camOrient.x, _camOrient.y, _camOrient.z);
+	_matView = glm::lookAt(camPos, camLookAt, camOrient);
+
+	// old stuff (legacy):
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	double l = _fov / 2.0;
-	double aspect = (double)_width / _height;
-//	glOrtho(-l, l, -l, l, -l, l);
 	glOrtho(-l* aspect, l * aspect, -l, l, -l, l);
-
 
 	gluLookAt(
 		_camPos.x, _camPos.y, _camPos.z,
 		_camLookAt.x, _camLookAt.y, _camLookAt.z,
 		_camOrient.x, _camOrient.y, _camOrient.z);
-
-	//	glMatrixMode(GL_MODELVIEW);
 }
 
 double SDLWindow::GetFOV() const

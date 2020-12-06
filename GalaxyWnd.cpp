@@ -119,9 +119,6 @@ void GalaxyWnd::InitGL()
 	glClearColor(0.0f, .0f, 0.1f, 0.0f);
 
 	SetCameraOrientation(Vec3D(0, 1, 0));
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 }
 
 void GalaxyWnd::InitSimulation()
@@ -241,8 +238,8 @@ void GalaxyWnd::Render()
 
 	if (_flags & (int)DisplayItem::DENSITY_WAVES)
 	{
-		DrawDensityWaves(50, _galaxy.GetFarFieldRad());
 		DrawGalaxyRadii();
+		DrawDensityWaves(50, _galaxy.GetFarFieldRad());
 	}
 
 	if (_flags & (int)DisplayItem::VELOCITY)
@@ -548,9 +545,7 @@ void GalaxyWnd::DrawH2()
 
 void GalaxyWnd::DrawGalaxyRadii()
 {
-//#define USE_VERTEX_BUFFER
-#if defined USE_VERTEX_BUFFER
-	_vertDensityWaves.Draw();
+	_vertDensityWaves.Draw(_matView, _matProjection);
 
 	// Captions (immer noch im immediate mode!)
 	glColor3f(1, 1, 0);
@@ -559,26 +554,6 @@ void GalaxyWnd::DrawGalaxyRadii()
 	DrawText(_pFont, TextCoords::Model, 0, _galaxy.GetRad() + 500, "Disk");
 	glColor3f(1, 0, 0);
 	DrawText(_pFont, TextCoords::Model, 0, _galaxy.GetFarFieldRad() + 500, "Intergalactic medium");
-#else
-	//  code for immediate drawing
-	glColor4f(1, 1, 0, 0.6);
-	double r = _galaxy.GetCoreRad();
-	if (r > 0)
-	{
-		DrawEllipsis(r, r, 0, 3);
-		DrawText(_pFont, TextCoords::Model, 0, r + 500, "Core");
-	}
-
-	glColor4f(0, 1, 0, 0.6);
-	r = _galaxy.GetRad();
-	DrawEllipsis(r, r, 0, 3);
-	DrawText(_pFont, TextCoords::Model, 0, r + 500, "Disk");
-
-	glColor4f(1, 0, 0, 0.6);
-	r = _galaxy.GetFarFieldRad();
-	DrawEllipsis(r, r, 0, 3);
-	DrawText(_pFont, TextCoords::Model, 0, r + 500, "Intergalactic medium");
-#endif
 }
 
 void GalaxyWnd::DrawAxis(const Vec2D& origin)
