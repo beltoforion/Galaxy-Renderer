@@ -855,7 +855,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case SDLK_KP_0:
-			_temp = 4000;
+			_temp = 3600;
 			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				4000,     // radius of the core
@@ -949,7 +949,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				true,
 				0,
 				0,
-				70,   // total number of stars
+				100,   
 				[](double r) { return _temp + r / 5; });
 			break;
 
