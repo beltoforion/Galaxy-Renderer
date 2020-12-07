@@ -175,7 +175,7 @@ void VertexBuffer::Draw(glm::mat4 &matView, glm::mat4 &matProjection)
 	glLineWidth(2);
 
 	glBindVertexArray(_vao);
-	glDrawElements(GL_LINE_STRIP, _idx.size(), GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_LINE_STRIP, (int)_idx.size(), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
 
 	glDisable(GL_BLEND);

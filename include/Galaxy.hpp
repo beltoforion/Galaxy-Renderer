@@ -10,26 +10,26 @@ class Galaxy final
 public:
 
 	Galaxy(
-		double rad = 15000,
-		double radCore = 6000,
-		double deltaAng = 0.019,
-		double ex1 = 0.8,
-		double ex2 = 1,
+		float rad = 15000,
+		float radCore = 6000,
+		float deltaAng = 0.019,
+		float ex1 = 0.8,
+		float ex2 = 1,
 		int numStars = 40000);
 	~Galaxy();
 
 	void Reset(
-		double rad,
-		double radCore,
-		double deltaAng,
-		double ex1,
-		double ex2,
+		float rad,
+		float radCore,
+		float deltaAng,
+		float ex1,
+		float ex2,
 		int numStars,
 		bool hasDarkMatter,
 		int pertN,
-		double pertAmp,
-		double dustRenderSize,
-		double baseTemp);
+		float pertAmp,
+		float dustRenderSize,
+		float baseTemp);
 
 	void Reset();
 
@@ -37,47 +37,45 @@ public:
 	Star* GetDust() const;
 	Star* GetH2() const;
 
-	double GetRad() const;
-	double GetCoreRad() const;
-	double GetFarFieldRad() const;
-	double GetSigma() const;
+	float GetRad() const;
+	float GetCoreRad() const;
+	float GetFarFieldRad() const;
 
 	// Properties depending on the orbital radius
 
-	double GetExcentricity(double rad) const;
-	double GetOrbitalVelocity(double rad) const;
+	float GetExcentricity(float rad) const;
+	float GetOrbitalVelocity(float rad) const;
 
-	double GetAngularOffset(double rad) const;
-	double GetAngularOffset() const;
+	float GetAngularOffset(float rad) const;
+	float GetAngularOffset() const;
 
-	double GetExInner() const;
-	double GetExOuter() const;
-	double GetTimeStep() const;
-	double GetTime() const;
-	double GetDustRenderSize() const;
+	float GetExInner() const;
+	float GetExOuter() const;
+	float GetTimeStep() const;
+	float GetTime() const;
+	float GetDustRenderSize() const;
 	int GetNumStars() const;
 	int GetNumDust() const;
 	int GetNumH2() const;
 	int GetPertN() const;
-	double GetPertAmp() const;
-	double GetBaseTemp() const noexcept;
+	float GetPertAmp() const;
+	float GetBaseTemp() const noexcept;
 
 	void ToggleDarkMatter();
 
-	void SingleTimeStep(double time);
+	void SingleTimeStep(float time);
 
 	const Vec2D& GetStarPos(int idx);
 
 	void SetPertN(int n);
-	void SetPertAmp(double amp);
-	void SetSigma(double sigma);
-	void SetAngularOffset(double offset);
-	void SetCoreRad(double rad);
-	void SetRad(double rad);
-	void SetExInner(double ex);
-	void SetExOuter(double ex);
-	void SetDustRenderSize(double sz);
-	void SetBaseTemp(double temp);
+	void SetPertAmp(float amp);
+	void SetAngularOffset(float offset);
+	void SetCoreRad(float rad);
+	void SetRad(float rad);
+	void SetExInner(float ex);
+	void SetExOuter(float ex);
+	void SetDustRenderSize(float sz);
+	void SetBaseTemp(float temp);
 
 	bool HasDarkMatter() const noexcept;
 
@@ -90,42 +88,40 @@ private:
 
 	// Parameters needed for defining the general structure of the galaxy
 
-	double _elEx1;          ///< Excentricity of the innermost ellipse
-	double _elEx2;          ///< Excentricity of the outermost ellipse
+	float _elEx1;          ///< Excentricity of the innermost ellipse
+	float _elEx2;          ///< Excentricity of the outermost ellipse
 
-	double _velOrigin;      ///< Velovity at the innermost core in km/s
+	float _velOrigin;      ///< Velovity at the innermost core in km/s
 
-	double _angleOffset;    ///< Angular offset per parsec
+	float _angleOffset;    ///< Angular offset per parsec
 
-	double _radCore;        ///< Radius of the inner core
-	double _radGalaxy;      ///< Radius of the galaxy
-	double _radFarField;    ///< The radius after which all density waves must have circular shape
-	double _velAngle;       ///< Angular velocity of the density waves
+	float _radCore;        ///< Radius of the inner core
+	float _radGalaxy;      ///< Radius of the galaxy
+	float _radFarField;    ///< The radius after which all density waves must have circular shape
+	float _velAngle;       ///< Angular velocity of the density waves
 
-	double _dustRenderSize;
+	float _dustRenderSize;
 
 	int _numStars;          ///< Total number of stars
 	int _numDust;           ///< Number of Dust Particles
 	int _numH2;             ///< Number of H2 Regions
 
 	int _pertN;
-	double _pertAmp;
+	float _pertAmp;
 
-	double _time;
-	double _timeStep;
+	float _time;
+	float _timeStep;
 
 	bool _hasDarkMatter;
 
-	double _baseTemp;
+	float _baseTemp;
 
 public:
-
 	int _numberByRad[100];  ///< Historgramm showing distribution of stars
 
 private:
-
 	Vec2D _pos;             ///< Center of the galaxy
 	Star *_pStars;          ///< Pointer to an array of star data
-	Star* _pDust;           ///< Pointer to an array of dusty areas
-	Star* _pH2;
+	Star *_pDust;           ///< Pointer to an array of dusty areas
+	Star *_pH2;
 };

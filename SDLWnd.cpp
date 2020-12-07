@@ -14,7 +14,7 @@
 #include "MathHelper.hpp"
 
 
-void SDLWindow::DrawText(TTF_Font* pFont, TextCoords coords, int x, int y, const char* fmt, ...)
+void SDLWindow::DrawText(TTF_Font* pFont, TextCoords coords, float x, float y, const char* fmt, ...)
 {
 	if (pFont == nullptr)
 		throw std::runtime_error("TextOut failed: font is null!");
@@ -58,13 +58,13 @@ void SDLWindow::DrawText(TTF_Font* pFont, TextCoords coords, int x, int y, const
 
 	if (coords == TextCoords::Model)
 	{
-		auto pos = GetWindowPos(x, y, 0);
+		auto pos = GetWindowPos((GLfloat)x, (GLfloat)y, 0);
 		x = pos.x;
 		y = pos.y;
 	}
 
-	GLfloat xp = (GLfloat)x;
-	GLfloat yp = (GLfloat)y;
+	GLfloat xp = x;
+	GLfloat yp = y;
 
 	glPushMatrix();
 	glLoadIdentity();
@@ -123,7 +123,7 @@ Vec3D SDLWindow::GetOGLPos(int x, int y)
 
 	gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
 
-	return Vec3D(posX, posY, posZ);
+	return Vec3D((float)posX, (float)posY, (float)posZ);
 }
 
 Vec2D SDLWindow::GetWindowPos(GLfloat x, GLfloat y, GLfloat z)
@@ -138,7 +138,7 @@ Vec2D SDLWindow::GetWindowPos(GLfloat x, GLfloat y, GLfloat z)
 	glGetIntegerv(GL_VIEWPORT, viewport);
 	gluProject(x, y, z,	modelview, projection, viewport, screen + 0, screen + 1, screen + 2);
 
-	return Vec2D(screen[0], screen[1]);
+	return Vec2D((float)screen[0], (float)screen[1]);
 }
 
 
@@ -156,8 +156,9 @@ SDLWindow::SDLWindow()
 	, _pSdlRenderer(nullptr)
 	, _texStar(0)
 	, _bRunning(true)
-{
-}
+	, _matProjection()
+	, _matView()
+{}
 
 SDLWindow::~SDLWindow()
 {

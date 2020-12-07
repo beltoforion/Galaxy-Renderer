@@ -7,19 +7,19 @@ class MathHelper
 public:
 
 	/** \brief Convert parsec to kilometre. */
-	static const double PC_TO_KM;
+	static const float PC_TO_KM;
 
 	/** \brief Seconds per year. */
-	static const double SEC_PER_YEAR;
+	static const float SEC_PER_YEAR;
 
 	/** \brief Deg to radian conversion faktor. */
-	static const double DEG_TO_RAD;
+	static const float DEG_TO_RAD;
 
 	/** \brief Radian to deg conversion faktor. */
-	static const double RAD_TO_DEG;
+	static const float RAD_TO_DEG;
 
 	/** \brief Constant of gravity. */
-	static const double CONTANT_OF_GRAVITY;
+	static const float CONTANT_OF_GRAVITY;
 
 	static inline unsigned int PowerTwoFloor(unsigned int val)
 	{

@@ -7,13 +7,21 @@
 
 
 CumulativeDistributionFunction::CumulativeDistributionFunction()
-	:m_pDistFun(nullptr)
+	: m_pDistFun(nullptr)
 	, m_vM1()
 	, m_vY1()
 	, m_vX1()
 	, m_vM2()
 	, m_vY2()
 	, m_vX2()
+	, m_fMin()
+	, m_fMax()
+	, m_fWidth()
+	, m_nSteps()
+	, m_I0()
+	, m_k()
+	, m_a()
+	, m_RBulge()
 {}
 
 
@@ -51,7 +59,7 @@ void CumulativeDistributionFunction::BuildCDF(int nSteps)
 	m_vX1.push_back(0.0);
 	for (int i = 0; i < nSteps; i += 2)
 	{
-		x = (i + 2) * h;
+		x = h * (i + 2);
 		y += h / 3 * ((this->*m_pDistFun)(m_fMin + i * h) + 4 * (this->*m_pDistFun)(m_fMin + (i + 1) * h) + (this->*m_pDistFun)(m_fMin + (i + 2) * h));
 
 		m_vM1.push_back((y - m_vY1.back()) / (2 * h));

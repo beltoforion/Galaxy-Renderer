@@ -43,7 +43,8 @@ private:
 	enum RenderUpdateHint : uint32_t
 	{
 		ruhNONE = 0,
-		ruhDENSITY_WAVES = 1 << 1
+		ruhDENSITY_WAVES = 1 << 1,
+		ruhAxis = 1 << 2
 	};
 
 	GalaxyWnd(const GalaxyWnd& orig);
@@ -59,20 +60,20 @@ private:
 	void AddEllipsisVertices(
 		std::vector<VertexColor>& vert, 
 		std::vector<int>& vertIdx, 
-		double a, 
-		double b, 
-		double angle, 
+		float a,
+		float b,
+		float angle,
 		uint32_t pertNum, 
-		double pertAmp, 
+		float pertAmp,
 		Color col) const;
 
 	Color ColorFromTemperature(double temp) const;
 
 	void UpdateDensityWaves();
+	void UpdateAxis();
 
 	int _camOrient;    ///< Index of the camera orientation to use
 	int _starRenderType;
-	double _roi;       ///< Radius of the region of interest
 	uint32_t _flags;   ///< The display flags
 
 	Galaxy _galaxy;
@@ -85,6 +86,7 @@ private:
 	uint32_t _renderUpdateHint;
 
 	VertexBuffer _vertDensityWaves;
+	VertexBuffer _vertAxis;
 
 	TTF_Font *_pSmallFont;
 	TTF_Font *_pFont;

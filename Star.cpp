@@ -17,17 +17,33 @@ Star::Star()
 	, m_pos(0, 0)
 {}
 
+//Star* Star::Clone() const
+//{
+//	Star *newStar = new Star(
+//	{
+//		m_theta,
+//		m_velTheta,
+//		double m_angle,
+//		double m_a,
+//		double m_b,
+//		double m_temp,
+//		double m_mag,
+//		Vec2D  m_center,
+//		Vec2D  m_vel,
+//		Vec2D  m_pos
+//	});
+//}
 
-void Star::CalcXY(int pertN, double pertAmp)
+void Star::CalcXY(int pertN, float pertAmp)
 {
-	double beta = -m_angle;
-	double alpha = m_theta * MathHelper::DEG_TO_RAD;
+	float beta = -m_angle;
+	float alpha = m_theta * MathHelper::DEG_TO_RAD;
 
 	// temporaries to save cpu time
-	double cosalpha = std::cos(alpha);
-	double sinalpha = std::sin(alpha);
-	double cosbeta = std::cos(beta);
-	double sinbeta = std::sin(beta);
+	float cosalpha = std::cos(alpha);
+	float sinalpha = std::sin(alpha);
+	float cosbeta = std::cos(beta);
+	float sinbeta = std::sin(beta);
 
 	Vec2D pos = Vec2D(
 		m_center.x + (m_a * cosalpha * cosbeta - m_b * sinalpha * sinbeta),
