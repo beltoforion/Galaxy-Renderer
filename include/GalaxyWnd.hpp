@@ -34,7 +34,6 @@ private:
 		STARS         = 0b000000010,
 		PAUSE         = 0b000000100,
 		HELP          = 0b000001000,
-		ROI           = 0b000010000,
 		DENSITY_WAVES = 0b000100000,
 		VELOCITY      = 0b001000000,
 		DUST          = 0b010000000,
@@ -47,28 +46,26 @@ private:
 		ruhDENSITY_WAVES = 1 << 1
 	};
 
-	struct Color
-	{
-		double r;
-		double g;
-		double b;
-	};
-
 	GalaxyWnd(const GalaxyWnd& orig);
 
 	void DrawStars();
 	void DrawDust();
 	void DrawH2();
-	void DrawStat();
 	void DrawHelp();
-	void DrawGalaxyRadii();
+	void DrawDensityWaves();
 	void DrawAxis(const Vec2D& origin);
-	void DrawDensityWaves(int num, double rad);
 	void DrawVelocity();
 	
-	void AddEllipsisVertices(std::vector<VertexColor>& vert, std::vector<int>& vertIdx, double a, double b, double angle, uint32_t pertNum, double pertAmp, float red, float green, float blue) const;
+	void AddEllipsisVertices(
+		std::vector<VertexColor>& vert, 
+		std::vector<int>& vertIdx, 
+		double a, 
+		double b, 
+		double angle, 
+		uint32_t pertNum, 
+		double pertAmp, 
+		Color col) const;
 
-	void DrawEllipsis(double a, double b, double angle, GLfloat width = 2);
 	Color ColorFromTemperature(double temp) const;
 
 	void UpdateDensityWaves();
@@ -83,7 +80,6 @@ private:
 	// Star color management
 	int _colNum;
 	double _t0, _t1, _dt;
-	static double _temp;
 	Color _col[200];
 	
 	uint32_t _renderUpdateHint;

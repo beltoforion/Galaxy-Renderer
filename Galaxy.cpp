@@ -54,7 +54,8 @@ void Galaxy::Reset()
 		_hasDarkMatter,
 		_pertN,
 		_pertAmp,
-		_dustRenderSize);
+		_dustRenderSize,
+		_baseTemp);
 }
 
 void Galaxy::Reset(
@@ -68,13 +69,9 @@ void Galaxy::Reset(
 	int pertN,
 	double pertAmp,
 	double dustRenderSize,
-	double (*ColorFun)(double))
+	double baseTemp)
 {
-	if (ColorFun == nullptr)
-		_colorFun = [](double r) { return 4200 + r / 5; };
-	else
-		_colorFun = ColorFun;
-
+	_baseTemp = baseTemp;
 	_elEx1 = ex1;
 	_elEx2 = ex2;
 	_elEx2 = ex2;
@@ -204,9 +201,7 @@ void Galaxy::InitStars()
 
 		// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
 		// the following temperature distribution (no science here it just looks right)
-//		_pDust[i].m_temp = 4500 + rad / 4.5;
-		_pDust[i].m_temp = _colorFun(rad);
-		 
+		_pDust[i].m_temp = _baseTemp + rad / 4.5;
 
 		_pDust[i].m_mag = 0.015 + 0.01 * (double)rand() / (double)RAND_MAX;
 		int idx = (int)std::min(1.0 / dh * (_pDust[i].m_a + _pDust[i].m_b) / 2.0, 99.0);
@@ -248,12 +243,14 @@ void Galaxy::InitStars()
 	}
 }
 
-void Galaxy::SetColorFunction(double (*cf)(double))
+double Galaxy::GetBaseTemp() const noexcept
 {
-	if (cf == nullptr)
-		throw std::runtime_error("Galaxy: color function must not be null!");
+	return _baseTemp;
+}
 
-	_colorFun = cf;
+void Galaxy::SetBaseTemp(double baseTemp)
+{
+	_baseTemp = baseTemp;
 	InitStars();
 }
 

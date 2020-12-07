@@ -15,7 +15,7 @@ public:
 		double deltaAng = 0.019,
 		double ex1 = 0.8,
 		double ex2 = 1,
-		int numStars = 20000);
+		int numStars = 40000);
 	~Galaxy();
 
 	void Reset(
@@ -29,7 +29,7 @@ public:
 		int pertN,
 		double pertAmp,
 		double dustRenderSize,
-		double (*ColorFun)(double) = nullptr);
+		double baseTemp);
 
 	void Reset();
 
@@ -60,6 +60,7 @@ public:
 	int GetNumH2() const;
 	int GetPertN() const;
 	double GetPertAmp() const;
+	double GetBaseTemp() const noexcept;
 
 	void ToggleDarkMatter();
 
@@ -76,7 +77,7 @@ public:
 	void SetExInner(double ex);
 	void SetExOuter(double ex);
 	void SetDustRenderSize(double sz);
-	void SetColorFunction(double (*cf)(double)) noexcept(false);
+	void SetBaseTemp(double temp);
 
 	bool HasDarkMatter() const noexcept;
 
@@ -115,7 +116,7 @@ private:
 
 	bool _hasDarkMatter;
 
-	double (*_colorFun)(double);
+	double _baseTemp;
 
 public:
 

@@ -6,11 +6,23 @@
 #include <gl/glew.h>
 #include <glm/glm.hpp>
 
+struct Color 
+{
+	Color(float a_r = 1, float a_g = 1, float a_b = 1, float a_a = 1)
+	{
+		r = a_r;
+		g = a_g;
+		b = a_b;
+		a = a_a;
+	}
+
+	float r, g, b, a;
+};
 
 struct VertexColor
 {
 	float x, y, z;
-	float red, green, blue;
+	float red, green, blue, alpha;
 };
 
 class VertexBuffer

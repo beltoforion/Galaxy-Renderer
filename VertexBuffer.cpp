@@ -58,12 +58,12 @@ void VertexBuffer::Initialize()
 		"uniform mat4 projMat;\n"
 		"uniform mat4 viewMat;\n"
 		"layout(location = 0) in vec3 position;\n"
-		"layout(location = 1) in vec3 color;\n"
+		"layout(location = 1) in vec4 color;\n"
 		"out vec4 vertexColor;\n"
 		"void main()\n"
 		"{\n"
 		"	gl_Position =  projMat * vec4(position, 1);\n"
-		"	vertexColor = vec4(color, 1);\n"
+		"	vertexColor = color;\n"
 		"}\n";
 	_vertexShader = CreateShader(GL_VERTEX_SHADER, &srcVertex);
 
@@ -144,7 +144,7 @@ void VertexBuffer::Update(const std::vector<VertexColor>& vert, const std::vecto
 
 	glEnableVertexAttribArray(attColor);
 	int rgbOffset = offsetof(VertexColor, red);
-	glVertexAttribPointer(attColor, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(rgbOffset));
+	glVertexAttribPointer(attColor, 4, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(rgbOffset));
 
 
 	// Set up index buffer array
@@ -169,6 +169,7 @@ void VertexBuffer::Draw(glm::mat4 &matView, glm::mat4 &matProjection)
 	glUniformMatrix4fv(projMatIdx, 1, GL_FALSE, glm::value_ptr(matProjection));
 
 	glEnable(GL_PRIMITIVE_RESTART);
+	glEnable(GL_BLEND);
 	glPrimitiveRestartIndex(0xFFFF);
 
 	glLineWidth(2);
@@ -177,24 +178,7 @@ void VertexBuffer::Draw(glm::mat4 &matView, glm::mat4 &matProjection)
 	glDrawElements(GL_LINE_STRIP, _idx.size(), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
 
-/* alternative ohne vao
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
-	// assign the vertex shader attributes:   Attribute 0: Position
-	glEnableVertexAttribArray(attPosition);
-	glVertexAttribPointer(attPosition, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), 0);
-
-	// assign the vertex shader attributes:   Attribute 1: Color
-	glEnableVertexAttribArray(attColor);
-	glVertexAttribPointer(attColor, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(VertexColor, red)));
-
-	glDrawElements(GL_LINE_STRIP, _idx.size(), GL_UNSIGNED_INT, nullptr);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-*/
-
+	glDisable(GL_BLEND);
 	glDisable(GL_PRIMITIVE_RESTART);
 	glUseProgram(0);
 }
