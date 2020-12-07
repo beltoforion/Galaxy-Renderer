@@ -21,6 +21,8 @@ public:
 	/** \brief Constant of gravity. */
 	static const float CONTANT_OF_GRAVITY;
 
+	static const float PI;
+
 	static inline unsigned int PowerTwoFloor(unsigned int val)
 	{
 		unsigned int power = 2, nextVal = power * 2;

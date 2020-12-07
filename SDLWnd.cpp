@@ -176,7 +176,7 @@ void SDLWindow::Close()
 }
 */
 
-void SDLWindow::Init(int width, int height, double axisLen, const std::string& caption)
+void SDLWindow::Init(int width, int height, float axisLen, const std::string& caption)
 {
 	_fov = axisLen;
 	_width = width;
@@ -220,7 +220,7 @@ void SDLWindow::Init(int width, int height, double axisLen, const std::string& c
 	InitSimulation();
 }
 
-void SDLWindow::ScaleAxis(double scale)
+void SDLWindow::ScaleAxis(float scale)
 {
 	_fov *= scale;
 	AdjustCamera();

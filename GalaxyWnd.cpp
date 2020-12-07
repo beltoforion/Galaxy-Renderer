@@ -331,7 +331,7 @@ void GalaxyWnd::AddEllipsisVertices(
 			fy += (GLfloat)((a / pertAmp) * cos(alpha * 2 * pertNum));
 		}
 
-		vertIdx.push_back(vert.size());
+		vertIdx.push_back((int)vert.size());
 
 		VertexColor vc = { fx, fy, 0, col.r, col.g, col.b, col.a };
 		vert.push_back(vc);
@@ -647,9 +647,9 @@ void GalaxyWnd::DrawHelp()
 	DrawText(_pFont, TextCoords::Window, (float)_width - 180, (float)_height - 30, " (C) 2020 Ingo Berg");
 }
 
-Color GalaxyWnd::ColorFromTemperature(double temp) const
+Color GalaxyWnd::ColorFromTemperature(float temp) const
 {
-	int idx = (temp - _t0) / (_t1 - _t0) * _colNum;
+	int idx = (int)((temp - _t0) / (_t1 - _t0) * _colNum);
 	idx = std::min(_colNum - 1, idx);
 	idx = std::max(0, idx);
 	return _col[idx];
@@ -893,7 +893,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			_galaxy.Reset(
 				15000,    // radius of the galaxy
 				4000,     // radius of the core
-				0.0003,   // angluar offset of the density wave per parsec of radius
+				0.0003f,   // angluar offset of the density wave per parsec of radius
 				1.45f,     // excentricity at the edge of the core
 				1.0f,      // excentricity at the edge of the disk
 				40000,

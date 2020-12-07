@@ -16,7 +16,7 @@
 class SDLWindow
 {
 public:
-	void Init(int width, int height, double axisLen, const std::string& caption);
+	void Init(int width, int height, float axisLen, const std::string& caption);
 
 	void MainLoop();
 	void ExitMainLoop();
@@ -51,7 +51,7 @@ protected:
 	void SetCamera(const Vec3D& pos, const Vec3D& lookAt, const Vec3D& orient);
 	void AdjustCamera();
 	int GetFPS() const;
-	void ScaleAxis(double scale);
+	void ScaleAxis(float scale);
 	double GetFOV() const;
 	SDL_Event m_event;
 
@@ -60,7 +60,7 @@ protected:
 	static Vec3D GetOGLPos(int x, int y);
 	static Vec2D GetWindowPos(GLfloat x, GLfloat y, GLfloat z);
 
-	double _fov;		///< Length of an axis
+	float _fov;		///< Length of an axis
 	
 	std::string _caption;
 

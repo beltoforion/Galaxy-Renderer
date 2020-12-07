@@ -241,7 +241,7 @@ void Galaxy::InitStars()
 		_pH2[k2].m_center = _pH2[k1].m_center;
 		_pH2[k2].m_temp = _pH2[k1].m_temp;
 		_pH2[k2].m_mag = _pH2[k1].m_mag;
-		idx = (int)std::min(1.0 / dh * (_pH2[k2].m_a + _pH2[k2].m_b) / 2.0, 99.0);
+		idx = (int)std::min(1.0 / dh * ((double)_pH2[k2].m_a + _pH2[k2].m_b) / 2.0, 99.0);
 		_numberByRad[idx]++;
 	}
 }
@@ -318,14 +318,14 @@ float Galaxy::GetOrbitalVelocity(float rad) const
 			float d = 2000;  // Dicke der Scheibe
 			float rho_so = 1;  // Dichte im Mittelpunkt
 			float rH = 2000; // Radius auf dem die Dichte um die Hälfte gefallen ist
-			return (float)rho_so * (float)std::exp(-r / rH) * (r * r) * M_PI * d;
+			return (float)rho_so * (float)std::exp(-r / rH) * (r * r) * MathHelper::PI * d;
 		}
 
 		static float MH(float r)
 		{
-			float rho_h0 = 0.15; // Dichte des Halos im Zentrum
+			float rho_h0 = 0.15f; // Dichte des Halos im Zentrum
 			float rC = 2500;     // typische skalenlänge im Halo
-			return (float)rho_h0 * 1 / (float)(1 + std::pow(r / rC, 2)) * (4 * M_PI * std::pow(r, 3) / 3);
+			return (float)rho_h0 * 1 / (float)(1 + std::pow(r / rC, 2)) * (4 * MathHelper::PI * std::pow(r, 3) / 3);
 		}
 
 		// Velocity curve with dark matter
@@ -355,7 +355,7 @@ float Galaxy::GetOrbitalVelocity(float rad) const
 	}
 
 	// Calculate velocity in degree per year
-	float u = 2 * M_PI * rad * MathHelper::PC_TO_KM;        // Umfang in km
+	float u = 2.0f * MathHelper::PI * rad * MathHelper::PC_TO_KM;        // Umfang in km
 	float time = u / (vel_kms * MathHelper::SEC_PER_YEAR);  // Umlaufzeit in Jahren
 
 	return 360.0f / time;                                   // Grad pro Jahr

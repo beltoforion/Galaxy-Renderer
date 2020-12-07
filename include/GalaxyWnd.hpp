@@ -67,7 +67,7 @@ private:
 		float pertAmp,
 		Color col) const;
 
-	Color ColorFromTemperature(double temp) const;
+	Color ColorFromTemperature(float temp) const;
 
 	void UpdateDensityWaves();
 	void UpdateAxis();
