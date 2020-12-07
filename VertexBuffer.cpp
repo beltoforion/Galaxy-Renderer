@@ -143,9 +143,8 @@ void VertexBuffer::Update(const std::vector<VertexColor>& vert, const std::vecto
 	glVertexAttribPointer(attPosition, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), 0); 
 
 	glEnableVertexAttribArray(attColor);
-	int rgbOffset = offsetof(VertexColor, red);
+	uint64_t rgbOffset = offsetof(VertexColor, red);
 	glVertexAttribPointer(attColor, 4, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(rgbOffset));
-
 
 	// Set up index buffer array
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
