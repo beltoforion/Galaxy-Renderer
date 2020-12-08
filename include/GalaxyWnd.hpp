@@ -80,7 +80,7 @@ private:
 	void UpdateDust();
 	void UpdateH2();
 
-	int _camOrient;    ///< Index of the camera orientation to use
+	int _camMode;    ///< Index of the camera orientation to use
 	int _starRenderType;
 	uint32_t _flags;   ///< The display flags
 

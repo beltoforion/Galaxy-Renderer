@@ -12,7 +12,7 @@
 
 GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
-	, _camOrient(0)
+	, _camMode(0)
 	, _starRenderType(1)
 	, _flags((int)DisplayItem::STARS | (int)DisplayItem::AXIS | (int)DisplayItem::HELP | (int)DisplayItem::DUST | (int)DisplayItem::H2)
 	, _galaxy()
@@ -324,6 +324,9 @@ void GalaxyWnd::UpdateDensityWaves()
 
 void GalaxyWnd::Update()
 {
+	if (!(_flags & (int)DisplayItem::PAUSE))
+		_galaxy.SingleTimeStep(100000); // time in years
+
 	if ((_renderUpdateHint & ruhDENSITY_WAVES) != 0)
 		UpdateDensityWaves();
 
@@ -338,6 +341,36 @@ void GalaxyWnd::Update()
 
 	if ((_renderUpdateHint & ruhH2) != 0)
 		UpdateH2();
+
+	Vec3D orient = { 0,1,0 };
+	switch (_camMode)
+	{
+		// Default orientation
+		default:
+			orient = { 0, 1, 0 };
+			break;
+
+		// Rotate with galaxy core
+		case 1:
+		{
+			auto& p = _galaxy.GetStarPos(1);
+			orient = { p.x, p.y, 0 };
+		}
+		break;
+
+		// Rotate with edge of disk
+		case 2:
+		{
+			auto& p = _galaxy.GetStarPos(2);
+			orient = { p.x, p.y, 0 };
+		}
+		break;
+	}
+
+	_camOrient = orient;
+	_camPos = { 0, 0, 5000 };
+	_camLookAt = { 0, 0, 0 };
+
 }
 
 void GalaxyWnd::Render()
@@ -350,44 +383,7 @@ void GalaxyWnd::Render()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Vec3D orient;
-	switch (_camOrient)
-	{
-		// Default orientation
-	case 0:
-		orient.x = 0;
-		orient.y = 1;
-		orient.z = 0;
-		break;
-
-		// Rotate with galaxy core
-	case 1:
-	{
-		auto& p = _galaxy.GetStarPos(1);
-		orient.x = p.x;
-		orient.y = p.y;
-		orient.z = 0;
-	}
-	break;
-
-	// Rotate with edge of disk
-	case 2:
-	{
-		auto& p = _galaxy.GetStarPos(2);
-		orient.x = p.x;
-		orient.y = p.y;
-		orient.z = 0;
-	}
-	break;
-	}
-
-	Vec3D lookAt = {0, 0, 0};
-	Vec3D pos = {0, 0, 5000};
-
-	SetCamera(pos, lookAt, orient);
-
-	if (!(_flags & (int)DisplayItem::PAUSE))
-		_galaxy.SingleTimeStep(100000); // time in years
+	AdjustCamera();
 
 	if (_flags & (int)DisplayItem::AXIS)
 		DrawAxis();
@@ -408,9 +404,7 @@ void GalaxyWnd::Render()
 		DrawVelocity();
 
 	if (_flags & (int)DisplayItem::HELP)
-	{
 		DrawHelp();
-	}
 
 	SDL_GL_SwapWindow(_pSdlWnd);
 	SDL_Delay(1);
@@ -693,7 +687,7 @@ void GalaxyWnd::DrawHelp()
 
 	glColor3f(0.8f, 0.8f, 1.0f);
 	float y = y0 - 60;
-	DrawText(_pFontCaption, TextCoords::Window, x0, y0 - 60, "Spiral Galaxy Simulator");
+	DrawText(_pFontCaption, TextCoords::Window, x0, y0 - 60, "Spiral Galaxy Renderer");
 
 	y0 = 60; // _height - 540;
 	float dy1 = (float)TTF_FontHeight(_pFont) + 8;
@@ -779,15 +773,15 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case SDLK_1:
-			_camOrient = 0;
+			_camMode = 0;
 			break;
 
 		case SDLK_2:
-			_camOrient = 1;
+			_camMode = 1;
 			break;
 
 		case SDLK_3:
-			_camOrient = 2;
+			_camMode = 2;
 			break;
 
 		case SDLK_q:

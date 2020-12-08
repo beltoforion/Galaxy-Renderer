@@ -308,6 +308,7 @@ void SDLWindow::MainLoop()
 	{
 		Update();
 		Render();
+
 		PollEvents();
 		++ct;
 
