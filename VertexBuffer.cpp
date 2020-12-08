@@ -1,5 +1,6 @@
 #include "VertexBuffer.hpp"
 #include <stdexcept>
+#include <sstream>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -13,6 +14,7 @@ VertexBuffer::VertexBuffer(int lineWidth)
 	, _vertexShader(0)
 	, _fragmentShader(0)
 	, _shaderProgram(0)
+	, _primitiveType(0)
 	, _lineWidth(lineWidth)
 {}
 
@@ -125,10 +127,10 @@ void VertexBuffer::Release()
 }
 
 
-void VertexBuffer::Update(const std::vector<VertexColor>& vert, const std::vector<int>& idx) 
-{
+void VertexBuffer::Update(const std::vector<VertexColor>& vert, const std::vector<int>& idx, GLuint type) {
 	_vert = vert;
 	_idx = idx;
+	_primitiveType = type;
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 	glBufferData(GL_ARRAY_BUFFER, _vert.size() * sizeof(VertexColor), _vert.data(), GL_STATIC_DRAW);
@@ -150,9 +152,13 @@ void VertexBuffer::Update(const std::vector<VertexColor>& vert, const std::vecto
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _idx.size() * sizeof(int), _idx.data(), GL_STATIC_DRAW);
 
-	auto error = glGetError();
-	if (error != GL_NO_ERROR)
-		throw std::runtime_error("VertexBuffer: Cannot create vbo!");
+	auto errc = glGetError();
+	if (errc != GL_NO_ERROR)
+	{
+		std::stringstream ss;
+		ss << "VertexBuffer: Cannot create vbo! (Error 0x" << std::hex << errc << ")"  << std::endl;
+		throw std::runtime_error(ss.str());
+	}
 
 	glBindVertexArray(0);
 }
@@ -174,7 +180,7 @@ void VertexBuffer::Draw(glm::mat4 &matView, glm::mat4 &matProjection)
 	glLineWidth(2);
 
 	glBindVertexArray(_vao);
-	glDrawElements(GL_LINE_STRIP, (int)_idx.size(), GL_UNSIGNED_INT, nullptr);
+	glDrawElements(_primitiveType, (int)_idx.size(), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
 
 	glDisable(GL_BLEND);

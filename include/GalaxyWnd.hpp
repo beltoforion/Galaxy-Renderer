@@ -22,7 +22,7 @@ protected:
 
 	virtual void OnProcessEvents(Uint32 type);
 
-	void InitGL() override;
+	void InitGL() noexcept (false) override;
 	void InitSimulation() override;
 
 private:
@@ -44,7 +44,10 @@ private:
 	{
 		ruhNONE = 0,
 		ruhDENSITY_WAVES = 1 << 1,
-		ruhAxis = 1 << 2
+		ruhAXIS = 1 << 2,
+		ruhSTARS = 1 << 3,
+		ruhDUST = 1 << 4,
+		ruhH2 = 1 << 5
 	};
 
 	GalaxyWnd(const GalaxyWnd& orig);
@@ -54,7 +57,7 @@ private:
 	void DrawH2();
 	void DrawHelp();
 	void DrawDensityWaves();
-	void DrawAxis(const Vec2D& origin);
+	void DrawAxis();
 	void DrawVelocity();
 	
 	void AddEllipsisVertices(
@@ -71,6 +74,9 @@ private:
 
 	void UpdateDensityWaves();
 	void UpdateAxis();
+	void UpdateStars();
+	void UpdateDust();
+	void UpdateH2();
 
 	int _camOrient;    ///< Index of the camera orientation to use
 	int _starRenderType;
@@ -87,6 +93,7 @@ private:
 
 	VertexBuffer _vertDensityWaves;
 	VertexBuffer _vertAxis;
+	VertexBuffer _vertStars;
 
 	TTF_Font *_pSmallFont;
 	TTF_Font *_pFont;

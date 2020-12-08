@@ -37,7 +37,7 @@ protected:
 	virtual void Render() = 0;
 	virtual void Update() = 0;
 
-	virtual void InitGL() = 0;
+	virtual void InitGL() noexcept (false) = 0;
 	virtual void InitSimulation() = 0;
 
 	virtual void PollEvents();

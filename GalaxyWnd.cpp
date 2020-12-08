@@ -20,9 +20,10 @@ GalaxyWnd::GalaxyWnd()
 	, _t0(1000)
 	, _t1(10000)
 	, _dt((_t1 - _t0) / _colNum)
-	, _renderUpdateHint(ruhDENSITY_WAVES)
+	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhH2)
 	, _vertDensityWaves(4)
 	, _vertAxis()
+	, _vertStars()
 	, _pSmallFont(nullptr)
 	, _pFont(nullptr)
 	, _pFontCaption(nullptr)
@@ -35,7 +36,7 @@ GalaxyWnd::GalaxyWnd()
 		colourSystem* cs = &SMPTEsystem;
 		bbTemp = _t0 + _dt * i;
 		spectrum_to_xyz(bb_spectrum, &x, &y, &z);
-		
+
 		xyz_to_rgb(cs, x, y, z, &r, &g, &b);
 		norm_rgb(&r, &g, &b);
 
@@ -50,9 +51,10 @@ GalaxyWnd::~GalaxyWnd()
 {
 	_vertDensityWaves.Release();
 	_vertAxis.Release();
+	_vertStars.Release();
 }
 
-void GalaxyWnd::InitGL()
+void GalaxyWnd::InitGL() noexcept(false)
 {
 	// Font initialization
 	TTF_Init();
@@ -149,10 +151,126 @@ void GalaxyWnd::InitSimulation()
 		4000);      // dust render size in pixel
 }
 
+void GalaxyWnd::UpdateDust()
+{
+	std::cout << "Updating dust" << std::endl;
+	std::vector<VertexColor> vert;
+	std::vector<int> idx;
+
+	_renderUpdateHint &= ~ruhDUST;
+}
+
+void GalaxyWnd::UpdateH2()
+{
+	std::cout << "Updating H2 Regions" << std::endl;
+	std::vector<VertexColor> vert;
+	std::vector<int> idx;
+
+	_renderUpdateHint &= ~ruhH2;
+}
+
+void GalaxyWnd::UpdateStars()
+{
+	std::cout << "Updating stars" << std::endl;
+
+	std::vector<VertexColor> vert;
+	std::vector<int> idx;
+
+	int num = _galaxy.GetNumStars();
+	Star* pStars = _galaxy.GetStars();
+
+	float a = 1;
+	Color color = Color(1, 1, 1, a);
+
+	if (_starRenderType == 2)
+		color = Color(1, 1, 1, a);
+
+	for (int i = 1; i < num; ++i)
+	{
+		const Vec2D& pos = pStars[i].m_pos;
+		const Color& col = ColorFromTemperature(pStars[i].m_temp);
+		if (_starRenderType == 1)
+		{
+			color = Color(
+				col.r * pStars[i].m_mag,
+				col.g * pStars[i].m_mag,
+				col.b * pStars[i].m_mag, 
+				a);
+		}
+		else
+		{
+			color = Color(1, 1, 1, a);
+		}
+
+		// todo: Render a small portion of the stars as bright distinct stars
+		float size =3;
+		if (i < num / 30)
+		{
+			size = 6;
+			color.r = std::min(.2f + color.r, 1.f);
+			color.g = std::min(.2f + color.g, 1.f);
+			color.b = std::min(.2f + color.b, 1.f);
+		}
+		
+		idx.push_back(vert.size());
+		vert.push_back({ pos.x, pos.y, 0.0f , color.r, color.g, color.b, color.a });
+	}
+
+//	_vertStars.Update(vert, idx, GL_POINTS);
+	_renderUpdateHint &= ~ruhSTARS;
+}
+
 void GalaxyWnd::UpdateAxis()
 {
-	std::cout << "UpdateAxis" << std::endl;
-	_renderUpdateHint &= ~ruhAxis;
+	std::vector<VertexColor> vert;
+	std::vector<int> idx;
+
+	GLfloat s = (GLfloat)std::pow(10, (int)(std::log10(_fov / 2)));
+	GLfloat l = _fov / 100, p = 0;
+
+	float r = 0.3, g = 0.3, b = 0.3, a = 0.8;
+	for (int i = 0; p < _fov; ++i)
+	{
+		p += s;
+		idx.push_back((int)vert.size());
+		vert.push_back({ p, -l, 0, r, g, b, a });
+
+		idx.push_back((int)vert.size());
+		vert.push_back({ p,  l, 0, r, g, b, a });
+
+		idx.push_back((int)vert.size());
+		vert.push_back({ -p, -l, 0, r, g, b, a });
+
+		idx.push_back((int)vert.size());
+		vert.push_back({ -p,  0, 0, r, g, b, a });
+
+		idx.push_back((int)vert.size());
+		vert.push_back({ -l, p, 0, r, g, b, a });
+
+		idx.push_back((int)vert.size());
+		vert.push_back({ 0, p, 0, r, g, b, a });
+
+		idx.push_back((int)vert.size());
+		vert.push_back({ -l, -p, 0, r, g, b, a });
+
+		idx.push_back((int)vert.size());
+		vert.push_back({ 0, -p, 0, r, g, b, a });
+	}
+
+	idx.push_back((int)vert.size());
+	vert.push_back({ -_fov, 0, 0, r, g, b, a });
+
+	idx.push_back((int)vert.size());
+	vert.push_back({ _fov, 0, 0, r, g, b, a });
+
+	idx.push_back((int)vert.size());
+	vert.push_back({ 0, -_fov, 0, r, g, b, a });
+
+	idx.push_back((int)vert.size());
+	vert.push_back({ 0, _fov, 0, r, g, b, a });
+
+	_vertAxis.Update(vert, idx, GL_LINES);
+	_renderUpdateHint &= ~ruhAXIS;
 }
 
 /** \brief Update the density wave vertex buffers
@@ -174,13 +292,13 @@ void GalaxyWnd::UpdateDensityWaves()
 	{
 		float r = dr * (i + 1);
 		AddEllipsisVertices(
-			vert, 
-			idx, 
-			r, 
-			r * _galaxy.GetExcentricity(r), 
-			MathHelper::RAD_TO_DEG * _galaxy.GetAngularOffset(r), 
+			vert,
+			idx,
+			r,
+			r * _galaxy.GetExcentricity(r),
+			MathHelper::RAD_TO_DEG * _galaxy.GetAngularOffset(r),
 			_galaxy.GetPertN(),
-			_galaxy.GetPertAmp(), 
+			_galaxy.GetPertAmp(),
 			Color(1, 1, 1, 0.2f));
 	}
 
@@ -188,7 +306,7 @@ void GalaxyWnd::UpdateDensityWaves()
 	// Add three circles at the boundaries of core, galaxy and galactic medium
 	//
 
-	int pertNum = 0; 
+	int pertNum = 0;
 	float pertAmp = 0;
 	auto r = _galaxy.GetCoreRad();
 	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, Color(1, 1, 0, 0.5));
@@ -197,9 +315,9 @@ void GalaxyWnd::UpdateDensityWaves()
 	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, Color(0, 1, 0, 0.5));
 
 	r = _galaxy.GetFarFieldRad();
-	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, { 1, 0, 0, 0.5});
+	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, { 1, 0, 0, 0.5 });
 
-	_vertDensityWaves.Update(vert, idx);
+	_vertDensityWaves.Update(vert, idx, GL_LINE_STRIP);
 	_renderUpdateHint &= ~ruhDENSITY_WAVES;
 }
 
@@ -210,11 +328,25 @@ void GalaxyWnd::Update()
 		UpdateDensityWaves();
 	}
 
-	if ((_renderUpdateHint & ruhAxis) != 0)
+	if ((_renderUpdateHint & ruhAXIS) != 0)
 	{
 		UpdateAxis();
 	}
 
+	if ((_renderUpdateHint & ruhSTARS) != 0)
+	{
+		UpdateStars();
+	}
+
+	if ((_renderUpdateHint & ruhDUST) != 0)
+	{
+		UpdateDust();
+	}
+
+	if ((_renderUpdateHint & ruhH2) != 0)
+	{
+		UpdateH2();
+	}
 }
 
 void GalaxyWnd::Render()
@@ -267,9 +399,9 @@ void GalaxyWnd::Render()
 		_galaxy.SingleTimeStep(100000); // time in years
 
 	if (_flags & (int)DisplayItem::AXIS)
-		DrawAxis(Vec2D(0, 0));
+		DrawAxis();
 
-		if (_flags & (int)DisplayItem::DUST)
+	if (_flags & (int)DisplayItem::DUST)
 		DrawDust();
 
 	if (_flags & (int)DisplayItem::H2)
@@ -367,6 +499,8 @@ void GalaxyWnd::DrawVelocity()
 
 void GalaxyWnd::DrawStars()
 {
+//	_vertStars.Draw(_matView, _matProjection);
+
 	glBindTexture(GL_TEXTURE_2D, _texStar);
 
 	float maxSize = 0.0f;
@@ -540,21 +674,18 @@ void GalaxyWnd::DrawDensityWaves()
 	DrawText(_pFont, TextCoords::Model, 0, _galaxy.GetFarFieldRad() + 500, "Intergalactic medium");
 }
 
-void GalaxyWnd::DrawAxis(const Vec2D& origin)
+void GalaxyWnd::DrawAxis()
 {
+	_vertAxis.Draw(_matView, _matProjection);
+
 	glColor3f((GLfloat)0.3, (GLfloat)0.3, (GLfloat)0.3);
-	glLineWidth(1);
 
 	GLfloat s = (GLfloat)std::pow(10, (int)(std::log10(_fov / 2)));
 	GLfloat l = _fov / 100, p = 0;
 
-	glPushMatrix();
-	glTranslated(origin.x, origin.y, 0);
-
 	for (int i = 0; p < _fov; ++i)
 	{
 		p += s;
-
 		if (i % 2 == 0)
 		{
 			DrawText(_pFont, TextCoords::Model, p - l, -4 * l, "%2.0f", p);
@@ -564,28 +695,7 @@ void GalaxyWnd::DrawAxis(const Vec2D& origin)
 			glRasterPos2f(p - l, 2 * l);
 			DrawText(_pFont, TextCoords::Model, p - l, 2 * l, "%2.0f", p);
 		}
-
-		glBegin(GL_LINES);
-		glVertex3f(p, -l, 0);
-		glVertex3f(p, l, 0);
-		glVertex3f(-p, -l, 0);
-		glVertex3f(-p, 0, 0);
-		glVertex3f(-l, p, 0);
-		glVertex3f(0, p, 0);
-		glVertex3f(-l, -p, 0);
-		glVertex3f(0, -p, 0);
-		glEnd();
-
 	}
-
-	glBegin(GL_LINES);
-	glVertex3f((GLfloat)-_fov, 0, 0);
-	glVertex3f((GLfloat)_fov, 0, 0);
-	glVertex3f(0, (GLfloat)-_fov, 0);
-	glVertex3f(0, (GLfloat)_fov, 0);
-	glEnd();
-
-	glPopMatrix();
 }
 
 void GalaxyWnd::DrawHelp()
@@ -631,8 +741,8 @@ void GalaxyWnd::DrawHelp()
 
 	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Physics:");
 	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[z],[h] Base Temp.:  %2.2lf K", _galaxy.GetBaseTemp());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[m] Toggle Dark Matter: %s", _galaxy.HasDarkMatter() ? "ON":"OFF");
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[v] Display Velocity Curve: %s", ((_flags & (int)DisplayItem::VELOCITY) != 0) ? "ON":"OFF");
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[m] Toggle Dark Matter: %s", _galaxy.HasDarkMatter() ? "ON" : "OFF");
+	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[v] Display Velocity Curve: %s", ((_flags & (int)DisplayItem::VELOCITY) != 0) ? "ON" : "OFF");
 
 	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Predefined Galaxies:");
 	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[KP1] - [KP8] Predefined Galaxies");
@@ -695,39 +805,37 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 		case SDLK_q:
 			_galaxy.SetExInner(_galaxy.GetExInner() + 0.05f);
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_a:
 			_galaxy.SetExInner(std::max(_galaxy.GetExInner() - 0.05f, 0.0f));
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_w:
 			_galaxy.SetExOuter(_galaxy.GetExOuter() + 0.05f);
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_s:
 			_galaxy.SetExOuter(std::max(_galaxy.GetExOuter() - 0.05f, 0.0f));
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_e:
 			_galaxy.SetAngularOffset(_galaxy.GetAngularOffset() + 0.00002f);
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_d:
 			_galaxy.SetAngularOffset(std::max(_galaxy.GetAngularOffset() - 0.00002f, 0.0f));
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_r:
 			if (_galaxy.GetRad() > _galaxy.GetCoreRad() + 500)
-			{
 				_galaxy.SetCoreRad(_galaxy.GetCoreRad() + 500);
-			}
 			break;
 
 		case SDLK_m:
@@ -736,17 +844,17 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 		case SDLK_f:
 			_galaxy.SetCoreRad(std::max(_galaxy.GetCoreRad() - 500, 0.0f));
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_t:
 			_galaxy.SetRad(_galaxy.GetRad() + 1000);
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_g:
 			_galaxy.SetRad(std::max(_galaxy.GetRad() - 1000, 0.0f));
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_z:
@@ -820,7 +928,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				90,
 				3600);      // dust render size in pixel
 			_fov = 33960;
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_KP_1:
@@ -837,23 +945,23 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				100,
 				4500);
 			_fov = 46585;
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_KP_2:
 			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				4000,     // radius of the core
-				0.0004f,   // angluar offset of the density wave per parsec of radius
+				0.00064f,   // angluar offset of the density wave per parsec of radius
 				0.9f,      // excentricity at the edge of the core
 				0.9f,      // excentricity at the edge of the disk
-				30000,
+				40000,
 				true,
 				0,
 				0,
-				70,   // total number of stars
-				4200);
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+				85,
+				4100);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 		case SDLK_KP_3:
 			_galaxy.Reset(
@@ -868,7 +976,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				0,
 				70,   // total number of stars
 				4500);
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_KP_4:
@@ -885,7 +993,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				90,      // dust render size in pixel
 				4000);
 			_fov = 35000;
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 			// Typ SBb
@@ -900,26 +1008,26 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 				true,
 				0,
 				0,
-				100,   
+				100,
 				4500);
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_KP_6:
 			_galaxy.Reset(
 				14000,    // radius of the galaxy
-				12500,     // radius of the core
-				0.0002f,   // angluar offset of the density wave per parsec of radius
-				0.65f,     // excentricity at the edge of the core
-				0.95f,      // excentricity at the edge of the disk
+				12500,    // radius of the core
+				0.0002f,  // angluar offset of the density wave per parsec of radius
+				0.65f,    // excentricity at the edge of the core
+				0.95f,    // excentricity at the edge of the disk
 				40000,    // total number of stars
 				true,     // has dark matter
 				3,        // Perturbations per full ellipse
 				72,       // Amplitude damping factor of perturbation
-				85,        // dust render size in pixel
+				85,       // dust render size in pixel
 				2200);
 			_fov = 36982;
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 
@@ -927,17 +1035,17 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				1500,     // radius of the core
-				0.0004f,   // angluar offset of the density wave per parsec of radius
+				0.0004f,  // angluar offset of the density wave per parsec of radius
 				1.1f,     // excentricity at the edge of the core
-				1.0f,      // excentricity at the edge of the disk
+				1.0f,     // excentricity at the edge of the disk
 				40000,    // total number of stars
 				true,     // has dark matter
 				1,        // Perturbations per full ellipse
 				20,       // Amplitude damping factor of perturbation
 				80,
-				2800);      // dust render size in pixel
+				2800);    // dust render size in pixel
 			_fov = 41091;
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 
@@ -945,36 +1053,35 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			_galaxy.Reset(
 				13000,    // radius of the galaxy
 				4000,     // radius of the core
-				0.0004f,   // angluar offset of the density wave per parsec of radius
-				0.85f,     // excentricity at the edge of the core
-				0.95f,      // excentricity at the edge of the disk
+				0.0004f,  // angluar offset of the density wave per parsec of radius
+				0.85f,    // excentricity at the edge of the core
+				0.95f,    // excentricity at the edge of the disk
 				40000,    // total number of stars
 				true,     // has dark matter
 				1,        // Perturbations per full ellipse
 				20,       // Amplitude damping factor of perturbation
-				80,      // dust render size in pixel
+				80,       // dust render size in pixel
 				4500);
 			_fov = 41091;
-			_renderUpdateHint |= ruhDENSITY_WAVES;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_PLUS:
 		case SDLK_KP_PLUS:
 			ScaleAxis(0.9f);
 			SetCameraOrientation(Vec3D(0, 1, 0));
-			_renderUpdateHint |= ruhAxis;
+			_renderUpdateHint |= ruhAXIS;
 			break;
 
 		case SDLK_MINUS:
 		case SDLK_KP_MINUS:
 			ScaleAxis(1.1f);
 			SetCameraOrientation(Vec3D(0, 1, 0));
-			_renderUpdateHint |= ruhAxis;
+			_renderUpdateHint |= ruhAXIS;
 			break;
 
 		default:
 			break;
-
 		}
 
 		break;

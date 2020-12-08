@@ -33,7 +33,7 @@ public:
 
 	void Initialize();
 	void Release();
-	void Update(const std::vector<VertexColor>& vert, const std::vector<int>& idx) noexcept(false);
+	void Update(const std::vector<VertexColor>& vert, const std::vector<int>& idx, GLuint primitiveType) noexcept(false);
 	void Draw(glm::mat4& matView, glm::mat4& matProj);
 
 private:
@@ -59,6 +59,9 @@ private:
 	GLuint _vertexShader;
 	GLuint _fragmentShader;
 	GLuint _shaderProgram;
+
+	GLuint _primitiveType;
+
 	int _lineWidth;
 
 	GLuint CreateShader(GLenum shaderType, const char** shaderSource);
