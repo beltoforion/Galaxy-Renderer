@@ -13,3 +13,6 @@ For more Details please read the Articles.
 * https://beltoforion.de/de/rendern_von_spiralgalaxien [german]
 
 ![titleimage](https://beltoforion.de/en/spiral_galaxy_renderer/images/github_title_galaxy_simulator.jpg)
+
+Hers is a list of galaxies created by the algorithm:
+![image](https://beltoforion.de/en/spiral_galaxy_renderer/images/galaxy_overview.jpg)
