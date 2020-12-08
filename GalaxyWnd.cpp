@@ -21,7 +21,7 @@ GalaxyWnd::GalaxyWnd()
 	, _t1(10000)
 	, _dt((_t1 - _t0) / _colNum)
 	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhH2)
-	, _vertDensityWaves(4)
+	, _vertDensityWaves(2)
 	, _vertAxis()
 	, _vertStars()
 	, _pSmallFont(nullptr)
@@ -126,13 +126,14 @@ void GalaxyWnd::InitGL() noexcept(false)
 
 	_vertDensityWaves.Initialize();
 	_vertAxis.Initialize();
+	_vertStars.Initialize();
 
 	glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 
 	glDisable(GL_DEPTH_TEST);
 	glClearColor(0.0f, .0f, 0.1f, 0.0f);
 
-	SetCameraOrientation(Vec3D(0, 1, 0));
+	SetCameraOrientation({ 0, 1, 0 });
 }
 
 void GalaxyWnd::InitSimulation()
@@ -180,26 +181,26 @@ void GalaxyWnd::UpdateStars()
 	Star* pStars = _galaxy.GetStars();
 
 	float a = 1;
-	Color color = Color(1, 1, 1, a);
+	Color color = { 1, 1, 1, a };
 
 	if (_starRenderType == 2)
-		color = Color(1, 1, 1, a);
+		color = { 1, 1, 1, a };
 
 	for (int i = 1; i < num; ++i)
 	{
-		const Vec2D& pos = pStars[i].m_pos;
-		const Color& col = ColorFromTemperature(pStars[i].m_temp);
+		const Vec2D& pos = pStars[i].pos;
+		const Color& col = ColorFromTemperature(pStars[i].temp);
 		if (_starRenderType == 1)
 		{
-			color = Color(
-				col.r * pStars[i].m_mag,
-				col.g * pStars[i].m_mag,
-				col.b * pStars[i].m_mag, 
-				a);
+			color = {
+				col.r * pStars[i].mag,
+				col.g * pStars[i].mag,
+				col.b * pStars[i].mag,
+				a };
 		}
 		else
 		{
-			color = Color(1, 1, 1, a);
+			color = { 1, 1, 1, a };
 		}
 
 		// todo: Render a small portion of the stars as bright distinct stars
@@ -212,11 +213,11 @@ void GalaxyWnd::UpdateStars()
 			color.b = std::min(.2f + color.b, 1.f);
 		}
 		
-		idx.push_back(vert.size());
+		idx.push_back((int)vert.size());
 		vert.push_back({ pos.x, pos.y, 0.0f , color.r, color.g, color.b, color.a });
 	}
 
-//	_vertStars.Update(vert, idx, GL_POINTS);
+	_vertStars.Update(vert, idx, GL_POINTS);
 	_renderUpdateHint &= ~ruhSTARS;
 }
 
@@ -299,7 +300,7 @@ void GalaxyWnd::UpdateDensityWaves()
 			MathHelper::RAD_TO_DEG * _galaxy.GetAngularOffset(r),
 			_galaxy.GetPertN(),
 			_galaxy.GetPertAmp(),
-			Color(1, 1, 1, 0.2f));
+			{ 1, 1, 1, 0.2f });
 	}
 
 	//
@@ -309,10 +310,10 @@ void GalaxyWnd::UpdateDensityWaves()
 	int pertNum = 0;
 	float pertAmp = 0;
 	auto r = _galaxy.GetCoreRad();
-	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, Color(1, 1, 0, 0.5));
+	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, { 1, 1, 0, 0.5 });
 
 	r = _galaxy.GetRad();
-	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, Color(0, 1, 0, 0.5));
+	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, { 0, 1, 0, 0.5 });
 
 	r = _galaxy.GetFarFieldRad();
 	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, { 1, 0, 0, 0.5 });
@@ -324,29 +325,19 @@ void GalaxyWnd::UpdateDensityWaves()
 void GalaxyWnd::Update()
 {
 	if ((_renderUpdateHint & ruhDENSITY_WAVES) != 0)
-	{
 		UpdateDensityWaves();
-	}
 
 	if ((_renderUpdateHint & ruhAXIS) != 0)
-	{
 		UpdateAxis();
-	}
 
 	if ((_renderUpdateHint & ruhSTARS) != 0)
-	{
 		UpdateStars();
-	}
 
 	if ((_renderUpdateHint & ruhDUST) != 0)
-	{
 		UpdateDust();
-	}
 
 	if ((_renderUpdateHint & ruhH2) != 0)
-	{
 		UpdateH2();
-	}
 }
 
 void GalaxyWnd::Render()
@@ -390,8 +381,8 @@ void GalaxyWnd::Render()
 	break;
 	}
 
-	Vec3D lookAt(0, 0, 0);
-	Vec3D pos(0, 0, 5000);
+	Vec3D lookAt = {0, 0, 0};
+	Vec3D pos = {0, 0, 5000};
 
 	SetCamera(pos, lookAt, orient);
 
@@ -444,9 +435,6 @@ void GalaxyWnd::AddEllipsisVertices(
 	float sinbeta = sin(beta);
 	float cosbeta = cos(beta);
 
-	Vec2D pos;
-	Vec2D vecNull;
-
 	int firstPointIdx = static_cast<int>(vert.size());
 	for (int i = 0; i < 360; i += 360 / steps)
 	{
@@ -484,8 +472,8 @@ void GalaxyWnd::DrawVelocity()
 	glBegin(GL_POINTS);
 	for (int i = 0; i < _galaxy.GetNumStars(); ++i)
 	{
-		const Vec2D& vel = pStars[i].m_vel;
-		double r = pStars[i].m_a; //(pStars[i].m_a + pStars[i].m_b)/2;
+		const Vec2D& vel = pStars[i].vel;
+		double r = pStars[i].a; 
 
 		// umrechnen in km/s
 		double v = sqrt(vel.x * vel.x + vel.y * vel.y);   // pc / timestep
@@ -500,7 +488,7 @@ void GalaxyWnd::DrawVelocity()
 void GalaxyWnd::DrawStars()
 {
 //	_vertStars.Draw(_matView, _matProjection);
-
+	
 	glBindTexture(GL_TEXTURE_2D, _texStar);
 
 	float maxSize = 0.0f;
@@ -527,14 +515,14 @@ void GalaxyWnd::DrawStars()
 	// Render all Stars from the stars array
 	for (int i = 1; i < num; ++i)
 	{
-		const Vec2D& pos = pStars[i].m_pos;
-		const Color& col = ColorFromTemperature(pStars[i].m_temp);
+		const Vec2D& pos = pStars[i].pos;
+		const Color& col = ColorFromTemperature(pStars[i].temp);
 		if (_starRenderType == 1)
 		{
 			glColor3f(
-				(GLfloat)col.r * pStars[i].m_mag,
-				(GLfloat)col.g * pStars[i].m_mag,
-				(GLfloat)col.b * pStars[i].m_mag);
+				(GLfloat)col.r * pStars[i].mag,
+				(GLfloat)col.g * pStars[i].mag,
+				(GLfloat)col.b * pStars[i].mag);
 		}
 		glVertex3f(pos.x, pos.y, 0.0f);
 
@@ -548,14 +536,14 @@ void GalaxyWnd::DrawStars()
 
 	for (int i = 1; i < num / 30; ++i)
 	{
-		const Vec2D& pos = pStars[i].m_pos;
-		const Color& col = ColorFromTemperature(pStars[i].m_temp);
+		const Vec2D& pos = pStars[i].pos;
+		const Color& col = ColorFromTemperature(pStars[i].temp);
 		if (_starRenderType == 1)
 		{
 			glColor3f(
-				0.2f + col.r * pStars[i].m_mag,
-				0.2f + col.g * pStars[i].m_mag,
-				0.2f + col.b * pStars[i].m_mag);
+				0.2f + col.r * pStars[i].mag,
+				0.2f + col.g * pStars[i].mag,
+				0.2f + col.b * pStars[i].mag);
 		}
 		glVertex3f(pos.x, pos.y, 0.0f);
 
@@ -590,12 +578,12 @@ void GalaxyWnd::DrawDust()
 
 	for (int i = 0; i < num; ++i)
 	{
-		const Vec2D& pos = pDust[i].m_pos;
-		const Color& col = ColorFromTemperature(pDust[i].m_temp);
+		const Vec2D& pos = pDust[i].pos;
+		const Color& col = ColorFromTemperature(pDust[i].temp);
 		glColor3f(
-			col.r * (float)pDust[i].m_mag,
-			col.g * (float)pDust[i].m_mag,
-			col.b * (float)pDust[i].m_mag);
+			col.r * (float)pDust[i].mag,
+			col.g * (float)pDust[i].mag,
+			col.b * (float)pDust[i].mag);
 		glVertex3f(pos.x, pos.y, 0.0f);
 
 	}
@@ -630,8 +618,8 @@ void GalaxyWnd::DrawH2()
 		int k1 = 2 * i;
 		int k2 = 2 * i + 1;
 
-		const Vec2D& p1 = pH2[k1].m_pos;
-		const Vec2D& p2 = pH2[k2].m_pos;
+		const Vec2D& p1 = pH2[k1].pos;
+		const Vec2D& p2 = pH2[k2].pos;
 
 		float dst = sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 		float size = ((1000 - dst) / 10) - 50;
@@ -640,11 +628,11 @@ void GalaxyWnd::DrawH2()
 
 		glPointSize(2 * size);
 		glBegin(GL_POINTS);
-		const Color& col = ColorFromTemperature(pH2[k1].m_temp);
+		const Color& col = ColorFromTemperature(pH2[k1].temp);
 		glColor3f(
-			col.r * pH2[i].m_mag * 2.0f,
-			col.g * pH2[i].m_mag * 0.5f,
-			col.b * pH2[i].m_mag * 0.5f);
+			col.r * pH2[i].mag * 2.0f,
+			col.g * pH2[i].mag * 0.5f,
+			col.b * pH2[i].mag * 0.5f);
 		glVertex3f(p1.x, p1.y, 0.0f);
 		glEnd();
 
@@ -702,7 +690,6 @@ void GalaxyWnd::DrawHelp()
 {
 	float x0 = 10, y0 = 60, dy = 20;
 	int line = 0;
-	Vec3D p;
 
 	glColor3f(0.8f, 0.8f, 1.0f);
 	float y = y0 - 60;
@@ -1069,14 +1056,14 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 		case SDLK_PLUS:
 		case SDLK_KP_PLUS:
 			ScaleAxis(0.9f);
-			SetCameraOrientation(Vec3D(0, 1, 0));
+			SetCameraOrientation({0, 1, 0});
 			_renderUpdateHint |= ruhAXIS;
 			break;
 
 		case SDLK_MINUS:
 		case SDLK_KP_MINUS:
 			ScaleAxis(1.1f);
-			SetCameraOrientation(Vec3D(0, 1, 0));
+			SetCameraOrientation({0, 1, 0});
 			_renderUpdateHint |= ruhAXIS;
 			break;
 

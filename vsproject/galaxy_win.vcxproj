@@ -208,8 +208,7 @@ xcopy /Y $(SolutionDir)..\assets\consola.ttf $(OutDir)</Command>
     <ClCompile Include="..\MathHelper.cpp" />
     <ClCompile Include="..\SDLWnd.cpp" />
     <ClCompile Include="..\specrend.cpp" />
-    <ClCompile Include="..\Star.cpp" />
-    <ClCompile Include="..\VertexBuffer.cpp" />
+    <ClCompile Include="..\VertexBufferBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -222,7 +221,9 @@ xcopy /Y $(SolutionDir)..\assets\consola.ttf $(OutDir)</Command>
     <ClInclude Include="..\include\SDLWnd.hpp" />
     <ClInclude Include="..\include\specrend.h" />
     <ClInclude Include="..\include\Star.hpp" />
-    <ClInclude Include="..\include\VertexBuffer.hpp" />
+    <ClInclude Include="..\include\VertexBufferBase.hpp" />
+    <ClInclude Include="..\include\VertexBufferLines.hpp" />
+    <ClInclude Include="..\include\VertexBufferStars.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

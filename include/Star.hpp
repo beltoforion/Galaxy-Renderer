@@ -3,11 +3,6 @@
 
 struct Vec2D final
 {
-	Vec2D(float a_x = 0, float a_y = 0)
-		: x(a_x)
-		, y(a_y)
-	{}
-
 	float x;
 	float y;
 };
@@ -15,12 +10,6 @@ struct Vec2D final
 
 struct Vec3D final
 {
-	Vec3D(float a_x = 0, float a_y = 0, float a_z = 0)
-		: x(a_x)
-		, y(a_y)
-		, z(a_z)
-	{}
-
 	float x;
 	float y;
 	float z;
@@ -29,19 +18,28 @@ struct Vec3D final
 
 struct Star final
 {
-	Star();
-//	Star* Clone() const;
+	Star()
+		: theta(0)
+		, velTheta(0)
+		, angle(0)
+		, a(0)
+		, b(0)
+		, temp(0)
+		, mag(0)
+		, center({ 0, 0 })
+		, vel({ 0, 0 })
+		, pos({ 0, 0 })
+	{}
 
-	void CalcXY(int pertN, float pertAmp);
+	float theta;    // position auf der ellipse
+	float velTheta; // angular velocity
+	float angle;    // tilt of the ellipse
+	float a;        // kleine halbachse
+	float b;        // große halbachse
+	float temp;     // star temperature
+	float mag;      // brightness;
 
-	float m_theta;    // position auf der ellipse
-	float m_velTheta; // angular velocity
-	float m_angle;    // tilt of the ellipse
-	float m_a;        // kleine halbachse
-	float m_b;        // große halbachse
-	float m_temp;     // star temperature
-	float m_mag;      // brigtness;
-	Vec2D  m_center;   // center of the elliptical orbit
-	Vec2D  m_vel;      // Current velocity (calculated)
-	Vec2D  m_pos;      // current position in kartesion koordinates
+	Vec2D center;   // center of the elliptical orbit
+	Vec2D vel;      // Current velocity (calculated)
+	Vec2D pos;      // current position in kartesion koordinates
 };

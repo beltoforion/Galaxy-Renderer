@@ -6,7 +6,9 @@
 
 #include "SDLWnd.hpp"
 #include "Galaxy.hpp"
-#include "VertexBuffer.hpp"
+#include "VertexBufferBase.hpp"
+#include "VertexBufferLines.hpp"
+#include "VertexBufferStars.hpp"
 
 /** \brief Main window of th n-body simulation. */
 class GalaxyWnd final : public SDLWindow
@@ -91,9 +93,9 @@ private:
 	
 	uint32_t _renderUpdateHint;
 
-	VertexBuffer _vertDensityWaves;
-	VertexBuffer _vertAxis;
-	VertexBuffer _vertStars;
+	VertexBufferLines _vertDensityWaves;
+	VertexBufferLines _vertAxis;
+	VertexBufferStars _vertStars;
 
 	TTF_Font *_pSmallFont;
 	TTF_Font *_pFont;

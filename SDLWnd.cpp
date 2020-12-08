@@ -123,7 +123,7 @@ Vec3D SDLWindow::GetOGLPos(int x, int y)
 
 	gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
 
-	return Vec3D((float)posX, (float)posY, (float)posZ);
+	return {(float)posX, (float)posY, (float)posZ};
 }
 
 Vec2D SDLWindow::GetWindowPos(GLfloat x, GLfloat y, GLfloat z)
@@ -138,7 +138,7 @@ Vec2D SDLWindow::GetWindowPos(GLfloat x, GLfloat y, GLfloat z)
 	glGetIntegerv(GL_VIEWPORT, viewport);
 	gluProject(x, y, z,	modelview, projection, viewport, screen + 0, screen + 1, screen + 2);
 
-	return Vec2D((float)screen[0], (float)screen[1]);
+	return { (float)screen[0], (float)screen[1] };
 }
 
 
@@ -149,9 +149,9 @@ SDLWindow::SDLWindow()
 	, _height(0)
 	, _caption()
 	, _fps(0)
-	, _camPos(0, 0, 2)
-	, _camLookAt(0, 0, 0)
-	, _camOrient(0, 1, 0)
+	, _camPos({ 0, 0, 2 })
+	, _camLookAt({ 0, 0, 0 })
+	, _camOrient({ 0, 1, 0 })
 	, _pSdlWnd(nullptr)
 	, _pSdlRenderer(nullptr)
 	, _texStar(0)

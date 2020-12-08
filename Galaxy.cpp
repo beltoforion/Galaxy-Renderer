@@ -35,7 +35,7 @@ Galaxy::Galaxy(
 	, _hasDarkMatter(true)
 	, _baseTemp(4000)
 	, _numberByRad()
-	, _pos(0, 0)
+	, _pos({ 0, 0 })
 	, _pStars(nullptr)
 	, _pDust(nullptr)
 	, _pH2(nullptr)
@@ -122,32 +122,32 @@ void Galaxy::InitStars()
 	// camera with the galaxy rotation.
 
 	// First star ist the black hole at the centre
-	_pStars[0].m_a = 0;
-	_pStars[0].m_b = 0;
-	_pStars[0].m_angle = 0;
-	_pStars[0].m_theta = 0;
-	_pStars[0].m_velTheta = 0;
-	_pStars[0].m_center = Vec2D(0, 0);
-	_pStars[0].m_velTheta = GetOrbitalVelocity((_pStars[0].m_a + _pStars[0].m_b) / 2.0f);
-	_pStars[0].m_temp = 6000;
+	_pStars[0].a = 0;
+	_pStars[0].b = 0;
+	_pStars[0].angle = 0;
+	_pStars[0].theta = 0;
+	_pStars[0].velTheta = 0;
+	_pStars[0].center = { 0, 0 };
+	_pStars[0].velTheta = GetOrbitalVelocity((_pStars[0].a + _pStars[0].b) / 2.0f);
+	_pStars[0].temp = 6000;
 
 	// second star is at the edge of the core area
-	_pStars[1].m_a = _radCore;
-	_pStars[1].m_b = _radCore * GetExcentricity(_radCore);
-	_pStars[1].m_angle = GetAngularOffset(_radCore);
-	_pStars[1].m_theta = 0;
-	_pStars[1].m_center = Vec2D(0, 0);
-	_pStars[1].m_velTheta = GetOrbitalVelocity((_pStars[1].m_a + _pStars[1].m_b) / 2.0f);
-	_pStars[1].m_temp = 6000;
+	_pStars[1].a = _radCore;
+	_pStars[1].b = _radCore * GetExcentricity(_radCore);
+	_pStars[1].angle = GetAngularOffset(_radCore);
+	_pStars[1].theta = 0;
+	_pStars[1].center = { 0, 0 };
+	_pStars[1].velTheta = GetOrbitalVelocity((_pStars[1].a + _pStars[1].b) / 2.0f);
+	_pStars[1].temp = 6000;
 
 	// third star is at the edge of the disk
-	_pStars[2].m_a = _radGalaxy;
-	_pStars[2].m_b = _radGalaxy * GetExcentricity(_radGalaxy);
-	_pStars[2].m_angle = GetAngularOffset(_radGalaxy);
-	_pStars[2].m_theta = 0;
-	_pStars[2].m_center = Vec2D(0, 0);
-	_pStars[2].m_velTheta = GetOrbitalVelocity((_pStars[2].m_a + _pStars[2].m_b) / 2.0f);
-	_pStars[2].m_temp = 6000;
+	_pStars[2].a = _radGalaxy;
+	_pStars[2].b = _radGalaxy * GetExcentricity(_radGalaxy);
+	_pStars[2].angle = GetAngularOffset(_radGalaxy);
+	_pStars[2].theta = 0;
+	_pStars[2].center = { 0, 0 };
+	_pStars[2].velTheta = GetOrbitalVelocity((_pStars[2].a + _pStars[2].b) / 2.0f);
+	_pStars[2].temp = 6000;
 
 	// cell width of the histogramm
 	float dh = _radFarField / 100.0f;
@@ -167,16 +167,16 @@ void Galaxy::InitStars()
 	{
 		float rad = (float)cdf.ValFromProb((float)rand() / (float)RAND_MAX);
 
-		_pStars[i].m_a = rad;
-		_pStars[i].m_b = rad * GetExcentricity(rad);
-		_pStars[i].m_angle = GetAngularOffset(rad);
-		_pStars[i].m_theta = 360.0f * ((float)rand() / RAND_MAX);
-		_pStars[i].m_velTheta = GetOrbitalVelocity(rad);
-		_pStars[i].m_center = Vec2D(0, 0);
-		_pStars[i].m_temp = 6000 + (4000 * ((float)rand() / RAND_MAX)) - 2000;
-		_pStars[i].m_mag = 0.3f + 0.2f * (float)rand() / (float)RAND_MAX;
+		_pStars[i].a = rad;
+		_pStars[i].b = rad * GetExcentricity(rad);
+		_pStars[i].angle = GetAngularOffset(rad);
+		_pStars[i].theta = 360.0f * ((float)rand() / RAND_MAX);
+		_pStars[i].velTheta = GetOrbitalVelocity(rad);
+		_pStars[i].center = { 0, 0 };
+		_pStars[i].temp = 6000 + (4000 * ((float)rand() / RAND_MAX)) - 2000;
+		_pStars[i].mag = 0.3f + 0.2f * (float)rand() / (float)RAND_MAX;
 
-		int idx = (int)std::min(1.0f / dh * (_pStars[i].m_a + _pStars[i].m_b) / 2.0f, 99.0f);
+		int idx = (int)std::min(1.0f / dh * (_pStars[i].a + _pStars[i].b) / 2.0f, 99.0f);
 		_numberByRad[idx]++;
 	}
 
@@ -195,19 +195,19 @@ void Galaxy::InitStars()
 			rad = sqrt(x * x + y * y);
 		}
 
-		_pDust[i].m_a = rad;
-		_pDust[i].m_b = rad * GetExcentricity(rad);
-		_pDust[i].m_angle = GetAngularOffset(rad);
-		_pDust[i].m_theta = 360.0f * ((float)rand() / (float)RAND_MAX);
-		_pDust[i].m_velTheta = GetOrbitalVelocity((_pDust[i].m_a + _pDust[i].m_b) / 2.0f);
-		_pDust[i].m_center = Vec2D(0, 0);
+		_pDust[i].a = rad;
+		_pDust[i].b = rad * GetExcentricity(rad);
+		_pDust[i].angle = GetAngularOffset(rad);
+		_pDust[i].theta = 360.0f * ((float)rand() / (float)RAND_MAX);
+		_pDust[i].velTheta = GetOrbitalVelocity((_pDust[i].a + _pDust[i].b) / 2.0f);
+		_pDust[i].center = { 0, 0 };
 
 		// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
 		// the following temperature distribution (no science here it just looks right)
-		_pDust[i].m_temp = _baseTemp + rad / 4.5f;
+		_pDust[i].temp = _baseTemp + rad / 4.5f;
 
-		_pDust[i].m_mag = 0.015f + 0.01f * (float)rand() / (float)RAND_MAX;
-		int idx = (int)std::min(1.0f / dh * (_pDust[i].m_a + _pDust[i].m_b) / 2.0f, 99.0f);
+		_pDust[i].mag = 0.015f + 0.01f * (float)rand() / (float)RAND_MAX;
+		int idx = (int)std::min(1.0f / dh * (_pDust[i].a + _pDust[i].b) / 2.0f, 99.0f);
 		_numberByRad[idx]++;
 	}
 
@@ -219,29 +219,29 @@ void Galaxy::InitStars()
 		rad = sqrt(x * x + y * y);
 
 		int k1 = 2 * i;
-		_pH2[k1].m_a = rad;
-		_pH2[k1].m_b = rad * GetExcentricity(rad);
-		_pH2[k1].m_angle = GetAngularOffset(rad);
-		_pH2[k1].m_theta = 360.0f * ((float)rand() / (float)RAND_MAX);
-		_pH2[k1].m_velTheta = GetOrbitalVelocity((_pH2[k1].m_a + _pH2[k1].m_b) / 2.0f);
-		_pH2[k1].m_center = Vec2D(0, 0);
-		_pH2[k1].m_temp = 6000 + (6000 * ((float)rand() / (float)RAND_MAX)) - 3000;
-		_pH2[k1].m_mag = 0.1f + 0.05f * (float)rand() / (float)RAND_MAX;
-		int idx = (int)std::min(1.0f / dh * (_pH2[k1].m_a + _pH2[k1].m_b) / 2.0f, 99.0f);
+		_pH2[k1].a = rad;
+		_pH2[k1].b = rad * GetExcentricity(rad);
+		_pH2[k1].angle = GetAngularOffset(rad);
+		_pH2[k1].theta = 360.0f * ((float)rand() / (float)RAND_MAX);
+		_pH2[k1].velTheta = GetOrbitalVelocity((_pH2[k1].a + _pH2[k1].b) / 2.0f);
+		_pH2[k1].center = { 0, 0 };
+		_pH2[k1].temp = 6000 + (6000 * ((float)rand() / (float)RAND_MAX)) - 3000;
+		_pH2[k1].mag = 0.1f + 0.05f * (float)rand() / (float)RAND_MAX;
+		int idx = (int)std::min(1.0f / dh * (_pH2[k1].a + _pH2[k1].b) / 2.0f, 99.0f);
 		_numberByRad[idx]++;
 
 		// Create second point 100 pc away from the first one
 		int dist = 1000;
 		int k2 = 2 * i + 1;
-		_pH2[k2].m_a = (rad + dist);
-		_pH2[k2].m_b = (rad /*+ dist*/)*GetExcentricity(rad /*+ dist*/);
-		_pH2[k2].m_angle = GetAngularOffset(rad);
-		_pH2[k2].m_theta = _pH2[k1].m_theta;
-		_pH2[k2].m_velTheta = _pH2[k1].m_velTheta;
-		_pH2[k2].m_center = _pH2[k1].m_center;
-		_pH2[k2].m_temp = _pH2[k1].m_temp;
-		_pH2[k2].m_mag = _pH2[k1].m_mag;
-		idx = (int)std::min(1.0 / dh * ((double)_pH2[k2].m_a + _pH2[k2].m_b) / 2.0, 99.0);
+		_pH2[k2].a = (rad + dist);
+		_pH2[k2].b = (rad /*+ dist*/)*GetExcentricity(rad /*+ dist*/);
+		_pH2[k2].angle = GetAngularOffset(rad);
+		_pH2[k2].theta = _pH2[k1].theta;
+		_pH2[k2].velTheta = _pH2[k1].velTheta;
+		_pH2[k2].center = _pH2[k1].center;
+		_pH2[k2].temp = _pH2[k1].temp;
+		_pH2[k2].mag = _pH2[k1].mag;
+		idx = (int)std::min(1.0 / dh * ((double)_pH2[k2].a + _pH2[k2].b) / 2.0, 99.0);
 		_numberByRad[idx]++;
 	}
 }
@@ -459,6 +459,31 @@ float Galaxy::GetTime() const
 	return _time;
 }
 
+void Galaxy::CalcXY(Star &p, int pertN, float pertAmp)
+{
+	float beta = -p.angle;
+	float alpha = p.theta * MathHelper::DEG_TO_RAD;
+
+	// temporaries to save cpu time
+	float cosalpha = std::cos(alpha);
+	float sinalpha = std::sin(alpha);
+	float cosbeta = std::cos(beta);
+	float sinbeta = std::sin(beta);
+
+	Vec2D ps = {
+		p.center.x + (p.a * cosalpha * cosbeta - p.b * sinalpha * sinbeta),
+		p.center.y + (p.a * cosalpha * sinbeta + p.b * sinalpha * cosbeta) };
+
+	// Add small perturbations to create more spiral arms
+	if (pertAmp > 0 && pertN > 0)
+	{
+		ps.x += (p.a / pertAmp) * sin(alpha * 2 * pertN);
+		ps.y += (p.a / pertAmp) * cos(alpha * 2 * pertN);
+	}
+
+	p.pos = ps;
+}
+
 void Galaxy::SingleTimeStep(float time)
 {
 	_timeStep = time;
@@ -467,28 +492,30 @@ void Galaxy::SingleTimeStep(float time)
 	Vec2D posOld;
 	for (int i = 0; i < _numStars; ++i)
 	{
-		_pStars[i].m_theta += (_pStars[i].m_velTheta * time);
-		posOld = _pStars[i].m_pos;
-		_pStars[i].CalcXY(_pertN, _pertAmp);
+		_pStars[i].theta += (_pStars[i].velTheta * time);
+		posOld = _pStars[i].pos;
+		CalcXY(_pStars[i], _pertN, _pertAmp);
 
-		Vec2D b = Vec2D(
-			_pStars[i].m_pos.x - posOld.x,
-			_pStars[i].m_pos.y - posOld.y);
-		_pStars[i].m_vel = b;
+		Vec2D b = {
+			_pStars[i].pos.x - posOld.x,
+			_pStars[i].pos.y - posOld.y 
+		};
+
+		_pStars[i].vel = b;
 	}
 
 	for (int i = 0; i < _numDust; ++i)
 	{
-		_pDust[i].m_theta += (_pDust[i].m_velTheta * time);
-		posOld = _pDust[i].m_pos;
-		_pDust[i].CalcXY(_pertN, _pertAmp);
+		_pDust[i].theta += (_pDust[i].velTheta * time);
+		posOld = _pDust[i].pos;
+		CalcXY(_pDust[i], _pertN, _pertAmp);
 	}
 
 	for (int i = 0; i < _numH2 * 2; ++i)
 	{
-		_pH2[i].m_theta += (_pH2[i].m_velTheta * time);
-		posOld = _pDust[i].m_pos;
-		_pH2[i].CalcXY(_pertN, _pertAmp);
+		_pH2[i].theta += (_pH2[i].velTheta * time);
+		posOld = _pDust[i].pos;
+		CalcXY(_pH2[i], _pertN, _pertAmp);
 	}
 }
 
@@ -497,7 +524,7 @@ const Vec2D& Galaxy::GetStarPos(int idx)
 	if (idx >= _numStars)
 		throw std::runtime_error("Index out of bounds.");
 
-	return _pStars[idx].m_pos; //GetPos();
+	return _pStars[idx].pos; 
 }
 
 int Galaxy::GetNumH2() const

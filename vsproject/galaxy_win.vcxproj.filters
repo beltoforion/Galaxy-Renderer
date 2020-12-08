@@ -33,16 +33,13 @@
     <ClCompile Include="..\specrend.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="..\Star.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="..\GalaxyWnd.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="..\MathHelper.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="..\VertexBuffer.cpp">
+    <ClCompile Include="..\VertexBufferBase.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
@@ -51,9 +48,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\specrend.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\VertexBuffer.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="..\include\Star.hpp">
@@ -72,6 +66,15 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="..\include\CumulativeDistributionFunction.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\VertexBufferBase.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\VertexBufferLines.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\VertexBufferStars.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

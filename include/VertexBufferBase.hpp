@@ -8,14 +8,6 @@
 
 struct Color 
 {
-	Color(float a_r = 1, float a_g = 1, float a_b = 1, float a_a = 1)
-	{
-		r = a_r;
-		g = a_g;
-		b = a_b;
-		a = a_a;
-	}
-
 	float r, g, b, a;
 };
 
@@ -25,24 +17,27 @@ struct VertexColor
 	float red, green, blue, alpha;
 };
 
-class VertexBuffer
+
+class VertexBufferBase
 {
 public:
-	VertexBuffer(int lineWidth = 1);
-	~VertexBuffer();
+	VertexBufferBase();
+	virtual ~VertexBufferBase();
 
 	void Initialize();
 	void Release();
 	void Update(const std::vector<VertexColor>& vert, const std::vector<int>& idx, GLuint primitiveType) noexcept(false);
 	void Draw(glm::mat4& matView, glm::mat4& matProj);
 
-private:
+	virtual void OnBeforeDraw();
+	virtual void OnSetupAttribArray() const = 0;
+	virtual void OnReleaseAttribArray() const = 0;
 
-	enum AttributeIdx : int
-	{
-		attPosition = 0,
-		attColor = 1
-	};
+protected:
+	virtual const char* GetVertexShaderSource() const = 0;
+	virtual const char* GetFragmentShaderSource() const = 0;
+
+private:
 
 	// Vertex buffer object
 	GLuint _vbo;
@@ -61,8 +56,6 @@ private:
 	GLuint _shaderProgram;
 
 	GLuint _primitiveType;
-
-	int _lineWidth;
 
 	GLuint CreateShader(GLenum shaderType, const char** shaderSource);
 };
