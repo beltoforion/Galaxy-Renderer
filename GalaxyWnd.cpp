@@ -20,7 +20,7 @@ GalaxyWnd::GalaxyWnd()
 	, _t0(1000)
 	, _t1(10000)
 	, _dt((_t1 - _t0) / _colNum)
-	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE)
+	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE | ruhCREATE_TEXT)
 	, _vertDensityWaves(2)
 	, _vertAxis()
 	, _vertVelocityCurve(1, GL_DYNAMIC_DRAW)
@@ -277,10 +277,15 @@ void GalaxyWnd::UpdateAxis()
 	_renderUpdateHint &= ~ruhAXIS;
 }
 
+void GalaxyWnd::UpdateText()
+{
+	_renderUpdateHint &= ~ruhCREATE_TEXT;
+}
+
 void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 {
 	// I don't need every star for the curve.
-	int num = _galaxy.GetNumStars() / 4;
+	int num = _galaxy.GetNumStars() / 3;
 
 	std::vector<VertexColor> vert;
 	vert.reserve(num);
@@ -390,6 +395,9 @@ void GalaxyWnd::Update()
 
 	if ((_flags & (int)DisplayItem::VELOCITY) != 0)
 		UpdateVelocityCurve(true); // Update Data Only, no buffer recreation!
+
+	if ((_renderUpdateHint & ruhCREATE_TEXT) != 0)
+		UpdateText();
 
 	Vec3D orient = { 0,1,0 };
 	switch (_camMode)
@@ -1099,6 +1107,8 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 		}
 
+		// Whatever key was presses, update the text
+		_renderUpdateHint |= ruhCREATE_TEXT;
 		break;
 	}
 }
