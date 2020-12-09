@@ -104,4 +104,6 @@ private:
 	TTF_Font *_pSmallFont;
 	TTF_Font *_pFont;
 	TTF_Font *_pFontCaption;
+
+	std::vector<Galaxy::GalaxyParam> _predefinedGalaxies;
 };

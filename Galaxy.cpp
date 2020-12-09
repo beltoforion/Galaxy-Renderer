@@ -47,7 +47,7 @@ Galaxy::~Galaxy()
 
 void Galaxy::Reset()
 {
-	Reset(
+	Reset({
 		_radGalaxy,
 		_radCore,
 		_angleOffset,
@@ -58,37 +58,26 @@ void Galaxy::Reset()
 		_pertN,
 		_pertAmp,
 		_dustRenderSize,
-		_baseTemp);
+		_baseTemp });
 }
 
-void Galaxy::Reset(
-	float rad,
-	float radCore,
-	float deltaAng,
-	float ex1,
-	float ex2,
-	int numStars,
-	bool hasDarkMatter,
-	int pertN,
-	float pertAmp,
-	float dustRenderSize,
-	float baseTemp)
+void Galaxy::Reset(GalaxyParam param)
 {
-	_baseTemp = baseTemp;
-	_elEx1 = ex1;
-	_elEx2 = ex2;
-	_elEx2 = ex2;
-	_angleOffset = deltaAng;
-	_radCore = radCore;
-	_radGalaxy = rad;
+	_baseTemp = param.baseTemp;
+	_elEx1 = param.ex1;
+	_elEx2 = param.ex2;
+	_elEx2 = param.ex2;
+	_angleOffset = param.deltaAng;
+	_radCore = param.radCore;
+	_radGalaxy = param.rad;
 	_radFarField = _radGalaxy * 2;  // there is no science behind this threshold it just looks nice
-	_numStars = numStars;
-	_numDust = numStars / 2;
+	_numStars = param.numStars;
+	_numDust = param.numStars / 2;
 	_time = 0;
-	_dustRenderSize = dustRenderSize;
-	_hasDarkMatter = hasDarkMatter;
-	_pertN = pertN;
-	_pertAmp = pertAmp;
+	_dustRenderSize = param.dustRenderSize;
+	_hasDarkMatter = param.hasDarkMatter;
+	_pertN = param.pertN;
+	_pertAmp = param.pertAmp;
 
 	for (int i = 0; i < 100; ++i)
 		_numberByRad[i] = 0;

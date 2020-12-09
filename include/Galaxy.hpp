@@ -9,6 +9,20 @@ class Galaxy final
 {
 public:
 
+	struct GalaxyParam {
+		float rad;
+		float radCore;
+		float deltaAng;
+		float ex1;
+		float ex2;
+		int numStars;
+		bool hasDarkMatter;
+		int pertN;
+		float pertAmp;
+		float dustRenderSize;
+		float baseTemp;
+	};
+
 	Galaxy(
 		float rad = 15000,
 		float radCore = 6000,
@@ -18,18 +32,20 @@ public:
 		int numStars = 40000);
 	~Galaxy();
 
-	void Reset(
-		float rad,
-		float radCore,
-		float deltaAng,
-		float ex1,
-		float ex2,
-		int numStars,
-		bool hasDarkMatter,
-		int pertN,
-		float pertAmp,
-		float dustRenderSize,
-		float baseTemp);
+	//void Reset(
+	//	float rad,
+	//	float radCore,
+	//	float deltaAng,
+	//	float ex1,
+	//	float ex2,
+	//	int numStars,
+	//	bool hasDarkMatter,
+	//	int pertN,
+	//	float pertAmp,
+	//	float dustRenderSize,
+	//	float baseTemp);
+
+	void Reset(GalaxyParam param);
 
 	void Reset();
 

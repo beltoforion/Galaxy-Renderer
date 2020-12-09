@@ -46,6 +46,16 @@ GalaxyWnd::GalaxyWnd()
 		col.b = (float)b;
 		col.a = 1.f;
 	}
+
+	_predefinedGalaxies.push_back({ 13000, 4000, .0004f, .85f, .95f, 40000, true, 2, 40, 90, 3600 });
+	_predefinedGalaxies.push_back({	16000, 4000, .0003f, .8f, .85f, 40000, true, 0, 40, 100, 4500 });
+	_predefinedGalaxies.push_back({ 13000, 4000, .00064f, .9f, .9f, 40000, true, 0, 0, 85, 4100 });
+	_predefinedGalaxies.push_back({	13000, 4000, .0004f, 1.35f, 1.05f, 40000, true, 0, 0, 70, 4500 });
+	_predefinedGalaxies.push_back({	13000, 4500, .0002f, .65f, .95f, 40000, true, 3, 72, 90, 4000 });
+	_predefinedGalaxies.push_back({	15000, 4000, .0003f, 1.45f, 1.0f, 40000, true, 0, 0, 100, 4500 });
+	_predefinedGalaxies.push_back({ 14000, 12500, .0002f, 0.65f, 0.95f, 40000, true, 3, 72, 85, 2200 });
+	_predefinedGalaxies.push_back({	13000, 1500, .0004f, 1.1f, 1.0f, 40000, true, 1, 20, 80, 2800 });
+	_predefinedGalaxies.push_back({ 13000, 4000, .0004f, .85f, .95f, 40000, true, 1, 20, 80, 4500 });
 }
 
 GalaxyWnd::~GalaxyWnd()
@@ -142,7 +152,7 @@ void GalaxyWnd::InitGL() noexcept(false)
 void GalaxyWnd::InitSimulation()
 {
 	_galaxy.Reset(
-		13000,    // radius of the galaxy
+		{ 13000,    // radius of the galaxy
 		4000,     // radius of the core
 		0.0004f,   // angluar offset of the density wave per parsec of radius
 		0.85f,     // excentricity at the edge of the core
@@ -152,7 +162,7 @@ void GalaxyWnd::InitSimulation()
 		2,        // Perturbations per full ellipse
 		40,       // Amplitude damping factor of perturbation
 		100,
-		4000);      // dust render size in pixel
+		4000 });      // dust render size in pixel
 }
 
 void GalaxyWnd::UpdateDust()
@@ -564,7 +574,6 @@ void GalaxyWnd::DrawStars()
 	glPointSize(6); //4
 	glBegin(GL_POINTS);
 
-
 	for (int i = 1; i < num / 30; ++i)
 	{
 		const Vec2D& pos = pStars[i].pos;
@@ -938,153 +947,54 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case SDLK_KP_0:
-			_galaxy.Reset(
-				13000,    // radius of the galaxy
-				4000,     // radius of the core
-				0.0004f,   // angluar offset of the density wave per parsec of radius
-				0.85f,     // excentricity at the edge of the core
-				0.95f,      // excentricity at the edge of the disk
-				40000,    // total number of stars
-				true,     // has dark matter
-				2,        // Perturbations per full ellipse
-				40,       // Amplitude damping factor of perturbation
-				90,
-				3600);      // dust render size in pixel
+			_galaxy.Reset(_predefinedGalaxies[0]);      // dust render size in pixel
 			_fov = 33960;
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 		case SDLK_KP_1:
-			_galaxy.Reset(
-				16000,    // radius of the galaxy
-				4000,     // radius of the core
-				0.0003f,   // angluar offset of the density wave per parsec of radius
-				0.8f,      // excentricity at the edge of the core
-				0.85f,     // excentricity at the edge of the disk
-				40000,    // total number of stars
-				true,     // has dark matter
-				0,        // Perturbations per full ellipse
-				40,       // Amplitude damping factor of perturbation
-				100,
-				4500);
+			_galaxy.Reset(_predefinedGalaxies[1]);
 			_fov = 46585;
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 		case SDLK_KP_2:
-			_galaxy.Reset(
-				13000,    // radius of the galaxy
-				4000,     // radius of the core
-				0.00064f,   // angluar offset of the density wave per parsec of radius
-				0.9f,      // excentricity at the edge of the core
-				0.9f,      // excentricity at the edge of the disk
-				40000,
-				true,
-				0,
-				0,
-				85,
-				4100);
+			_galaxy.Reset(_predefinedGalaxies[2]);
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
 			break;
 		case SDLK_KP_3:
-			_galaxy.Reset(
-				13000,    // radius of the galaxy
-				4000,     // radius of the core
-				0.0004f,   // angluar offset of the density wave per parsec of radius
-				1.35f,      // excentricity at the edge of the core
-				1.05f,      // excentricity at the edge of the disk
-				40000,
-				true,
-				0,
-				0,
-				70,   // total number of stars
-				4500);
+			_galaxy.Reset(_predefinedGalaxies[3]);
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 		case SDLK_KP_4:
-			_galaxy.Reset(
-				13000,    // radius of the galaxy
-				4500,     // radius of the core
-				0.0002f,   // angluar offset of the density wave per parsec of radius
-				0.65f,     // excentricity at the edge of the core
-				0.95f,      // excentricity at the edge of the disk
-				40000,    // total number of stars
-				true,     // has dark matter
-				3,        // Perturbations per full ellipse
-				72,       // Amplitude damping factor of perturbation
-				90,      // dust render size in pixel
-				4000);
+			_galaxy.Reset(_predefinedGalaxies[4]);
 			_fov = 35000;
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 			// Typ SBb
 		case SDLK_KP_5:
-			_galaxy.Reset(
-				15000,    // radius of the galaxy
-				4000,     // radius of the core
-				0.0003f,   // angluar offset of the density wave per parsec of radius
-				1.45f,     // excentricity at the edge of the core
-				1.0f,      // excentricity at the edge of the disk
-				40000,
-				true,
-				0,
-				0,
-				100,
-				4500);
+			_galaxy.Reset(_predefinedGalaxies[5]);
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 		case SDLK_KP_6:
-			_galaxy.Reset(
-				14000,    // radius of the galaxy
-				12500,    // radius of the core
-				0.0002f,  // angluar offset of the density wave per parsec of radius
-				0.65f,    // excentricity at the edge of the core
-				0.95f,    // excentricity at the edge of the disk
-				40000,    // total number of stars
-				true,     // has dark matter
-				3,        // Perturbations per full ellipse
-				72,       // Amplitude damping factor of perturbation
-				85,       // dust render size in pixel
-				2200);
+			_galaxy.Reset(_predefinedGalaxies[6]);
 			_fov = 36982;
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 
 		case SDLK_KP_7:
-			_galaxy.Reset(
-				13000,    // radius of the galaxy
-				1500,     // radius of the core
-				0.0004f,  // angluar offset of the density wave per parsec of radius
-				1.1f,     // excentricity at the edge of the core
-				1.0f,     // excentricity at the edge of the disk
-				40000,    // total number of stars
-				true,     // has dark matter
-				1,        // Perturbations per full ellipse
-				20,       // Amplitude damping factor of perturbation
-				80,
-				2800);    // dust render size in pixel
+			_galaxy.Reset(_predefinedGalaxies[7]);    // dust render size in pixel
 			_fov = 41091;
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 
 		case SDLK_KP_8:
-			_galaxy.Reset(
-				13000,    // radius of the galaxy
-				4000,     // radius of the core
-				0.0004f,  // angluar offset of the density wave per parsec of radius
-				0.85f,    // excentricity at the edge of the core
-				0.95f,    // excentricity at the edge of the disk
-				40000,    // total number of stars
-				true,     // has dark matter
-				1,        // Perturbations per full ellipse
-				20,       // Amplitude damping factor of perturbation
-				80,       // dust render size in pixel
-				4500);
+			_galaxy.Reset(_predefinedGalaxies[8]);
 			_fov = 41091;
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
 			break;
@@ -1107,7 +1017,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 		}
 
-		// Whatever key was presses, update the text
+		// Whatever key was pressed, update the text
 		_renderUpdateHint |= ruhCREATE_TEXT;
 		break;
 	}
