@@ -49,7 +49,8 @@ private:
 		ruhAXIS = 1 << 2,
 		ruhSTARS = 1 << 3,
 		ruhDUST = 1 << 4,
-		ruhH2 = 1 << 5
+		ruhH2 = 1 << 5,
+		ruhCREATE_VELOCITY_CURVE = 1 << 6
 	};
 
 	GalaxyWnd(const GalaxyWnd& orig);
@@ -60,7 +61,6 @@ private:
 	void DrawHelp();
 	void DrawDensityWaves();
 	void DrawAxis();
-	void DrawVelocity();
 	
 	void AddEllipsisVertices(
 		std::vector<VertexColor>& vert, 
@@ -79,6 +79,7 @@ private:
 	void UpdateStars();
 	void UpdateDust();
 	void UpdateH2();
+	void UpdateVelocityCurve(bool updateOnly);
 
 	int _camMode;    ///< Index of the camera orientation to use
 	int _starRenderType;
@@ -95,6 +96,7 @@ private:
 
 	VertexBufferLines _vertDensityWaves;
 	VertexBufferLines _vertAxis;
+	VertexBufferLines _vertVelocityCurve;
 	VertexBufferStars _vertStars;
 
 	TTF_Font *_pSmallFont;

@@ -6,10 +6,12 @@
 class VertexBufferLines : public VertexBufferBase
 {
 public:
-	VertexBufferLines(int lineWidth = 1)
+	VertexBufferLines(int lineWidth = 1, GLuint bufferMode = GL_STATIC_DRAW)
 		: VertexBufferBase()
 		, _lineWidth(lineWidth)
-	{}
+	{
+		_bufferMode = bufferMode;
+	}
 
 	void OnBeforeDraw() override
 	{

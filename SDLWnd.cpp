@@ -55,7 +55,6 @@ void SDLWindow::DrawText(TTF_Font* pFont, TextCoords coords, float x, float y, c
 
 
 	glMatrixMode(GL_PROJECTION);
-
 	if (coords == TextCoords::Model)
 	{
 		auto pos = GetWindowPos((GLfloat)x, (GLfloat)y, 0);

@@ -9,6 +9,7 @@ VertexBufferBase::VertexBufferBase()
 	: _vbo(0)
 	, _ibo(0)
 	, _vao(0)
+	, _bufferMode(GL_STATIC_DRAW)
 	, _vert()
 	, _idx()
 	, _vertexShader(0)
@@ -107,14 +108,23 @@ void VertexBufferBase::Release()
 		glDeleteVertexArrays(1, &_vao);
 }
 
+void VertexBufferBase::UpdateBuffer(const std::vector<VertexColor>& vert) noexcept(false)
+{
+	if (_bufferMode == GL_STATIC_DRAW)
+		throw std::runtime_error("VertexBufferBase: static buffers cannot be updated!");
 
-void VertexBufferBase::Update(const std::vector<VertexColor>& vert, const std::vector<int>& idx, GLuint type) {
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, _vert.size() * sizeof(VertexColor), vert.data());
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void VertexBufferBase::CreateBuffer(const std::vector<VertexColor>& vert, const std::vector<int>& idx, GLuint type) {
 	_vert = vert;
 	_idx = idx;
 	_primitiveType = type;
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	glBufferData(GL_ARRAY_BUFFER, _vert.size() * sizeof(VertexColor), _vert.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, _vert.size() * sizeof(VertexColor), _vert.data(), _bufferMode);
 
 	glBindVertexArray(_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);

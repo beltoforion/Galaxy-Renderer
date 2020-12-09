@@ -26,7 +26,8 @@ public:
 
 	void Initialize();
 	void Release();
-	void Update(const std::vector<VertexColor>& vert, const std::vector<int>& idx, GLuint primitiveType) noexcept(false);
+	void CreateBuffer(const std::vector<VertexColor>& vert, const std::vector<int>& idx, GLuint primitiveType) noexcept(false);
+	void UpdateBuffer(const std::vector<VertexColor>& vert) noexcept(false);
 	void Draw(glm::mat4& matView, glm::mat4& matProj);
 
 	virtual void OnBeforeDraw();
@@ -34,6 +35,8 @@ public:
 	virtual void OnReleaseAttribArray() const = 0;
 
 protected:
+	GLuint _bufferMode;
+
 	virtual const char* GetVertexShaderSource() const = 0;
 	virtual const char* GetFragmentShaderSource() const = 0;
 
