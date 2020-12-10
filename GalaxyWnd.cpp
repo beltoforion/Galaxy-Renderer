@@ -137,18 +137,18 @@ void GalaxyWnd::InitGL() noexcept(false)
 
 void GalaxyWnd::InitSimulation()
 {
-	_galaxy.Reset(
-		{ 13000,    // radius of the galaxy
-		4000,     // radius of the core
-		0.0004f,   // angluar offset of the density wave per parsec of radius
-		0.85f,     // excentricity at the edge of the core
-		0.95f,      // excentricity at the edge of the disk
-		30000,    // total number of stars
-		true,     // has dark matter
-		2,        // Perturbations per full ellipse
-		40,       // Amplitude damping factor of perturbation
-		100,
-		4000 });      // dust render size in pixel
+	_galaxy.Reset({ 
+			13000,		// radius of the galaxy
+			4000,		// radius of the core
+			0.0004f,	// angluar offset of the density wave per parsec of radius
+			0.85f,		// excentricity at the edge of the core
+			0.95f,		// excentricity at the edge of the disk
+			30000,		// total number of stars
+			true,		// has dark matter
+			2,			// Perturbations per full ellipse
+			40,			// Amplitude damping factor of perturbation
+			100,		// dust render size in pixel
+			4000 });  
 }
 
 void GalaxyWnd::UpdateDust()
@@ -399,8 +399,6 @@ void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 */
 void GalaxyWnd::UpdateDensityWaves()
 {
-	std::cout << "Density render update request received" << std::endl;
-
 	std::vector<VertexColor> vert;
 	std::vector<int> idx;
 

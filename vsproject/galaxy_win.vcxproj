@@ -208,8 +208,8 @@ xcopy /Y $(SolutionDir)..\assets\consola.ttf $(OutDir)</Command>
     <ClCompile Include="..\MathHelper.cpp" />
     <ClCompile Include="..\SDLWnd.cpp" />
     <ClCompile Include="..\specrend.cpp" />
+    <ClCompile Include="..\TextBuffer.cpp" />
     <ClCompile Include="..\VertexBufferBase.cpp" />
-    <ClCompile Include="TextBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
