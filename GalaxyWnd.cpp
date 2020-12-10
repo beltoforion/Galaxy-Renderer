@@ -25,10 +25,9 @@ GalaxyWnd::GalaxyWnd()
 	, _vertAxis()
 	, _vertVelocityCurve(1, GL_DYNAMIC_DRAW)
 	, _vertStars()
-	, _text()
-	, _pSmallFont(nullptr)
-	, _pFont(nullptr)
-	, _pFontCaption(nullptr)
+	, _textHelp()
+	, _textAxisLabel()
+	, _textGalaxyLabels()
 {
 	double x, y, z;
 	double r, g, b;
@@ -69,20 +68,6 @@ GalaxyWnd::~GalaxyWnd()
 
 void GalaxyWnd::InitGL() noexcept(false)
 {
-	// Font initialization
-	TTF_Init();
-	_pSmallFont = TTF_OpenFont("consola.ttf", 14);
-	if (_pSmallFont == nullptr)
-		throw std::runtime_error(TTF_GetError());
-
-	_pFont = TTF_OpenFont("arial.ttf", 18);
-	if (_pFont == nullptr)
-		throw std::runtime_error(TTF_GetError());
-
-	_pFontCaption = TTF_OpenFont("arial.ttf", 40);
-	if (_pFontCaption == nullptr)
-		throw std::runtime_error(TTF_GetError());
-
 	// GL initialization
 	glShadeModel(GL_SMOOTH);
 	glViewport(0, 0, GetWidth(), GetHeight());
@@ -141,7 +126,12 @@ void GalaxyWnd::InitGL() noexcept(false)
 	_vertAxis.Initialize();
 	_vertVelocityCurve.Initialize();
 	_vertStars.Initialize();
-	_text.Initialize();
+	
+	// Font initialization
+	TTF_Init();
+	_textHelp.Initialize();
+	_textAxisLabel.Initialize();
+	_textGalaxyLabels.Initialize();
 
 	glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 
@@ -286,6 +276,29 @@ void GalaxyWnd::UpdateAxis()
 	vert.push_back({ 0, _fov, 0, r, g, b, a });
 
 	_vertAxis.CreateBuffer(vert, idx, GL_LINES);
+
+	//
+	// Update Axis Labels
+	//
+
+	_textAxisLabel.Clear();
+	s = (GLfloat)std::pow(10, (int)(std::log10(_fov / 2)));
+	l = _fov / 100, p = 0;
+
+	for (int i = 0; p < _fov; ++i)
+	{
+		p += s;
+		if (i % 2 == 0)
+		{
+			_textAxisLabel.AddText(1, GetWindowPos( p - l, -4.f * l, 0), "%2.0f", p);
+		}
+		else
+		{
+			glRasterPos2f(p - l, 2 * l);
+			_textAxisLabel.AddText(1, GetWindowPos(p - l, 2 * l, 0), "%2.0f", p);
+		}
+	}
+	_textAxisLabel.CreateBuffer();
 	_renderUpdateHint &= ~ruhAXIS;
 }
 
@@ -296,53 +309,54 @@ void GalaxyWnd::UpdateText()
 	float y = y0 - 60;
 
 	y0 = 60;
-	float dy1 = _text.GetFontSize(1) + 8;
-	float dy2 = _text.GetFontSize(2) + 6;
+	float dy1 = _textHelp.GetFontSize(1) + 8;
+	float dy2 = _textHelp.GetFontSize(2) + 6;
 
-	_text.Clear();
-	_text.AddText(0, { x0, y0 - 60 }, "Spiral Galaxy Renderer");
+	_textHelp.Clear();
+	_textHelp.AddText(0, { x0, y0 - 60 }, "Spiral Galaxy Renderer");
 
-	y = y0;	  _text.AddText(1, { x0, y }, "Simulation Controls:");
-	y += dy1; _text.AddText(2, { x0, y }, "FPS:  %d", GetFPS());
-	y += dy2; _text.AddText(2, { x0, y }, "Time: %2.2e y", _galaxy.GetTime());
+	y = y0;	  _textHelp.AddText(1, { x0, y }, "Simulation Controls:");
+	y += dy1; _textHelp.AddText(2, { x0, y }, "FPS:  %d", GetFPS());
+	y += dy2; _textHelp.AddText(2, { x0, y }, "Time: %2.2e y", _galaxy.GetTime());
 
-	y += dy1; _text.AddText(1, { x0, y }, "Geometry:");
-	y += dy1; _text.AddText(2, { x0, y }, "[r],[f] RadCore:     %d pc", (int)_galaxy.GetCoreRad());
-	y += dy2; _text.AddText(2, { x0, y }, "[t],[g] RadGalaxy:   %d pc", (int)_galaxy.GetRad());
-	y += dy2; _text.AddText(2, { x0, y }, "        RadFarField: %d pc", (int)_galaxy.GetFarFieldRad());
-	y += dy2; _text.AddText(2, { x0, y }, "[q],[a] ExInner:     %2.2f", _galaxy.GetExInner());
-	y += dy2; _text.AddText(2, { x0, y }, "[w],[s] ExOuter:     %2.2f", _galaxy.GetExOuter());
-	y += dy2; _text.AddText(2, { x0, y }, "[e],[d] AngOff:      %1.4g deg/pc", _galaxy.GetAngularOffset());
-	y += dy2; _text.AddText(2, { x0, y }, "[+],[-] FoV:         %1.2f pc", _fov);
+	y += dy1; _textHelp.AddText(1, { x0, y }, "Geometry:");
+	y += dy1; _textHelp.AddText(2, { x0, y }, "[r],[f] RadCore:     %d pc", (int)_galaxy.GetCoreRad());
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[t],[g] RadGalaxy:   %d pc", (int)_galaxy.GetRad());
+	y += dy2; _textHelp.AddText(2, { x0, y }, "        RadFarField: %d pc", (int)_galaxy.GetFarFieldRad());
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[q],[a] ExInner:     %2.2f", _galaxy.GetExInner());
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[w],[s] ExOuter:     %2.2f", _galaxy.GetExOuter());
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[e],[d] AngOff:      %1.4g deg/pc", _galaxy.GetAngularOffset());
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[+],[-] FoV:         %1.2f pc", _fov);
 
-	y += dy1; _text.AddText(1, { x0, y }, "Spiral Arms:");
-	y += dy1; _text.AddText(2, { x0, y }, "[Home],[End]    Num pert:  %d", _galaxy.GetPertN());
-	y += dy2; _text.AddText(2, { x0, y }, "[PG_UP],[PG_DN] pertDamp:  %1.2f", _galaxy.GetPertAmp());
+	y += dy1; _textHelp.AddText(1, { x0, y }, "Spiral Arms:");
+	y += dy1; _textHelp.AddText(2, { x0, y }, "[Home],[End]    Num pert:  %d", _galaxy.GetPertN());
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[PG_UP],[PG_DN] pertDamp:  %1.2f", _galaxy.GetPertAmp());
 
-	y += dy1; _text.AddText(1, { x0, y }, "Display Features:");
-	y += dy1; _text.AddText(2, { x0, y }, "[b],[n]  Dust render size:  %2.2lf", _galaxy.GetDustRenderSize());
-	y += dy2; _text.AddText(2, { x0, y }, "[F1] Help Screen");
-	y += dy2; _text.AddText(2, { x0, y }, "[F2] Toggle Axis");
-	y += dy2; _text.AddText(2, { x0, y }, "[F3] Toggle Stars");
-	y += dy2; _text.AddText(2, { x0, y }, "[F4] Toggle Dust");
-	y += dy2; _text.AddText(2, { x0, y }, "[F5] Toggle H2 Regions");
-	y += dy2; _text.AddText(2, { x0, y }, "[F6] Toggle Density Waves");
+	y += dy1; _textHelp.AddText(1, { x0, y }, "Display Features:");
+	y += dy1; _textHelp.AddText(2, { x0, y }, "[b],[n]  Dust render size:  %2.2lf", _galaxy.GetDustRenderSize());
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F1] Help Screen");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F2] Toggle Axis");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F3] Toggle Stars");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F4] Toggle Dust");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F5] Toggle H2 Regions");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F6] Toggle Density Waves");
 
-	y += dy1; _text.AddText(1, { x0, y }, "Physics:");
-	y += dy1; _text.AddText(2, { x0, y }, "[z],[h] Base Temp.:  %2.2lf K", _galaxy.GetBaseTemp());
-	y += dy2; _text.AddText(2, { x0, y }, "[m] Toggle Dark Matter: %s", _galaxy.HasDarkMatter() ? "ON" : "OFF");
-	y += dy2; _text.AddText(2, { x0, y }, "[v] Display Velocity Curve: %s", ((_flags & (int)DisplayItem::VELOCITY) != 0) ? "ON" : "OFF");
+	y += dy1; _textHelp.AddText(1, { x0, y }, "Physics:");
+	y += dy1; _textHelp.AddText(2, { x0, y }, "[z],[h] Base Temp.:  %2.2lf K", _galaxy.GetBaseTemp());
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[m] Toggle Dark Matter: %s", _galaxy.HasDarkMatter() ? "ON" : "OFF");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[v] Display Velocity Curve: %s", ((_flags & (int)DisplayItem::VELOCITY) != 0) ? "ON" : "OFF");
 
-	y += dy1; _text.AddText(1, { x0, y }, "Predefined Galaxies:");
-	y += dy1; _text.AddText(2, { x0, y }, "[KP1] - [KP8] Predefined Galaxies");
-	y += dy2; _text.AddText(2, { x0, y }, "[Pause]       Halt simulation");
+	y += dy1; _textHelp.AddText(1, { x0, y }, "Predefined Galaxies:");
+	y += dy1; _textHelp.AddText(2, { x0, y }, "[KP1] - [KP8] Predefined Galaxies");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[Pause]       Halt simulation");
 
-	y += dy1; _text.AddText(1, { x0, y }, "Camera Control:");
-	y += dy1; _text.AddText(2, { x0, y }, "[1] fixed");
-	y += dy2; _text.AddText(2, { x0, y }, "[2] rotating with core");
-	y += dy2; _text.AddText(2, { x0, y }, "[3] rotating with outer disc");
+	y += dy1; _textHelp.AddText(1, { x0, y }, "Camera Control:");
+	y += dy1; _textHelp.AddText(2, { x0, y }, "[1] fixed");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[2] rotating with core");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[3] rotating with outer disc");
 
-	_text.AddText(1, { (float)_width - 180, (float)_height - 30 }, " (C) 2020 Ingo Berg");
+	_textHelp.AddText(1, { (float)_width - 180, (float)_height - 30 }, " (C) 2020 Ingo Berg");
+	_textHelp.CreateBuffer();
 
 	_renderUpdateHint &= ~ruhCREATE_TEXT;
 }
@@ -432,6 +446,17 @@ void GalaxyWnd::UpdateDensityWaves()
 	AddEllipsisVertices(vert, idx, r, r, 0, pertNum, pertAmp, { 1, 0, 0, 0.5 });
 
 	_vertDensityWaves.CreateBuffer(vert, idx, GL_LINE_STRIP);
+
+	//
+	// Update Labels
+	//
+
+	_textGalaxyLabels.Clear();
+	_textGalaxyLabels.AddText(1, GetWindowPos(0, _galaxy.GetCoreRad() + 500.f, 0), "Core");
+	_textGalaxyLabels.AddText(1, GetWindowPos(0, _galaxy.GetRad() + 500 + 500.f, 0), "Disk");
+	_textGalaxyLabels.AddText(1, GetWindowPos(0, _galaxy.GetFarFieldRad() + 500 + 500.f, 0), "Intergalactic medium");
+	_textGalaxyLabels.CreateBuffer();
+
 	_renderUpdateHint &= ~ruhDENSITY_WAVES;
 }
 
@@ -508,7 +533,11 @@ void GalaxyWnd::Render()
 	AdjustCamera();
 
 	if (_flags & (int)DisplayItem::AXIS)
-		DrawAxis();
+	{
+		_vertAxis.Draw(_matView, _matProjection);
+		glColor3f((GLfloat)0.3, (GLfloat)0.3, (GLfloat)0.3);
+		_textAxisLabel.Draw(_width, _height, _matView, _matProjection);
+	}
 
 	if (_flags & (int)DisplayItem::DUST)
 		DrawDust();
@@ -520,7 +549,10 @@ void GalaxyWnd::Render()
 		DrawStars();
 
 	if (_flags & (int)DisplayItem::DENSITY_WAVES)
-		DrawDensityWaves();
+	{
+		_vertDensityWaves.Draw(_matView, _matProjection);
+		_textGalaxyLabels.Draw(_width, _height, _matView, _matProjection);
+	}
 
 	if (_flags & (int)DisplayItem::VELOCITY)
 	{
@@ -530,8 +562,8 @@ void GalaxyWnd::Render()
 
 	if (_flags & (int)DisplayItem::HELP)
 	{
-		_text.Draw(_matView, _matProjection);
-		DrawHelp();
+		glColor4f((GLfloat)0.7, (GLfloat)0.7, (GLfloat)0.8, (GLfloat)0.7);
+		_textHelp.Draw(_width, _height, _matView, _matProjection);
 	}
 
 	SDL_GL_SwapWindow(_pSdlWnd);
@@ -752,101 +784,6 @@ void GalaxyWnd::DrawH2()
 	glDisable(GL_BLEND);
 }
 
-void GalaxyWnd::DrawDensityWaves()
-{
-	_vertDensityWaves.Draw(_matView, _matProjection);
-
-	// Captions (immer noch im immediate mode!)
-	glColor3f(1, 1, 0);
-	DrawText(_pFont, TextCoords::Model, 0, _galaxy.GetCoreRad() + 500, "Core");
-	glColor3f(0, 1, 0);
-	DrawText(_pFont, TextCoords::Model, 0, _galaxy.GetRad() + 500, "Disk");
-	glColor3f(1, 0, 0);
-	DrawText(_pFont, TextCoords::Model, 0, _galaxy.GetFarFieldRad() + 500, "Intergalactic medium");
-}
-
-void GalaxyWnd::DrawAxis()
-{
-	_vertAxis.Draw(_matView, _matProjection);
-
-	glColor3f((GLfloat)0.3, (GLfloat)0.3, (GLfloat)0.3);
-
-	GLfloat s = (GLfloat)std::pow(10, (int)(std::log10(_fov / 2)));
-	GLfloat l = _fov / 100, p = 0;
-
-	for (int i = 0; p < _fov; ++i)
-	{
-		p += s;
-		if (i % 2 == 0)
-		{
-			DrawText(_pFont, TextCoords::Model, p - l, -4 * l, "%2.0f", p);
-		}
-		else
-		{
-			glRasterPos2f(p - l, 2 * l);
-			DrawText(_pFont, TextCoords::Model, p - l, 2 * l, "%2.0f", p);
-		}
-	}
-}
-
-void GalaxyWnd::DrawHelp()
-{
-	float x0 = 10, y0 = 60, dy = 20;
-	int line = 0;
-
-	glColor3f(0.8f, 0.8f, 1.0f);
-	float y = y0 - 60;
-	DrawText(_pFontCaption, TextCoords::Window, x0, y0 - 60, "Spiral Galaxy Renderer");
-
-	y0 = 60; // _height - 540;
-	float dy1 = (float)TTF_FontHeight(_pFont) + 8;
-	float dy2 = (float)TTF_FontHeight(_pSmallFont) + 6;
-
-	glColor4f(1, 1, 1, 0.6f);
-	y = y0;	  DrawText(_pFont, TextCoords::Window, x0, y, "Simulation Controls:");
-	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "FPS:  %d", GetFPS());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "Time: %2.2e y", _galaxy.GetTime());
-
-	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Geometry:");
-	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[r],[f] RadCore:     %d pc", (int)_galaxy.GetCoreRad());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[t],[g] RadGalaxy:   %d pc", (int)_galaxy.GetRad());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "        RadFarField: %d pc", (int)_galaxy.GetFarFieldRad());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[q],[a] ExInner:     %2.2f", _galaxy.GetExInner());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[w],[s] ExOuter:     %2.2f", _galaxy.GetExOuter());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[e],[d] AngOff:      %1.4g deg/pc", _galaxy.GetAngularOffset());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[+],[-] FoV:         %1.2f pc", _fov);
-
-	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Spiral Arms:");
-	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[Home],[End]    Num pert:  %d", _galaxy.GetPertN());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[PG_UP],[PG_DN] pertDamp:  %1.2f", _galaxy.GetPertAmp());
-
-	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Display Features:");
-	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[b],[n]  Dust render size:  %2.2lf", _galaxy.GetDustRenderSize());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[F1] Help Screen");
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[F2] Toggle Axis");
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[F3] Toggle Stars");
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[F4] Toggle Dust");
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[F5] Toggle H2 Regions");
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[F6] Toggle Density Waves");
-
-	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Physics:");
-	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[z],[h] Base Temp.:  %2.2lf K", _galaxy.GetBaseTemp());
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[m] Toggle Dark Matter: %s", _galaxy.HasDarkMatter() ? "ON" : "OFF");
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[v] Display Velocity Curve: %s", ((_flags & (int)DisplayItem::VELOCITY) != 0) ? "ON" : "OFF");
-
-	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Predefined Galaxies:");
-	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[KP1] - [KP8] Predefined Galaxies");
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[Pause]       Halt simulation");
-
-	y += dy1; DrawText(_pFont, TextCoords::Window, x0, y, "Camera Control:");
-	y += dy1; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[1] fixed");
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[2] rotating with core");
-	y += dy2; DrawText(_pSmallFont, TextCoords::Window, x0, y, "[3] rotating with outer disc");
-
-	glColor4f(0.8f, 0.8f, 0.8f, 0.3f);
-	DrawText(_pFont, TextCoords::Window, (float)_width - 180, (float)_height - 30, " (C) 2020 Ingo Berg");
-}
-
 Color GalaxyWnd::ColorFromTemperature(float temp) const
 {
 	int idx = (int)((temp - _t0) / (_t1 - _t0) * _colNum);
@@ -1065,14 +1002,14 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 		case SDLK_KP_PLUS:
 			ScaleAxis(0.9f);
 			SetCameraOrientation({ 0, 1, 0 });
-			_renderUpdateHint |= ruhAXIS;
+			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES;  // ruhDENSITY_WAVES only for the labels!
 			break;
 
 		case SDLK_MINUS:
 		case SDLK_KP_MINUS:
 			ScaleAxis(1.1f);
 			SetCameraOrientation({ 0, 1, 0 });
-			_renderUpdateHint |= ruhAXIS;
+			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES;  // ruhDENSITY_WAVES only for the labels!
 			break;
 
 		default:

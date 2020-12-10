@@ -60,9 +60,6 @@ private:
 	void DrawStars();
 	void DrawDust();
 	void DrawH2();
-	void DrawHelp();
-	void DrawDensityWaves();
-	void DrawAxis();
 	
 	void AddEllipsisVertices(
 		std::vector<VertexColor>& vert, 
@@ -102,11 +99,10 @@ private:
 	VertexBufferLines _vertVelocityCurve;
 	VertexBufferStars _vertStars;
 
-	TextBuffer _text;
-
-	TTF_Font *_pSmallFont;
-	TTF_Font *_pFont;
-	TTF_Font *_pFontCaption;
+	TextBuffer _textHelp;
+	TextBuffer _textAxisLabel;
+	TextBuffer _textGalaxyLabels;
 
 	std::vector<Galaxy::GalaxyParam> _predefinedGalaxies;
 };
+
