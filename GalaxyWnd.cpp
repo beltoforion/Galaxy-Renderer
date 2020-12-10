@@ -25,6 +25,7 @@ GalaxyWnd::GalaxyWnd()
 	, _vertAxis()
 	, _vertVelocityCurve(1, GL_DYNAMIC_DRAW)
 	, _vertStars()
+	, _text()
 	, _pSmallFont(nullptr)
 	, _pFont(nullptr)
 	, _pFontCaption(nullptr)
@@ -140,6 +141,7 @@ void GalaxyWnd::InitGL() noexcept(false)
 	_vertAxis.Initialize();
 	_vertVelocityCurve.Initialize();
 	_vertStars.Initialize();
+	_text.Initialize();
 
 	glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 
@@ -289,6 +291,59 @@ void GalaxyWnd::UpdateAxis()
 
 void GalaxyWnd::UpdateText()
 {
+	float x0 = 10, y0 = 60, dy = 20;
+	int line = 0;
+	float y = y0 - 60;
+
+	y0 = 60;
+	float dy1 = _text.GetFontSize(1) + 8;
+	float dy2 = _text.GetFontSize(2) + 6;
+
+	_text.Clear();
+	_text.AddText(0, { x0, y0 - 60 }, "Spiral Galaxy Renderer");
+
+	y = y0;	  _text.AddText(1, { x0, y }, "Simulation Controls:");
+	y += dy1; _text.AddText(2, { x0, y }, "FPS:  %d", GetFPS());
+	y += dy2; _text.AddText(2, { x0, y }, "Time: %2.2e y", _galaxy.GetTime());
+
+	y += dy1; _text.AddText(1, { x0, y }, "Geometry:");
+	y += dy1; _text.AddText(2, { x0, y }, "[r],[f] RadCore:     %d pc", (int)_galaxy.GetCoreRad());
+	y += dy2; _text.AddText(2, { x0, y }, "[t],[g] RadGalaxy:   %d pc", (int)_galaxy.GetRad());
+	y += dy2; _text.AddText(2, { x0, y }, "        RadFarField: %d pc", (int)_galaxy.GetFarFieldRad());
+	y += dy2; _text.AddText(2, { x0, y }, "[q],[a] ExInner:     %2.2f", _galaxy.GetExInner());
+	y += dy2; _text.AddText(2, { x0, y }, "[w],[s] ExOuter:     %2.2f", _galaxy.GetExOuter());
+	y += dy2; _text.AddText(2, { x0, y }, "[e],[d] AngOff:      %1.4g deg/pc", _galaxy.GetAngularOffset());
+	y += dy2; _text.AddText(2, { x0, y }, "[+],[-] FoV:         %1.2f pc", _fov);
+
+	y += dy1; _text.AddText(1, { x0, y }, "Spiral Arms:");
+	y += dy1; _text.AddText(2, { x0, y }, "[Home],[End]    Num pert:  %d", _galaxy.GetPertN());
+	y += dy2; _text.AddText(2, { x0, y }, "[PG_UP],[PG_DN] pertDamp:  %1.2f", _galaxy.GetPertAmp());
+
+	y += dy1; _text.AddText(1, { x0, y }, "Display Features:");
+	y += dy1; _text.AddText(2, { x0, y }, "[b],[n]  Dust render size:  %2.2lf", _galaxy.GetDustRenderSize());
+	y += dy2; _text.AddText(2, { x0, y }, "[F1] Help Screen");
+	y += dy2; _text.AddText(2, { x0, y }, "[F2] Toggle Axis");
+	y += dy2; _text.AddText(2, { x0, y }, "[F3] Toggle Stars");
+	y += dy2; _text.AddText(2, { x0, y }, "[F4] Toggle Dust");
+	y += dy2; _text.AddText(2, { x0, y }, "[F5] Toggle H2 Regions");
+	y += dy2; _text.AddText(2, { x0, y }, "[F6] Toggle Density Waves");
+
+	y += dy1; _text.AddText(1, { x0, y }, "Physics:");
+	y += dy1; _text.AddText(2, { x0, y }, "[z],[h] Base Temp.:  %2.2lf K", _galaxy.GetBaseTemp());
+	y += dy2; _text.AddText(2, { x0, y }, "[m] Toggle Dark Matter: %s", _galaxy.HasDarkMatter() ? "ON" : "OFF");
+	y += dy2; _text.AddText(2, { x0, y }, "[v] Display Velocity Curve: %s", ((_flags & (int)DisplayItem::VELOCITY) != 0) ? "ON" : "OFF");
+
+	y += dy1; _text.AddText(1, { x0, y }, "Predefined Galaxies:");
+	y += dy1; _text.AddText(2, { x0, y }, "[KP1] - [KP8] Predefined Galaxies");
+	y += dy2; _text.AddText(2, { x0, y }, "[Pause]       Halt simulation");
+
+	y += dy1; _text.AddText(1, { x0, y }, "Camera Control:");
+	y += dy1; _text.AddText(2, { x0, y }, "[1] fixed");
+	y += dy2; _text.AddText(2, { x0, y }, "[2] rotating with core");
+	y += dy2; _text.AddText(2, { x0, y }, "[3] rotating with outer disc");
+
+	_text.AddText(1, { (float)_width - 180, (float)_height - 30 }, " (C) 2020 Ingo Berg");
+
 	_renderUpdateHint &= ~ruhCREATE_TEXT;
 }
 
@@ -474,7 +529,10 @@ void GalaxyWnd::Render()
 	}
 
 	if (_flags & (int)DisplayItem::HELP)
+	{
+		_text.Draw(_matView, _matProjection);
 		DrawHelp();
+	}
 
 	SDL_GL_SwapWindow(_pSdlWnd);
 	SDL_Delay(1);
@@ -809,18 +867,22 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 		{
 		case SDLK_END:
 			_galaxy.SetPertN(std::max(_galaxy.GetPertN() - 1, 0));
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_HOME:
 			_galaxy.SetPertN(std::min(_galaxy.GetPertN() + 1, 5));
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_PAGEDOWN:
 			_galaxy.SetPertAmp(_galaxy.GetPertAmp() - 2);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_PAGEUP:
 			_galaxy.SetPertAmp(_galaxy.GetPertAmp() + 2);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_1:

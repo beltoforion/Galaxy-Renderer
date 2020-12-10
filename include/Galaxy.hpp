@@ -32,21 +32,7 @@ public:
 		int numStars = 40000);
 	~Galaxy();
 
-	//void Reset(
-	//	float rad,
-	//	float radCore,
-	//	float deltaAng,
-	//	float ex1,
-	//	float ex2,
-	//	int numStars,
-	//	bool hasDarkMatter,
-	//	int pertN,
-	//	float pertAmp,
-	//	float dustRenderSize,
-	//	float baseTemp);
-
 	void Reset(GalaxyParam param);
-
 	void Reset();
 
 	Star* GetStars() const;

@@ -42,6 +42,9 @@
     <ClCompile Include="..\VertexBufferBase.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="TextBuffer.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -75,6 +78,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="..\include\VertexBufferStars.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\TextBuffer.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
