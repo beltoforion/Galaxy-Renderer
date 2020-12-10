@@ -41,10 +41,7 @@ GalaxyWnd::GalaxyWnd()
 		xyz_to_rgb(cs, x, y, z, &r, &g, &b);
 		norm_rgb(&r, &g, &b);
 
-		col.r = (float)r;
-		col.g = (float)g;
-		col.b = (float)b;
-		col.a = 1.f;
+		col = { (float)r, (float)g, (float)b, 1.f };
 	}
 
 	_predefinedGalaxies.push_back({ 13000, 4000, .0004f, .85f, .95f, 40000, true, 2, 40, 90, 3600 });
@@ -128,16 +125,13 @@ void GalaxyWnd::InitGL() noexcept(false)
 	_vertStars.Initialize();
 	
 	// Font initialization
-	TTF_Init();
 	_textHelp.Initialize();
 	_textAxisLabel.Initialize();
 	_textGalaxyLabels.Initialize();
 
 	glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-
 	glDisable(GL_DEPTH_TEST);
 	glClearColor(0.0f, .0f, 0.1f, 0.0f);
-
 	SetCameraOrientation({ 0, 1, 0 });
 }
 
@@ -281,7 +275,7 @@ void GalaxyWnd::UpdateAxis()
 	// Update Axis Labels
 	//
 
-	_textAxisLabel.Clear();
+	_textAxisLabel.BeginUpdate();
 	s = (GLfloat)std::pow(10, (int)(std::log10(_fov / 2)));
 	l = _fov / 100, p = 0;
 
@@ -298,7 +292,7 @@ void GalaxyWnd::UpdateAxis()
 			_textAxisLabel.AddText(1, GetWindowPos(p - l, 2 * l, 0), "%2.0f", p);
 		}
 	}
-	_textAxisLabel.CreateBuffer();
+	_textAxisLabel.EndUpdate();
 	_renderUpdateHint &= ~ruhAXIS;
 }
 
@@ -312,7 +306,7 @@ void GalaxyWnd::UpdateText()
 	float dy1 = _textHelp.GetFontSize(1) + 8;
 	float dy2 = _textHelp.GetFontSize(2) + 6;
 
-	_textHelp.Clear();
+	_textHelp.BeginUpdate();
 	_textHelp.AddText(0, { x0, y0 - 60 }, "Spiral Galaxy Renderer");
 
 	y = y0;	  _textHelp.AddText(1, { x0, y }, "Simulation Controls:");
@@ -356,7 +350,7 @@ void GalaxyWnd::UpdateText()
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[3] rotating with outer disc");
 
 	_textHelp.AddText(1, { (float)_width - 180, (float)_height - 30 }, " (C) 2020 Ingo Berg");
-	_textHelp.CreateBuffer();
+	_textHelp.EndUpdate();
 
 	_renderUpdateHint &= ~ruhCREATE_TEXT;
 }
@@ -451,11 +445,11 @@ void GalaxyWnd::UpdateDensityWaves()
 	// Update Labels
 	//
 
-	_textGalaxyLabels.Clear();
+	_textGalaxyLabels.BeginUpdate();
 	_textGalaxyLabels.AddText(1, GetWindowPos(0, _galaxy.GetCoreRad() + 500.f, 0), "Core");
 	_textGalaxyLabels.AddText(1, GetWindowPos(0, _galaxy.GetRad() + 500 + 500.f, 0), "Disk");
 	_textGalaxyLabels.AddText(1, GetWindowPos(0, _galaxy.GetFarFieldRad() + 500 + 500.f, 0), "Intergalactic medium");
-	_textGalaxyLabels.CreateBuffer();
+	_textGalaxyLabels.EndUpdate();
 
 	_renderUpdateHint &= ~ruhDENSITY_WAVES;
 }
@@ -517,7 +511,6 @@ void GalaxyWnd::Update()
 	_camOrient = orient;
 	_camPos = { 0, 0, 5000 };
 	_camLookAt = { 0, 0, 0 };
-
 }
 
 void GalaxyWnd::Render()
@@ -1011,13 +1004,10 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			SetCameraOrientation({ 0, 1, 0 });
 			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES;  // ruhDENSITY_WAVES only for the labels!
 			break;
+		} // switch (m_event.key.keysym.sym)
 
-		default:
-			break;
-		}
-
-		// Whatever key was pressed, update the text
+		// Whatever key was pressed, always update the help text
 		_renderUpdateHint |= ruhCREATE_TEXT;
 		break;
-	}
+	} // switch (type) -> Mouse or Keys
 }

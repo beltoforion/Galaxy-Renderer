@@ -21,8 +21,9 @@ public:
 	void AddText(int idxFont, Vec2D pos, const char* fmt, ...);
 	void Draw(int width, int height, glm::mat4& matView, glm::mat4& matProjection);
 	float GetFontSize(int idxFont) const;
-	void CreateBuffer() noexcept(false);
-	void Clear();
+
+	void BeginUpdate();
+	void EndUpdate();
 
 private:
 	
@@ -46,6 +47,8 @@ private:
 
 	GLuint _vbo;
 
+	bool _updating;
+
 	std::vector<GLuint> _textureId;
 	std::vector<TextureData> _textureData;
 	std::vector<VertexTexture> _vert;
@@ -63,4 +66,6 @@ private:
 	const char* GetVertexShaderSource() const;
 	const char* GetFragmentShaderSource() const;
 	GLuint CreateShader(GLenum shaderType, const char** shaderSource);
+	void CreateBuffer() noexcept(false);
+	void Clear();
 };

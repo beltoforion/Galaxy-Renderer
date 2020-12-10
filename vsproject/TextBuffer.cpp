@@ -7,6 +7,11 @@ TextBuffer::TextBuffer()
 	, _pSmallFont(nullptr)
 	, _pFont(nullptr)
 	, _pFontCaption(nullptr)
+	, _vbo(0)
+	, _updating(false)
+	, _vertexShader(0)
+	, _fragmentShader(0)
+	, _shaderProgram(0)
 {}
 
 
@@ -70,6 +75,9 @@ GLuint TextBuffer::CreateShader(GLenum shaderType, const char** shaderSource)
 
 void TextBuffer::Initialize()
 {
+	if (!TTF_WasInit())
+		TTF_Init();
+
 	_pSmallFont = TTF_OpenFont("consola.ttf", 14);
 	if (_pSmallFont == nullptr)
 		throw std::runtime_error(TTF_GetError());
@@ -276,6 +284,25 @@ void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matP
 	glDeleteTextures(1, &texId);
 	glPopMatrix();
 */
+}
+
+void TextBuffer::BeginUpdate()
+{
+	if (_updating)
+		throw std::runtime_error("TextBuffer::BeginUpdate: An update is already in Progress!");
+
+	_updating = true;
+	Clear();
+
+}
+
+void TextBuffer::EndUpdate()
+{
+	if (!_updating)
+		throw std::runtime_error("TextBuffer::EndUpdate: No update in progress!");
+
+	_updating = false; 
+	CreateBuffer();
 }
 
 void TextBuffer::CreateBuffer() noexcept(false)
