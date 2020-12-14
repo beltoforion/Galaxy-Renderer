@@ -12,8 +12,6 @@ VertexBufferBase::VertexBufferBase()
 	, _bufferMode(GL_STATIC_DRAW)
 	, _vert()
 	, _idx()
-	, _vertexShader(0)
-	, _fragmentShader(0)
 	, _shaderProgram(0)
 	, _primitiveType(0)
 {}
@@ -56,14 +54,14 @@ void VertexBufferBase::Initialize()
 	glGenVertexArrays(1, &_vao);
 
 	const char *srcVertex = GetVertexShaderSource();
-	_vertexShader = CreateShader(GL_VERTEX_SHADER, &srcVertex);
+	GLuint vertexShader = CreateShader(GL_VERTEX_SHADER, &srcVertex);
 
 	const char *srcFragment = GetFragmentShaderSource();
-	_fragmentShader = CreateShader(GL_FRAGMENT_SHADER, &srcFragment);
+	GLuint fragmentShader = CreateShader(GL_FRAGMENT_SHADER, &srcFragment);
 
 	_shaderProgram = glCreateProgram();
-	glAttachShader(_shaderProgram, _vertexShader);
-	glAttachShader(_shaderProgram, _fragmentShader);
+	glAttachShader(_shaderProgram, vertexShader);
+	glAttachShader(_shaderProgram, fragmentShader);
 	glLinkProgram(_shaderProgram);
 
 	GLint isLinked = 0;
@@ -79,15 +77,15 @@ void VertexBufferBase::Initialize()
 
 		// clean up
 		glDeleteProgram(_shaderProgram);
-		glDeleteShader(_vertexShader);
-		glDeleteShader(_fragmentShader);
+		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
 
 		throw std::runtime_error("VertexBuffer: shader program linking failed!");
 	}
 
 	// Always detach shaders after a successful link.
-	glDetachShader(_shaderProgram, _vertexShader);
-	glDetachShader(_shaderProgram, _fragmentShader);
+	glDetachShader(_shaderProgram, vertexShader);
+	glDetachShader(_shaderProgram, fragmentShader);
 }
 
 void VertexBufferBase::Release()

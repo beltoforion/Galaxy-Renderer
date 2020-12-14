@@ -54,8 +54,6 @@ private:
 	std::vector<VertexColor> _vert;
 	std::vector<int> _idx;
 
-	GLuint _vertexShader;
-	GLuint _fragmentShader;
 	GLuint _shaderProgram;
 
 	GLuint _primitiveType;

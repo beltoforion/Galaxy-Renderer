@@ -32,12 +32,8 @@ private:
 		SDL_Surface* surface;
 		Vec2D pos;
 		Vec2D size;
+		GLuint id;
 	};
-
-	//struct Color
-	//{
-	//	float r, g, b, a;
-	//};
 
 	struct VertexTexture
 	{
@@ -55,7 +51,7 @@ private:
 
 	bool _updating;
 
-	std::vector<GLuint> _textureId;
+//	std::vector<GLuint> _textureId;
 	std::vector<TextureData> _textureData;
 	std::vector<VertexTexture> _vert;
 	std::vector<int> _idx;

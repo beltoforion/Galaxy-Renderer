@@ -153,12 +153,10 @@ void TextBuffer::Clear()
 	for (auto td : _textureData)
 	{
 		SDL_FreeSurface(td.surface);
+		glDeleteTextures(1, &td.id);
 	}
 
-	glDeleteTextures(_textureId.size(), _textureId.data());
-
 	_textureData.clear();
-	_textureId.clear();
 
 	if (_vbo != 0)
 		glDeleteBuffers(1, &_vbo);
@@ -178,7 +176,7 @@ void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matP
 	glGenBuffers(1, &vbo);
 	glGenBuffers(1, &ebo);
 
-	for (int i = 0; i < _textureId.size(); ++i)
+	for (int i = 0; i < _textureData.size(); ++i)
 	{
 		const auto &td = _textureData[i];
 
@@ -219,7 +217,7 @@ void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matP
 		auto offset = offsetof(VertexTexture, tx);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexTexture), (GLvoid*)offset);
 
-		glBindTexture(GL_TEXTURE_2D, _textureId[i]);
+		glBindTexture(GL_TEXTURE_2D, td.id);
 
 		GLuint projMatIdx = glGetUniformLocation(_shaderProgram, "projMat");
 		glm::mat4 projection = glm::ortho<float>(0, width, height, 0, 0, 1);
@@ -272,15 +270,13 @@ void TextBuffer::CheckError() const
 }
 void TextBuffer::CreateBuffer()
 {
-	_textureId.resize(_textureData.size());
-	glGenTextures(_textureData.size(), _textureId.data());
-	for (int i = 0; i < _textureId.size(); ++i)
+	for (int i = 0; i < _textureData.size(); ++i)
 	{
-		glBindTexture(GL_TEXTURE_2D, _textureId[i]);
+		auto& td = _textureData[i];
+		glGenTextures(1, &td.id);
+		glBindTexture(GL_TEXTURE_2D, td.id);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-		const auto &td = _textureData[i];
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, td.size.x, td.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, td.surface->pixels);
 	}
 	
