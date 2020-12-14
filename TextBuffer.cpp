@@ -1,9 +1,10 @@
 #include "TextBuffer.hpp"
-#include "MathHelper.hpp"
 #include <sstream>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "MathHelper.hpp"
 
 TextBuffer::TextBuffer()
 	: _textureData()
@@ -24,16 +25,14 @@ const char* TextBuffer::GetVertexShaderSource() const
 {
 	return
 		"#version 330 core\n"
-		"layout(location = 0) in vec3 posVert;\n"
+		"layout(location = 0) in vec2 posVert;\n"
 		"layout(location = 1) in vec2 posTex;\n"
 		"uniform mat4 projMat;\n"
 		"out vec2 texCoord;\n"
-		"out vec4 color;\n"
 		"void main()\n"
 		"{\n"
-		"	gl_Position =  projMat * vec4(posVert, 1);\n"
-		"	texCoord = vec2(posTex.x, posTex.y);\n"
-		"	color = vec4(1,1,1,1);\n"
+		"	gl_Position =  projMat * vec4(posVert, 0, 1);\n"
+		"	texCoord = posTex;\n"
 		"}\n";
 }
 
@@ -42,12 +41,11 @@ const char* TextBuffer::GetFragmentShaderSource() const
 	return
 		"#version 330 core\n"
 		"out vec4 FragColor;\n"
-		"in vec3 color;\n"
 		"in vec2 texCoord;\n"
-		"uniform sampler2D texture1;"
+		"uniform sampler2D texSampler;"
 		"void main()\n"
 		"{\n"
-		"	FragColor = texture(texture1, texCoord);\n"
+		"	FragColor = texture(texSampler, texCoord);\n"
 		"}\n";
 }
 
@@ -184,11 +182,11 @@ void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matP
 
 		VertexTexture vertexData[6]
 		{
-			{ x,     y,     0, 0, 0 },
-			{ x + w, y,     0, 1, 0 },
-			{ x + w, y + h, 0, 1, 1},
-			{ x,     y + h, 0, 0, 1},
-			{ x + w, y + h, 0, 1, 1}
+			{ x,     y,     0, 0 },
+			{ x + w, y,     1, 0 },
+			{ x + w, y + h, 1, 1},
+			{ x,     y + h, 0, 1},
+			{ x + w, y + h, 1, 1}
 		};
 
 		GLuint indexData[] =
@@ -206,13 +204,13 @@ void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matP
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexData), indexData, GL_STATIC_DRAW);
 
 		// Position attribute
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexTexture), 0);
+		glEnableVertexAttribArray(attVertexPosition);
+		glVertexAttribPointer(attVertexPosition, 2, GL_FLOAT, GL_FALSE, sizeof(VertexTexture), 0);
 
 		// texture coord attribute
-		glEnableVertexAttribArray(1);
+		glEnableVertexAttribArray(attTexturePosition);
 		auto offset = offsetof(VertexTexture, tx);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexTexture), (GLvoid*)offset);
+		glVertexAttribPointer(attTexturePosition, 2, GL_FLOAT, GL_FALSE, sizeof(VertexTexture), (GLvoid*)offset);
 
 		glBindTexture(GL_TEXTURE_2D, td.id);
 
@@ -222,10 +220,10 @@ void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matP
 		glm::mat4 projection = glm::ortho((float)0, (float)width, (float)height, (float)0, (float)0, (float)1);
 		glUniformMatrix4fv(projMatIdx, 1, GL_FALSE, glm::value_ptr(projection));
 		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, sizeof(vertexData) / sizeof(VertexTexture), GL_UNSIGNED_INT, 0);
 
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(attVertexPosition);
+		glDisableVertexAttribArray(attTexturePosition);
 	}
 
 	glUseProgram(0);

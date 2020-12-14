@@ -104,5 +104,7 @@ private:
 	TextBuffer _textGalaxyLabels;
 
 	std::vector<Galaxy::GalaxyParam> _predefinedGalaxies;
+
+	GLuint _texStar;
 };
 

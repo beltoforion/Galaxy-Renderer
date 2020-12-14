@@ -37,7 +37,7 @@ private:
 
 	struct VertexTexture
 	{
-		float x, y, z;
+		float x, y;
 		float tx, ty;
 	};
 

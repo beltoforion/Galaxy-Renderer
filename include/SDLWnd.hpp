@@ -25,12 +25,6 @@ public:
 	int GetHeight() const;
 	
 protected:
-	enum class TextCoords
-	{
-		Model,
-		Window
-	};
-
 	SDLWindow();
 	virtual ~SDLWindow();
 
@@ -53,12 +47,9 @@ protected:
 	int GetFPS() const;
 	void ScaleAxis(float scale);
 	double GetFOV() const;
-	SDL_Event m_event;
-
-	void DrawText(TTF_Font *pFont, TextCoords coords, float x, float y, const char* fmt, ...);
-
-	static Vec3D GetOGLPos(int x, int y);
 	static Vec2D GetWindowPos(GLfloat x, GLfloat y, GLfloat z);
+
+	SDL_Event _event;
 
 	float _fov;		///< Length of an axis
 	
@@ -78,8 +69,6 @@ protected:
 
 	glm::mat4 _matProjection;
 	glm::mat4 _matView;
-
-	GLuint _texStar;
 
 	volatile bool _bRunning;
 };

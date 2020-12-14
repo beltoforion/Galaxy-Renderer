@@ -14,117 +14,6 @@
 #include "MathHelper.hpp"
 
 
-void SDLWindow::DrawText(TTF_Font* pFont, TextCoords coords, float x, float y, const char* fmt, ...)
-{
-	if (pFont == nullptr)
-		throw std::runtime_error("TextOut failed: font is null!");
-
-	if (fmt == nullptr)
-		throw std::runtime_error("TextOut failed: bad format string!");
-
-	char text[256];
-	va_list ap;
-
-	va_start(ap, fmt);
-
-	vsprintf(text, fmt, ap);
-	va_end(ap);
-
-	auto* pSurface = TTF_RenderText_Blended(pFont, text, { 255, 255, 255 });
-	if (pSurface == nullptr)
-		return;
-
-	GLuint texId;
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glGenTextures(1, &texId);
-	glBindTexture(GL_TEXTURE_2D, texId);
-
-	SDL_Surface* s = nullptr;
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	// It seems textures must be powers of 2 in dimension: 
-	// https://stackoverflow.com/questions/30016083/sdl2-opengl-sdl2-ttf-displaying-text
-	// Create a surface to the correct size in RGB format, and copy the old image
-	int w = MathHelper::PowerTwoFloor(pSurface->w) << 1;
-	int h = MathHelper::PowerTwoFloor(pSurface->h) << 1;
-	s = SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-	SDL_BlitSurface(pSurface, nullptr, s, nullptr);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
-
-
-	glMatrixMode(GL_PROJECTION);
-	if (coords == TextCoords::Model)
-	{
-		auto pos = GetWindowPos((GLfloat)x, (GLfloat)y, 0);
-		x = pos.x;
-		y = pos.y;
-	}
-
-	GLfloat xp = x;
-	GLfloat yp = y;
-
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0, _width, _height, 0, 0, 1);
-
-	// make a rectangle
-	glBegin(GL_TRIANGLES);
-	glTexCoord2i(0, 0);
-	glVertex3f(xp, yp, 0);
-	glTexCoord2i(1, 0);
-	glVertex3f(xp + w, yp, 0);
-	glTexCoord2i(1, 1);
-	glVertex3f(xp + w, yp + h, 0);
-
-	glTexCoord2i(0, 0);
-	glVertex3f(xp, yp, 0);
-	glTexCoord2i(0, 1);
-	glVertex3f(xp, yp + h, 0);
-	glTexCoord2i(1, 1);
-	glVertex3f(xp + w, yp + h, 0);
-	glEnd();
-
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);
-
-	// cleanup
-	if (s != nullptr)
-		SDL_FreeSurface(s);
-
-	if (pSurface != nullptr)
-		SDL_FreeSurface(pSurface);
-
-	glDeleteTextures(1, &texId);
-	glPopMatrix();
-}
-
-/** \brief get opengl position from a screen position
-
-   see also:  http://nehe.gamedev.net/data/articles/article.asp?article=13
-*/
-Vec3D SDLWindow::GetOGLPos(int x, int y)
-{
-	GLint viewport[4];
-	GLdouble modelview[16];
-	GLdouble projection[16];
-	GLfloat winX, winY, winZ;
-	GLdouble posX, posY, posZ;
-
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-	winX = (float)x;
-	winY = (float)viewport[3] - (float)y;
-	glReadPixels(x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
-
-	gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
-
-	return {(float)posX, (float)posY, (float)posZ};
-}
-
 Vec2D SDLWindow::GetWindowPos(GLfloat x, GLfloat y, GLfloat z)
 {
 	GLdouble modelview[16];
@@ -142,7 +31,7 @@ Vec2D SDLWindow::GetWindowPos(GLfloat x, GLfloat y, GLfloat z)
 
 
 SDLWindow::SDLWindow()
-	: m_event()
+	: _event()
 	, _fov(0)
 	, _width(0)
 	, _height(0)
@@ -153,7 +42,6 @@ SDLWindow::SDLWindow()
 	, _camOrient({ 0, 1, 0 })
 	, _pSdlWnd(nullptr)
 	, _pSdlRenderer(nullptr)
-	, _texStar(0)
 	, _bRunning(true)
 	, _matProjection()
 	, _matView()
@@ -342,16 +230,16 @@ void SDLWindow::OnProcessEvents(Uint32 type)
 
 void SDLWindow::PollEvents()
 {
-	while (SDL_PollEvent(&m_event))
+	while (SDL_PollEvent(&_event))
 	{
-		switch (m_event.type)
+		switch (_event.type)
 		{
 		case SDL_QUIT:
 			ExitMainLoop();
 			break;
 
 		default:
-			OnProcessEvents(m_event.type);
+			OnProcessEvents(_event.type);
 			break;
 		} // switch event type
 	}

@@ -28,6 +28,7 @@ GalaxyWnd::GalaxyWnd()
 	, _textHelp()
 	, _textAxisLabel()
 	, _textGalaxyLabels()
+	, _texStar(0)
 {
 	double x, y, z;
 	double r, g, b;
@@ -768,7 +769,6 @@ void GalaxyWnd::DrawH2()
 		glEnd();
 	}
 
-
 	glDisable(GL_POINT_SPRITE_ARB);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_BLEND);
@@ -790,7 +790,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 		break;
 
 	case SDL_KEYDOWN:
-		switch (m_event.key.keysym.sym)
+		switch (_event.key.keysym.sym)
 		{
 		case SDLK_END:
 			_galaxy.SetPertN(std::max(_galaxy.GetPertN() - 1, 0));
