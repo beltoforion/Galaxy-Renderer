@@ -51,7 +51,6 @@ private:
 
 	bool _updating;
 
-//	std::vector<GLuint> _textureId;
 	std::vector<TextureData> _textureData;
 	std::vector<VertexTexture> _vert;
 	std::vector<int> _idx;
@@ -66,7 +65,5 @@ private:
 	const char* GetVertexShaderSource() const;
 	const char* GetFragmentShaderSource() const;
 	GLuint CreateShader(GLenum shaderType, const char** shaderSource);
-	void CreateBuffer();
 	void Clear();
-	void CheckError() const;
 };

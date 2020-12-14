@@ -39,10 +39,11 @@ protected:
 	{
 		return
 			"#version 330 core\n"
+			"out vec4 FragColor;\n"
 			"in vec4 vertexColor;\n"
 			"void main()\n"
 			"{\n"
-			"	gl_FragColor = vertexColor;\n"
+			"	FragColor = vertexColor;\n"
 			"}\n";
 	}
 

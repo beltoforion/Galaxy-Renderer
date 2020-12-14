@@ -164,9 +164,6 @@ void TextBuffer::Clear()
 
 void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matProjection)
 {
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-
 	glEnable(GL_BLEND);
 
 	glUseProgram(_shaderProgram);
@@ -220,7 +217,9 @@ void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matP
 		glBindTexture(GL_TEXTURE_2D, td.id);
 
 		GLuint projMatIdx = glGetUniformLocation(_shaderProgram, "projMat");
-		glm::mat4 projection = glm::ortho<float>(0, width, height, 0, 0, 1);
+		
+		// Note: You MUST use float parameters! (see https://stackoverflow.com/questions/12230312/is-glmortho-actually-wrong)
+		glm::mat4 projection = glm::ortho((float)0, (float)width, (float)height, (float)0, (float)0, (float)1);
 		glUniformMatrix4fv(projMatIdx, 1, GL_FALSE, glm::value_ptr(projection));
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -236,7 +235,6 @@ void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matP
 	glDeleteBuffers(1, &ebo);
 
 	glDisable(GL_BLEND);
-	glPopMatrix();
 }
 
 void TextBuffer::BeginUpdate()
@@ -253,23 +251,7 @@ void TextBuffer::EndUpdate()
 	if (!_updating)
 		throw std::runtime_error("TextBuffer::EndUpdate: No update in progress!");
 
-	_updating = false; 
-	CreateBuffer();
-}
-
-void TextBuffer::CheckError() const 
-{
-	auto errc = glGetError();
-	if (errc != GL_NO_ERROR)
-	{
-		std::stringstream ss;
-		ss << "GLError: (Error 0x" << std::hex << errc << ")" << std::endl;
-		throw std::runtime_error(ss.str());
-	}
-
-}
-void TextBuffer::CreateBuffer()
-{
+	// Create opengl textures
 	for (int i = 0; i < _textureData.size(); ++i)
 	{
 		auto& td = _textureData[i];
@@ -277,12 +259,13 @@ void TextBuffer::CreateBuffer()
 		glBindTexture(GL_TEXTURE_2D, td.id);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, td.size.x, td.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, td.surface->pixels);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)td.size.x, (GLsizei)td.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, td.surface->pixels);
 	}
-	
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
 
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	_updating = false; 
+}
 
 void TextBuffer::AddText(int idxFont, Vec2D pos, const char* fmt, ...)
 {

@@ -17,25 +17,25 @@ public:
 	void SetupRealistic(double I0, double k, double a, double RBulge, double min, double max, int nSteps);
 
 private:
-	dist_fun_t m_pDistFun;
-	double m_fMin;
-	double m_fMax;
-	double m_fWidth;
-	int m_nSteps;
+	dist_fun_t _pDistFun;
+	double _fMin;
+	double _fMax;
+	double _fWidth;
+	int _nSteps;
 
 	// parameters for realistic star distribution
-	double m_I0;
-	double m_k;
-	double m_a;
-	double m_RBulge;
+	double _I0;
+	double _k;
+	double _a;
+	double _RBulge;
 
-	std::vector<double> m_vM1;
-	std::vector<double> m_vY1;
-	std::vector<double> m_vX1;
+	std::vector<double> _vM1;
+	std::vector<double> _vY1;
+	std::vector<double> _vX1;
 
-	std::vector<double> m_vM2;
-	std::vector<double> m_vY2;
-	std::vector<double> m_vX2;
+	std::vector<double> _vM2;
+	std::vector<double> _vY2;
+	std::vector<double> _vX2;
 
 	void BuildCDF(int nSteps);
 

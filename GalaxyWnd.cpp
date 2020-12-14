@@ -367,7 +367,7 @@ void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 
 	Star* pStars = _galaxy.GetStars();
 
-	double dt_in_sec = _galaxy.GetTimeStep() * MathHelper::SEC_PER_YEAR;
+	float dt_in_sec = _galaxy.GetTimeStep() * MathHelper::SEC_PER_YEAR;
 	float r = 0, v = 0;
 	float cr = 0.5, cg = 1, cb = 1, ca = 0.15;
 	for (int i = 1; i < num; ++i)
@@ -380,7 +380,7 @@ void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 		v /= dt_in_sec;            // v in pc/sec
 		v *= MathHelper::PC_TO_KM; // v in km/s
 
-		idx.push_back(vert.size());
+		idx.push_back((int)vert.size());
 		vert.push_back({ r, v * 10.f, 0,  cr, cg, cb, ca });
 	}
 

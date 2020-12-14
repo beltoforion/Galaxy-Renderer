@@ -314,7 +314,7 @@ float Galaxy::GetOrbitalVelocity(float rad) const
 		{
 			float rho_h0 = 0.15f; // Dichte des Halos im Zentrum
 			float rC = 2500;     // typische skalenlänge im Halo
-			return (float)rho_h0 * 1 / (float)(1 + std::pow(r / rC, 2)) * (4 * MathHelper::PI * std::pow(r, 3) / 3);
+			return (float)rho_h0 * 1 / (float)(1 + std::pow(r / rC, 2)) * (float)(4 * MathHelper::PI * std::pow(r, 3) / 3);
 		}
 
 		// Velocity curve with dark matter
