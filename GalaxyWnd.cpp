@@ -553,7 +553,6 @@ void GalaxyWnd::Render()
 
 	if (_flags & (int)DisplayItem::HELP)
 	{
-		glColor4f((GLfloat)0.7, (GLfloat)0.7, (GLfloat)0.8, (GLfloat)0.7);
 		_textHelp.Draw(_width, _height, _matView, _matProjection);
 	}
 
@@ -754,18 +753,18 @@ void GalaxyWnd::DrawH2()
 
 		glPointSize(2 * size);
 		glBegin(GL_POINTS);
-		const Color& col = ColorFromTemperature(pH2[k1].temp);
-		glColor3f(
-			col.r * pH2[i].mag * 2.0f,
-			col.g * pH2[i].mag * 0.5f,
-			col.b * pH2[i].mag * 0.5f);
-		glVertex3f(p1.x, p1.y, 0.0f);
+			const Color& col = ColorFromTemperature(pH2[k1].temp);
+			glColor3f(
+				col.r * pH2[i].mag * 2.0f,
+				col.g * pH2[i].mag * 0.5f,
+				col.b * pH2[i].mag * 0.5f);
+			glVertex3f(p1.x, p1.y, 0.0f);
 		glEnd();
 
 		glPointSize(size / 6);
 		glBegin(GL_POINTS);
-		glColor3f(1, 1, 1);
-		glVertex3f(p1.x, p1.y, 0.0f);
+			glColor3f(1, 1, 1);
+			glVertex3f(p1.x, p1.y, 0.0f);
 		glEnd();
 	}
 

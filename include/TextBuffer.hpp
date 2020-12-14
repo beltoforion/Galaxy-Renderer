@@ -34,15 +34,21 @@ private:
 		Vec2D size;
 	};
 
-	struct Color
-	{
-		float r, g, b, a;
-	};
+	//struct Color
+	//{
+	//	float r, g, b, a;
+	//};
 
 	struct VertexTexture
 	{
 		float x, y, z;
-		float tx, ty, tz;
+		float tx, ty;
+	};
+
+	enum AttributeIdx : int
+	{
+		attVertexPosition = 0,
+		attTexturePosition = 1
 	};
 
 	GLuint _vbo;
@@ -54,8 +60,6 @@ private:
 	std::vector<VertexTexture> _vert;
 	std::vector<int> _idx;
 
-	GLuint _vertexShader;
-	GLuint _fragmentShader;
 	GLuint _shaderProgram;
 
 	TTF_Font* _pSmallFont;
@@ -66,6 +70,7 @@ private:
 	const char* GetVertexShaderSource() const;
 	const char* GetFragmentShaderSource() const;
 	GLuint CreateShader(GLenum shaderType, const char** shaderSource);
-	void CreateBuffer() noexcept(false);
+	void CreateBuffer();
 	void Clear();
+	void CheckError() const;
 };

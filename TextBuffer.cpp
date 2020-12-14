@@ -2,6 +2,9 @@
 #include "MathHelper.hpp"
 #include <sstream>
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 TextBuffer::TextBuffer()
 	: _textureData()
 	, _pSmallFont(nullptr)
@@ -9,11 +12,8 @@ TextBuffer::TextBuffer()
 	, _pFontCaption(nullptr)
 	, _vbo(0)
 	, _updating(false)
-	, _vertexShader(0)
-	, _fragmentShader(0)
 	, _shaderProgram(0)
 {}
-
 
 TextBuffer::~TextBuffer()
 {
@@ -23,14 +23,17 @@ TextBuffer::~TextBuffer()
 const char* TextBuffer::GetVertexShaderSource() const
 {
 	return
-		"attribute vec3 vPosition;\n"
-		"attribute vec2 vTextureCoord;\n"
-		"varying  vec2 vTexCoord;\n"
+		"#version 330 core\n"
+		"layout(location = 0) in vec3 posVert;\n"
+		"layout(location = 1) in vec2 posTex;\n"
 		"uniform mat4 projMat;\n"
-		"void main(void)\n"
+		"out vec2 texCoord;\n"
+		"out vec4 color;\n"
+		"void main()\n"
 		"{\n"
-		"	vTexCoord = vTextureCoord;\n"
-		"	gl_Position = projMat * vec4(vPosition, 1.0);\n"
+		"	gl_Position =  projMat * vec4(posVert, 1);\n"
+		"	texCoord = vec2(posTex.x, posTex.y);\n"
+		"	color = vec4(1,1,1,1);\n"
 		"}\n";
 }
 
@@ -38,10 +41,13 @@ const char* TextBuffer::GetFragmentShaderSource() const
 {
 	return
 		"#version 330 core\n"
-		"in vec4 vertexColor;\n"
+		"out vec4 FragColor;\n"
+		"in vec3 color;\n"
+		"in vec2 texCoord;\n"
+		"uniform sampler2D texture1;"
 		"void main()\n"
 		"{\n"
-		"	gl_FragColor = vertexColor;\n"
+		"	FragColor = texture(texture1, texCoord);\n"
 		"}\n";
 }
 
@@ -93,14 +99,14 @@ void TextBuffer::Initialize()
 	glGenBuffers(1, &_vbo);
 
 	const char* srcVertex = GetVertexShaderSource();
-	_vertexShader = CreateShader(GL_VERTEX_SHADER, &srcVertex);
+	GLuint vertexShader = CreateShader(GL_VERTEX_SHADER, &srcVertex);
 
 	const char* srcFragment = GetFragmentShaderSource();
-	_fragmentShader = CreateShader(GL_FRAGMENT_SHADER, &srcFragment);
+	GLuint fragmentShader = CreateShader(GL_FRAGMENT_SHADER, &srcFragment);
 
 	_shaderProgram = glCreateProgram();
-	glAttachShader(_shaderProgram, _vertexShader);
-	glAttachShader(_shaderProgram, _fragmentShader);
+	glAttachShader(_shaderProgram, vertexShader);
+	glAttachShader(_shaderProgram, fragmentShader);
 	glLinkProgram(_shaderProgram);
 
 	GLint isLinked = 0;
@@ -116,15 +122,15 @@ void TextBuffer::Initialize()
 
 		// clean up
 		glDeleteProgram(_shaderProgram);
-		glDeleteShader(_vertexShader);
-		glDeleteShader(_fragmentShader);
+		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
 
 		throw std::runtime_error("VertexBuffer: shader program linking failed!");
 	}
 
 	// Always detach shaders after a successful link.
-	glDetachShader(_shaderProgram, _vertexShader);
-	glDetachShader(_shaderProgram, _fragmentShader);
+	glDetachShader(_shaderProgram, vertexShader);
+	glDetachShader(_shaderProgram, fragmentShader);
 }
 
 float TextBuffer::GetFontSize(int idxFont) const
@@ -160,130 +166,79 @@ void TextBuffer::Clear()
 
 void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matProjection)
 {
-	glEnable(GL_TEXTURE_2D);
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+
 	glEnable(GL_BLEND);
 
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0, width, height, 0, 0, 1);
+	glUseProgram(_shaderProgram);
+
+	GLuint vbo, ebo, vao;
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &ebo);
 
 	for (int i = 0; i < _textureId.size(); ++i)
 	{
-		auto td = _textureData[i];
-		glBindTexture(GL_TEXTURE_2D, _textureId[i]);
+		const auto &td = _textureData[i];
 
-		GLfloat xp = td.pos.x;
-		GLfloat yp = td.pos.y;
+		GLfloat x = td.pos.x;
+		GLfloat y = td.pos.y;
 		GLfloat w = td.size.x;
 		GLfloat h = td.size.y;
-		
-		glBegin(GL_TRIANGLES);
-		glTexCoord2i(0, 0);
-		glVertex3f(xp, yp, 0);
-		glTexCoord2i(1, 0);
-		glVertex3f(xp + w, yp, 0);
-		glTexCoord2i(1, 1);
-		glVertex3f(xp + w, yp + h, 0);
 
-		glTexCoord2i(0, 0);
-		glVertex3f(xp, yp, 0);
-		glTexCoord2i(0, 1);
-		glVertex3f(xp, yp + h, 0);
-		glTexCoord2i(1, 1);
-		glVertex3f(xp + w, yp + h, 0);
-		glEnd();
+		VertexTexture vertexData[6]
+		{
+			{ x,     y,     0, 0, 0 },
+			{ x + w, y,     0, 1, 0 },
+			{ x + w, y + h, 0, 1, 1},
+			{ x,     y + h, 0, 0, 1},
+			{ x + w, y + h, 0, 1, 1}
+		};
+
+		GLuint indexData[] =
+		{
+			0, 1, 2,	// first triangle
+			0, 3, 4     // second triangle
+		};
+
+		glBindVertexArray(vao);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexData), indexData, GL_STATIC_DRAW);
+
+		// Position attribute
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexTexture), 0);
+
+		// texture coord attribute
+		glEnableVertexAttribArray(1);
+		auto offset = offsetof(VertexTexture, tx);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexTexture), (GLvoid*)offset);
+
+		glBindTexture(GL_TEXTURE_2D, _textureId[i]);
+
+		GLuint projMatIdx = glGetUniformLocation(_shaderProgram, "projMat");
+		glm::mat4 projection = glm::ortho<float>(0, width, height, 0, 0, 1);
+		glUniformMatrix4fv(projMatIdx, 1, GL_FALSE, glm::value_ptr(projection));
+		glBindVertexArray(vao);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
 	}
 
-	glPopMatrix();
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glUseProgram(0);
 
-	glDisable(GL_TEXTURE_2D);
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &ebo);
+
 	glDisable(GL_BLEND);
-
-/*
-	if (pFont == nullptr)
-		throw std::runtime_error("TextOut failed: font is null!");
-
-	if (fmt == nullptr)
-		throw std::runtime_error("TextOut failed: bad format string!");
-
-	char text[256];
-	va_list ap;
-
-	va_start(ap, fmt);
-
-	vsprintf(text, fmt, ap);
-	va_end(ap);
-
-	auto* pSurface = TTF_RenderText_Blended(pFont, text, { 255, 255, 255 });
-	if (pSurface == nullptr)
-		return;
-
-	GLuint texId;
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glGenTextures(1, &texId);
-	glBindTexture(GL_TEXTURE_2D, texId);
-
-	SDL_Surface* s = nullptr;
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	// It seems textures must be powers of 2 in dimension: 
-	// https://stackoverflow.com/questions/30016083/sdl2-opengl-sdl2-ttf-displaying-text
-	// Create a surface to the correct size in RGB format, and copy the old image
-	int w = MathHelper::PowerTwoFloor(pSurface->w) << 1;
-	int h = MathHelper::PowerTwoFloor(pSurface->h) << 1;
-	s = SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-	SDL_BlitSurface(pSurface, nullptr, s, nullptr);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
-
-
-	glMatrixMode(GL_PROJECTION);
-	if (coords == TextCoords::Model)
-	{
-		auto pos = GetWindowPos((GLfloat)x, (GLfloat)y, 0);
-		x = pos.x;
-		y = pos.y;
-	}
-
-	GLfloat xp = x;
-	GLfloat yp = y;
-
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0, _width, _height, 0, 0, 1);
-
-	// make a rectangle
-	glBegin(GL_TRIANGLES);
-	glTexCoord2i(0, 0);
-	glVertex3f(xp, yp, 0);
-	glTexCoord2i(1, 0);
-	glVertex3f(xp + w, yp, 0);
-	glTexCoord2i(1, 1);
-	glVertex3f(xp + w, yp + h, 0);
-
-	glTexCoord2i(0, 0);
-	glVertex3f(xp, yp, 0);
-	glTexCoord2i(0, 1);
-	glVertex3f(xp, yp + h, 0);
-	glTexCoord2i(1, 1);
-	glVertex3f(xp + w, yp + h, 0);
-	glEnd();
-
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);
-
-	// cleanup
-	if (s != nullptr)
-		SDL_FreeSurface(s);
-
-	if (pSurface != nullptr)
-		SDL_FreeSurface(pSurface);
-
-	glDeleteTextures(1, &texId);
 	glPopMatrix();
-*/
 }
 
 void TextBuffer::BeginUpdate()
@@ -293,7 +248,6 @@ void TextBuffer::BeginUpdate()
 
 	_updating = true;
 	Clear();
-
 }
 
 void TextBuffer::EndUpdate()
@@ -305,10 +259,20 @@ void TextBuffer::EndUpdate()
 	CreateBuffer();
 }
 
-void TextBuffer::CreateBuffer() noexcept(false)
+void TextBuffer::CheckError() const 
+{
+	auto errc = glGetError();
+	if (errc != GL_NO_ERROR)
+	{
+		std::stringstream ss;
+		ss << "GLError: (Error 0x" << std::hex << errc << ")" << std::endl;
+		throw std::runtime_error(ss.str());
+	}
+
+}
+void TextBuffer::CreateBuffer()
 {
 	_textureId.resize(_textureData.size());
-
 	glGenTextures(_textureData.size(), _textureId.data());
 	for (int i = 0; i < _textureId.size(); ++i)
 	{
@@ -316,28 +280,11 @@ void TextBuffer::CreateBuffer() noexcept(false)
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-		auto td = _textureData[i];
+		const auto &td = _textureData[i];
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, td.size.x, td.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, td.surface->pixels);
 	}
 	
 	glBindTexture(GL_TEXTURE_2D, 0);
-/*
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	glBufferData(GL_ARRAY_BUFFER, _vert.size() * sizeof(VertexTexture), _vert.data(), GL_STATIC_DRAW);
-
-	// Set up vertex buffer array
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
-	auto errc = glGetError();
-	if (errc != GL_NO_ERROR)
-	{
-		std::stringstream ss;
-		ss << "VertexBuffer: Cannot create vbo! (Error 0x" << std::hex << errc << ")" << std::endl;
-		throw std::runtime_error(ss.str());
-	}
-
-	glBindVertexArray(0);
-*/
 }
 
 
