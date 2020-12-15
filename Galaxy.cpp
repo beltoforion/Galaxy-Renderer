@@ -489,7 +489,7 @@ void Galaxy::SingleTimeStep(float time)
 	std::for_each(
 		std::execution::par_unseq,
 		_pStars,
-		_pStars + _numStars + 1,
+		_pStars + _numStars,
 		[pertN, pertAmp, time](auto&& star)
 		{
 			star.theta += (star.velTheta * time);
@@ -507,7 +507,7 @@ void Galaxy::SingleTimeStep(float time)
 	std::for_each(
 		std::execution::par_unseq,
 		_pDust,
-		_pDust + _numDust + 1,
+		_pDust + _numDust,
 		[pertN, pertAmp, time](auto&& dust)
 		{
 			dust.theta += (dust.velTheta * time);

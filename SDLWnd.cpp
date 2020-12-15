@@ -45,6 +45,7 @@ SDLWindow::SDLWindow()
 	, _bRunning(true)
 	, _matProjection()
 	, _matView()
+	, _stopEventPolling(false)
 {}
 
 SDLWindow::~SDLWindow()
@@ -196,7 +197,11 @@ void SDLWindow::MainLoop()
 		Update();
 		Render();
 
-		PollEvents();
+		// Note: SDL_PollEvents is stuttering every 3000 ms. For now i don't care
+		// https://stackoverflow.com/questions/53644628/sdl-pollevent-stuttering-while-idle
+		if (!_stopEventPolling)
+			PollEvents();
+
 		++ct;
 
 		t2 = time(nullptr);

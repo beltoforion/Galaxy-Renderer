@@ -558,7 +558,7 @@ void GalaxyWnd::Render()
 	}
 
 	SDL_GL_SwapWindow(_pSdlWnd);
-	SDL_Delay(10);
+	SDL_Delay(1);
 }
 
 void GalaxyWnd::AddEllipsisVertices(
@@ -1000,6 +1000,22 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			ScaleAxis(1.1f);
 			SetCameraOrientation({ 0, 1, 0 });
 			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES;  // ruhDENSITY_WAVES only for the labels!
+			break;
+
+		case SDLK_ESCAPE:
+			// This is a silly mechanism to disable sdl event polling and work around an issue where the polling stops briefly evers 3 seconds.
+			// the only purpose is to be able to screengrab proper animations.
+			static int ct = 0;
+			ct++;
+			if (ct <= 5)
+			{
+				std::cout << "Stop pressing [ESC] or i will stop event polling!" << std::endl;
+			}
+			else
+			{
+				std::cout << "Ok, you wanted this. Enjoy you frozen window..." << std::endl;
+				_stopEventPolling = true;
+			}
 			break;
 		} // switch (m_event.key.keysym.sym)
 

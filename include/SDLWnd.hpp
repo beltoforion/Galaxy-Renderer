@@ -71,4 +71,5 @@ protected:
 	glm::mat4 _matView;
 
 	volatile bool _bRunning;
+	bool _stopEventPolling;
 };
