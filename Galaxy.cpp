@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <cmath>
 #include <iostream>
+#include <execution>
+#include <algorithm>
 
 #include "MathHelper.hpp"
 #include "Star.hpp"
@@ -478,11 +480,45 @@ void Galaxy::SingleTimeStep(float time)
 	_timeStep = time;
 	_time += time;
 
-	Vec2D posOld;
+#define PARALLEL_TIMESTEP_CALCULATION
+#if defined(PARALLEL_TIMESTEP_CALCULATION)
+	auto pertN = _pertN;
+	auto pertAmp = _pertAmp;
+	auto tm = time;
+
+	std::for_each(
+		std::execution::par_unseq,
+		_pStars,
+		_pStars + _numStars + 1,
+		[pertN, pertAmp, time](auto&& star)
+		{
+			star.theta += (star.velTheta * time);
+			Vec2D posOld = star.pos;
+			Galaxy::CalcXY(star, pertN, pertAmp);
+
+			Vec2D b = {
+				star.pos.x - posOld.x,
+				star.pos.y - posOld.y
+			};
+
+			star.vel = b;
+		});
+
+	std::for_each(
+		std::execution::par_unseq,
+		_pDust,
+		_pDust + _numDust + 1,
+		[pertN, pertAmp, time](auto&& dust)
+		{
+			dust.theta += (dust.velTheta * time);
+			Vec2D posOld = dust.pos;
+			Galaxy::CalcXY(dust, pertN, pertAmp);
+		});
+#else
 	for (int i = 0; i < _numStars; ++i)
 	{
 		_pStars[i].theta += (_pStars[i].velTheta * time);
-		posOld = _pStars[i].pos;
+		Vec2D posOld = _pStars[i].pos;
 		CalcXY(_pStars[i], _pertN, _pertAmp);
 
 		Vec2D b = {
@@ -496,14 +532,16 @@ void Galaxy::SingleTimeStep(float time)
 	for (int i = 0; i < _numDust; ++i)
 	{
 		_pDust[i].theta += (_pDust[i].velTheta * time);
-		posOld = _pDust[i].pos;
+		Vec2D posOld = _pDust[i].pos;
 		CalcXY(_pDust[i], _pertN, _pertAmp);
 	}
+#endif
 
+	// There are too few H2 regions to merit parallelization
 	for (int i = 0; i < _numH2 * 2; ++i)
 	{
 		_pH2[i].theta += (_pH2[i].velTheta * time);
-		posOld = _pDust[i].pos;
+		Vec2D posOld = _pDust[i].pos;
 		CalcXY(_pH2[i], _pertN, _pertAmp);
 	}
 }

@@ -558,7 +558,7 @@ void GalaxyWnd::Render()
 	}
 
 	SDL_GL_SwapWindow(_pSdlWnd);
-	SDL_Delay(1);
+	SDL_Delay(10);
 }
 
 void GalaxyWnd::AddEllipsisVertices(
@@ -577,23 +577,23 @@ void GalaxyWnd::AddEllipsisVertices(
 
 	// Angle is given by Degree Value
 	float beta = -angle * MathHelper::DEG_TO_RAD;
-	float sinbeta = sin(beta);
-	float cosbeta = cos(beta);
+	float sinbeta = std::sin(beta);
+	float cosbeta = std::cos(beta);
 
 	int firstPointIdx = static_cast<int>(vert.size());
 	for (int i = 0; i < 360; i += 360 / steps)
 	{
 		float alpha = i * MathHelper::DEG_TO_RAD;
-		float sinalpha = sin(alpha);
-		float cosalpha = cos(alpha);
+		float sinalpha = std::sin(alpha);
+		float cosalpha = std::cos(alpha);
 
 		GLfloat fx = (GLfloat)(x + (a * cosalpha * cosbeta - b * sinalpha * sinbeta));
 		GLfloat fy = (GLfloat)(y + (a * cosalpha * sinbeta + b * sinalpha * cosbeta));
 
 		if (pertNum > 0)
 		{
-			fx += (GLfloat)((a / pertAmp) * sin(alpha * 2 * pertNum));
-			fy += (GLfloat)((a / pertAmp) * cos(alpha * 2 * pertNum));
+			fx += (GLfloat)((a / pertAmp) * std::sin(alpha * 2 * pertNum));
+			fy += (GLfloat)((a / pertAmp) * std::cos(alpha * 2 * pertNum));
 		}
 
 		vertIdx.push_back((int)vert.size());

@@ -43,7 +43,7 @@ public:
 	float GetCoreRad() const;
 	float GetFarFieldRad() const;
 
-	void CalcXY(Star &pStar, int pertN, float pertAmp);
+	static void CalcXY(Star &pStar, int pertN, float pertAmp);
 
 	// Properties depending on the orbital radius
 
