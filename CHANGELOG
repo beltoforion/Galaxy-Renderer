@@ -1,4 +1,4 @@
-Galaxy-Renderer 
+Spiral-Galaxy-Renderer 
 Copyright (C) 2012 - 2020 Ingo Berg
 
 =======================================================================
@@ -7,6 +7,15 @@ Copyright (C) 2012 - 2020 Ingo Berg
 
 History:
 --------
+
+Rev 1.9.9 2020-12-15
+--------------------
+Changes:
+   * Reorganized the Help Screen to make keyboard shortcuts more obvious
+   * Changed rendering logic to use shaders for density waves, text, diagrsam axis and velocity curves
+   * source code cleaned up and updated to C++17 standard
+   * added controls to change galaxy dust temperature
+   * added more predefined galaxies and changed existing ones
 
 Rev 1.1.0 2020-12-02
 --------------------
