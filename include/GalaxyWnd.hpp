@@ -52,7 +52,7 @@ private:
 		ruhDUST = 1 << 4,
 		ruhH2 = 1 << 5,
 		ruhCREATE_VELOCITY_CURVE = 1 << 6,
-		ruhCREATE_TEXT = 1 << 7,
+		ruhCREATE_TEXT = 1 << 7
 	};
 
 	GalaxyWnd(const GalaxyWnd& orig);

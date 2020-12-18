@@ -39,9 +39,6 @@
     <ClCompile Include="..\MathHelper.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="..\VertexBufferBase.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="..\TextBuffer.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>

@@ -3,7 +3,7 @@
 #include "VertexBufferBase.hpp"
 
 
-class VertexBufferStars : public VertexBufferBase
+class VertexBufferStars : public VertexBufferBase<VertexColor>
 {
 public:
 	VertexBufferStars()

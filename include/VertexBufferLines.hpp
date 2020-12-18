@@ -3,7 +3,7 @@
 #include "VertexBufferBase.hpp"
 
 
-class VertexBufferLines : public VertexBufferBase
+class VertexBufferLines : public VertexBufferBase<VertexColor>
 {
 public:
 	VertexBufferLines(int lineWidth = 1, GLuint bufferMode = GL_STATIC_DRAW)

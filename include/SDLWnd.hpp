@@ -51,7 +51,7 @@ protected:
 
 	SDL_Event _event;
 
-	float _fov;		///< Length of an axis
+	float _fov;			///< Length of an axis
 	
 	std::string _caption;
 

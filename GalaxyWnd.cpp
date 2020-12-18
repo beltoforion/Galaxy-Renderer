@@ -144,11 +144,11 @@ void GalaxyWnd::InitSimulation()
 			0.0004f,	// angluar offset of the density wave per parsec of radius
 			0.85f,		// excentricity at the edge of the core
 			0.95f,		// excentricity at the edge of the disk
-			30000,		// total number of stars
+			100000,		// total number of stars
 			true,		// has dark matter
 			2,			// Perturbations per full ellipse
 			40,			// Amplitude damping factor of perturbation
-			100,		// dust render size in pixel
+			70,			// dust render size in pixel
 			4000 });  
 }
 
@@ -609,7 +609,7 @@ void GalaxyWnd::AddEllipsisVertices(
 
 void GalaxyWnd::DrawStars()
 {
-	//	_vertStars.Draw(_matView, _matProjection);
+//		_vertStars.Draw(_matView, _matProjection);
 
 	glBindTexture(GL_TEXTURE_2D, _texStar);
 
@@ -627,8 +627,7 @@ void GalaxyWnd::DrawStars()
 	int num = _galaxy.GetNumStars();
 	Star* pStars = _galaxy.GetStars();
 
-
-	glPointSize(3); //4
+	glPointSize(2); 
 	glBegin(GL_POINTS);
 
 	if (_starRenderType == 2)
@@ -652,7 +651,7 @@ void GalaxyWnd::DrawStars()
 	glEnd();
 
 	// Render a portion of the stars as bright distinct stars
-	glPointSize(6); //4
+	glPointSize(5); 
 	glBegin(GL_POINTS);
 
 	for (int i = 1; i < num / 30; ++i)

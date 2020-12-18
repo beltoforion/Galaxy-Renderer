@@ -212,7 +212,6 @@ xcopy /Y $(SolutionDir)..\assets\consola.ttf $(OutDir)</Command>
     <ClCompile Include="..\SDLWnd.cpp" />
     <ClCompile Include="..\specrend.cpp" />
     <ClCompile Include="..\TextBuffer.cpp" />
-    <ClCompile Include="..\VertexBufferBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
