@@ -5,7 +5,7 @@
 # Spiral Galaxy Renderer
 
 A Program for modelling a two dimensional galaxy based on the density wave theory. This archive contains the source code for an 
-article at beltoforion.de about Simulating a Galaxy with the density wave thoery.
+article at beltoforion.de about Simulating a Galaxy with the density wave theory.
 
 For more Details please read the Articles.
 
