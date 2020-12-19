@@ -20,6 +20,7 @@ GalaxyWnd::GalaxyWnd()
 	, _t0(1000)
 	, _t1(10000)
 	, _dt((_t1 - _t0) / _colNum)
+	, _col()
 	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE | ruhCREATE_TEXT)
 	, _vertDensityWaves(2)
 	, _vertAxis()
@@ -608,7 +609,7 @@ void GalaxyWnd::AddEllipsisVertices(
 
 void GalaxyWnd::DrawStars()
 {
-//		_vertStars.Draw(_matView, _matProjection);
+//	_vertStars.Draw(_matView, _matProjection);
 
 	glBindTexture(GL_TEXTURE_2D, _texStar);
 

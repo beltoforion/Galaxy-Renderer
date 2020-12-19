@@ -13,7 +13,19 @@ class VertexBufferStars : public VertexBufferBase<VertexStar>
 public:
 	VertexBufferStars()
 		: VertexBufferBase()
-	{}
+	{
+		_attributes.push_back({ attPosition,      2, 0 });
+		_attributes.push_back({ attVelocity,      2, offsetof(Star, vel) });
+		_attributes.push_back({ attTheta,         1, offsetof(Star, theta) });
+		_attributes.push_back({ attVelTheta,      1, offsetof(Star, velTheta) });
+		_attributes.push_back({ attAngle,         1, offsetof(Star, angle) });
+		_attributes.push_back({ attSemiMajorAxis, 1, offsetof(Star, a) });
+		_attributes.push_back({ attSemiMinorAxis, 1, offsetof(Star, b) });
+		_attributes.push_back({ attCenter,        2, offsetof(Star, center) });
+		_attributes.push_back({ attTemperature,   1, offsetof(Star, temp) });
+		_attributes.push_back({ attMagnitude,     1, offsetof(Star, mag) });
+		_attributes.push_back({ attColor,         4, offsetof(VertexStar, col) });
+	}
 
 protected:
 
@@ -53,50 +65,6 @@ protected:
 			"}\n";
 	}
 
-	virtual void OnSetupAttribArray() const override 
-	{
-		glEnableVertexAttribArray(attPosition);
-		glVertexAttribPointer(attPosition, 2, GL_FLOAT, GL_FALSE, sizeof(VertexStar), 0);
-
-		glEnableVertexAttribArray(attVelocity);
-		glVertexAttribPointer(attVelocity, 2, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, vel)));
-
-		glEnableVertexAttribArray(attTheta);
-		glVertexAttribPointer(attTheta, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, theta)));
-
-		glEnableVertexAttribArray(attVelTheta);
-		glVertexAttribPointer(attVelTheta, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, velTheta)));
-
-		glEnableVertexAttribArray(attAngle);
-		glVertexAttribPointer(attAngle, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, angle)));
-
-		glEnableVertexAttribArray(attSemiMajorAxis);
-		glVertexAttribPointer(attSemiMajorAxis, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, a)));
-
-		glEnableVertexAttribArray(attSemiMinorAxis);
-		glVertexAttribPointer(attSemiMinorAxis, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, b)));
-
-		glEnableVertexAttribArray(attCenter);
-		glVertexAttribPointer(attCenter, 2, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, center)));
-
-		glEnableVertexAttribArray(attTemperature);
-		glVertexAttribPointer(attTemperature, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, temp)));
-
-		glEnableVertexAttribArray(attMagnitude);
-		glVertexAttribPointer(attMagnitude, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, mag)));
-
-		glEnableVertexAttribArray(attColor);
-		glVertexAttribPointer(attColor, 4, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(VertexStar, col)));
-	}
-
-	virtual void OnReleaseAttribArray() const override
-	{
-		for (int i = 0; i < attLast; ++i)
-		{
-			glDisableVertexAttribArray(i);
-		}
-	}
-
 private:
 
 	enum AttributeIdx : int
@@ -111,7 +79,6 @@ private:
 		attCenter = 7,
 		attTemperature = 8,
 		attMagnitude = 9,
-		attColor = 10,
-		attLast
+		attColor = 10
 	};
 };

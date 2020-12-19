@@ -72,7 +72,7 @@ public:
 
 	void Release()
 	{
-		OnReleaseAttribArray();
+		ReleaseAttribArray();
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -95,7 +95,7 @@ public:
 		_primitiveType = type;
 
 		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-		glBufferData(GL_ARRAY_BUFFER, _vert.size() * sizeof(VertexColor), _vert.data(), _bufferMode);
+		glBufferData(GL_ARRAY_BUFFER, _vert.size() * sizeof(TVertex), _vert.data(), _bufferMode);
 
 		glBindVertexArray(_vao);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
@@ -103,7 +103,12 @@ public:
 		// Set up vertex buffer array
 		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-		OnSetupAttribArray();
+		// Set up vertex buffer attributes
+		for (const AttributeDefinition &attrib : _attributes)
+		{
+			glEnableVertexAttribArray(attrib.attribIdx);
+			glVertexAttribPointer(attrib.attribIdx, attrib.size, GL_FLOAT, GL_FALSE, sizeof(TVertex), (GLvoid*)attrib.offset);
+		}
 
 		// Set up index buffer array
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
@@ -126,7 +131,7 @@ public:
 			throw std::runtime_error("VertexBufferBase: static buffers cannot be updated!");
 
 		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, _vert.size() * sizeof(VertexColor), vert.data());
+		glBufferSubData(GL_ARRAY_BUFFER, 0, _vert.size() * sizeof(TVertex), vert.data());
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
@@ -155,14 +160,27 @@ public:
 		glUseProgram(0);
 	}
 
-	virtual void OnBeforeDraw()
-	{}
+	void ReleaseAttribArray() const 
+	{
+		for (const auto &attrib : _attributes)
+		{
+			glDisableVertexAttribArray(attrib.attribIdx);
+		}
+	}
 
-	virtual void OnSetupAttribArray() const = 0;
-	virtual void OnReleaseAttribArray() const = 0;
+	virtual void OnBeforeDraw() {}
 
 protected:
+
+	struct AttributeDefinition
+	{
+		int attribIdx;
+		int size;
+		int offset;
+	};
+
 	GLuint _bufferMode;
+	std::vector<AttributeDefinition> _attributes;
 
 	virtual const char* GetVertexShaderSource() const = 0;
 	virtual const char* GetFragmentShaderSource() const = 0;

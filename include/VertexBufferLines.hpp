@@ -16,6 +16,9 @@ public:
 		, _lineWidth(lineWidth)
 	{
 		_bufferMode = bufferMode;
+
+		_attributes.push_back({ attPosition, 3, 0 });
+		_attributes.push_back({ attColor, 4, offsetof(VertexColor, col) });
 	}
 
 	void OnBeforeDraw() override
@@ -52,23 +55,8 @@ protected:
 			"}\n";
 	}
 
-	virtual void OnSetupAttribArray() const  override
-	{
-		glEnableVertexAttribArray(attPosition);
-		glVertexAttribPointer(attPosition, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), 0);
-
-		glEnableVertexAttribArray(attColor);
-		uint64_t rgbOffset = offsetof(VertexColor, col);
-		glVertexAttribPointer(attColor, 4, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(rgbOffset));
-	}
-
-	virtual void OnReleaseAttribArray() const override
-	{
-		glDisableVertexAttribArray(attPosition);
-		glDisableVertexAttribArray(attColor);
-	}
-
 private:
+
 	enum AttributeIdx : int
 	{
 		attPosition = 0,
