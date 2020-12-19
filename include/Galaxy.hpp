@@ -1,7 +1,8 @@
 #pragma once
 
 #include <memory>
-#include "Star.hpp"
+#include <vector>
+#include "Types.hpp"
 
 
 /** \brief A class to encapsulate the geometric details of a spiral galaxy. */
@@ -35,9 +36,9 @@ public:
 	void Reset(GalaxyParam param);
 	void Reset();
 
-	Star* GetStars() const;
-	Star* GetDust() const;
-	Star* GetH2() const;
+	Star* GetStars();
+	Star* GetDust();
+	Star* GetH2();
 
 	float GetRad() const;
 	float GetCoreRad() const;
@@ -69,7 +70,7 @@ public:
 
 	void SingleTimeStep(float time);
 
-	const Vec2D& GetStarPos(int idx);
+	const Vec2& GetStarPos(int idx);
 
 	void SetPertN(int n);
 	void SetPertAmp(float amp);
@@ -124,8 +125,8 @@ public:
 	int _numberByRad[100];  ///< Historgramm showing distribution of stars
 
 private:
-	Vec2D _pos;             ///< Center of the galaxy
-	Star *_pStars;          ///< Pointer to an array of star data
-	Star *_pDust;           ///< Pointer to an array of dusty areas
-	Star *_pH2;
+	Vec2 _pos;				   ///< Center of the galaxy
+	std::vector<Star> _stars;  ///< Pointer to an array of star data
+	std::vector<Star> _dust;   ///< Pointer to an array of dusty areas
+	std::vector<Star> _H2;
 };

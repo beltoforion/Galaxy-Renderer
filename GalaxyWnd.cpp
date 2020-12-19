@@ -7,7 +7,7 @@
 
 #include "MathHelper.hpp"
 #include "specrend.h"
-#include "Star.hpp"
+#include "Types.hpp"
 
 
 GalaxyWnd::GalaxyWnd()
@@ -174,7 +174,7 @@ void GalaxyWnd::UpdateStars()
 {
 	std::cout << "Updating stars" << std::endl;
 
-	std::vector<VertexColor> vert;
+	std::vector<VertexStar> vert;
 	std::vector<int> idx;
 
 	int num = _galaxy.GetNumStars();
@@ -188,7 +188,6 @@ void GalaxyWnd::UpdateStars()
 
 	for (int i = 1; i < num; ++i)
 	{
-		const Vec2D& pos = pStars[i].pos;
 		const Color& col = ColorFromTemperature(pStars[i].temp);
 		if (_starRenderType == 1)
 		{
@@ -203,7 +202,7 @@ void GalaxyWnd::UpdateStars()
 			color = { 1, 1, 1, a };
 		}
 
-		// todo: Render a small portion of the stars as bright distinct stars
+		// todo: Render a small portion of the stars as bigger, brighter distinct stars
 		float size = 3;
 		if (i < num / 30)
 		{
@@ -214,7 +213,8 @@ void GalaxyWnd::UpdateStars()
 		}
 
 		idx.push_back((int)vert.size());
-		vert.push_back({ pos.x, pos.y, 0.0f , color.r, color.g, color.b, color.a });
+//		vert.push_back({ pos.x, pos.y, 0.0f , color.r, color.g, color.b, color.a });
+		vert.push_back({ pStars[i], color });
 	}
 
 	_vertStars.CreateBuffer(vert, idx, GL_POINTS);
@@ -310,11 +310,11 @@ void GalaxyWnd::UpdateText()
 	_textHelp.BeginUpdate();
 	_textHelp.AddText(0, { x0, y0 - 60 }, "Spiral Galaxy Renderer");
 
-	y = y0;	  _textHelp.AddText(1, { x0, y }, "Simulation Controls:");
-	y += dy1; _textHelp.AddText(2, { x0, y }, "FPS:  %d", GetFPS());
-	y += dy2; _textHelp.AddText(2, { x0, y }, "Time: %2.2e y", _galaxy.GetTime());
+	//y = y0;	  _textHelp.AddText(1, { x0, y }, "Simulation Controls:");
+	//y += dy1; _textHelp.AddText(2, { x0, y }, "FPS:  %d", GetFPS());
+	//y += dy2; _textHelp.AddText(2, { x0, y }, "Time: %2.2e y", _galaxy.GetTime());
 
-	y += dy1; _textHelp.AddText(1, { x0, y }, "Geometry:");
+	y = y0; _textHelp.AddText(1, { x0, y }, "Geometry:");
 	y += dy1; _textHelp.AddText(2, { x0, y }, "[r],[f] RadCore:     %d pc", (int)_galaxy.GetCoreRad());
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[t],[g] RadGalaxy:   %d pc", (int)_galaxy.GetRad());
 	y += dy2; _textHelp.AddText(2, { x0, y }, "        RadFarField: %d pc", (int)_galaxy.GetFarFieldRad());
@@ -373,7 +373,7 @@ void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 	float cr = 0.5, cg = 1, cb = 1, ca = 0.15;
 	for (int i = 1; i < num; ++i)
 	{
-		const Vec2D& vel = pStars[i].vel;
+		const Vec2& vel = pStars[i].vel;
 		r = pStars[i].a;
 
 		// umrechnen in km/s
@@ -482,7 +482,7 @@ void GalaxyWnd::Update()
 	if ((_renderUpdateHint & ruhCREATE_TEXT) != 0)
 		UpdateText();
 
-	Vec3D orient = { 0,1,0 };
+	Vec3 orient = { 0,1,0 };
 	switch (_camMode)
 	{
 		// Default orientation
@@ -636,7 +636,7 @@ void GalaxyWnd::DrawStars()
 	// Render all Stars from the stars array
 	for (int i = 1; i < num; ++i)
 	{
-		const Vec2D& pos = pStars[i].pos;
+		const Vec2& pos = pStars[i].pos;
 		const Color& col = ColorFromTemperature(pStars[i].temp);
 		if (_starRenderType == 1)
 		{
@@ -656,7 +656,7 @@ void GalaxyWnd::DrawStars()
 
 	for (int i = 1; i < num / 30; ++i)
 	{
-		const Vec2D& pos = pStars[i].pos;
+		const Vec2& pos = pStars[i].pos;
 		const Color& col = ColorFromTemperature(pStars[i].temp);
 		if (_starRenderType == 1)
 		{
@@ -703,7 +703,7 @@ void GalaxyWnd::DrawDust()
 
 	for (int i = 0; i < num; ++i)
 	{
-		const Vec2D& pos = pDust[i].pos;
+		const Vec2& pos = pDust[i].pos;
 		const Color& col = ColorFromTemperature(pDust[i].temp);
 		glColor3f(
 			col.r * (float)pDust[i].mag,
@@ -743,8 +743,8 @@ void GalaxyWnd::DrawH2()
 		int k1 = 2 * i;
 		int k2 = 2 * i + 1;
 
-		const Vec2D& p1 = pH2[k1].pos;
-		const Vec2D& p2 = pH2[k2].pos;
+		const Vec2& p1 = pH2[k1].pos;
+		const Vec2& p2 = pH2[k2].pos;
 
 		float dst = sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 		float size = ((1000 - dst) / 10) - 50;

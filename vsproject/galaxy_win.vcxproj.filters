@@ -50,9 +50,6 @@
     <ClInclude Include="..\include\specrend.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\Star.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\SDLWnd.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -78,6 +75,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="..\include\TextBuffer.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Types.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

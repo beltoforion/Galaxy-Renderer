@@ -223,7 +223,7 @@ xcopy /Y $(SolutionDir)..\assets\consola.ttf $(OutDir)</Command>
     <ClInclude Include="..\include\MathHelper.hpp" />
     <ClInclude Include="..\include\SDLWnd.hpp" />
     <ClInclude Include="..\include\specrend.h" />
-    <ClInclude Include="..\include\Star.hpp" />
+    <ClInclude Include="..\include\Types.hpp" />
     <ClInclude Include="..\include\TextBuffer.hpp" />
     <ClInclude Include="..\include\VertexBufferBase.hpp" />
     <ClInclude Include="..\include\VertexBufferLines.hpp" />

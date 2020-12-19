@@ -2,8 +2,13 @@
 
 #include "VertexBufferBase.hpp"
 
+struct VertexStar
+{
+	Star star;
+	Color col;
+};
 
-class VertexBufferStars : public VertexBufferBase<VertexColor>
+class VertexBufferStars : public VertexBufferBase<VertexStar>
 {
 public:
 	VertexBufferStars()
@@ -11,18 +16,28 @@ public:
 	{}
 
 protected:
+
 	virtual const char* GetVertexShaderSource() const override
 	{
 		return
 			"#version 330 core\n"
 			"uniform mat4 projMat;\n"
 			"uniform mat4 viewMat;\n"
-			"layout(location = 0) in vec3 position;\n"
-			"layout(location = 1) in vec4 color;\n"
+			"layout(location = 0) in vec2 pos;\n"
+			"layout(location = 1) in vec2 vel;\n"
+			"layout(location = 2) in float theta;\n"
+			"layout(location = 3) in float velTheta;\n"
+			"layout(location = 4) in float angle;\n"
+			"layout(location = 5) in float a;\n"
+			"layout(location = 6) in float b;\n"
+			"layout(location = 7) in vec2 center;\n"
+			"layout(location = 8) in float temp;\n"
+			"layout(location = 9) in float mag;\n"
+			"layout(location = 10) in vec4 color;\n"
 			"out vec4 vertexColor;\n"
 			"void main()\n"
 			"{\n"
-			"	gl_Position =  projMat * vec4(position, 1);\n"
+			"	gl_Position =  projMat * vec4(pos, 0, 1);\n"
 			"	vertexColor = color;\n"
 			"}\n";
 	}
@@ -40,12 +55,50 @@ protected:
 
 	virtual void OnSetupAttribArray() const override 
 	{
+		//"layout(location = 0) in vec2 pos;\n"
+		//	"layout(location = 1) in vec2 vel;\n"
+		//	"layout(location = 2) in float theta;\n"
+		//	"layout(location = 3) in float velTheta;\n"
+		//	"layout(location = 4) in float angle;\n"
+		//	"layout(location = 5) in float a;\n"
+		//	"layout(location = 6) in float b;\n"
+		//	"layout(location = 7) in vec2 center;\n"
+		//	"layout(location = 8) in float temp;\n"
+		//	"layout(location = 9) in float mag;\n"
+		//	"layout(location = 10) in vec4 color;\n"
+
 		glEnableVertexAttribArray(attPosition);
-		glVertexAttribPointer(attPosition, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), 0);
+		glVertexAttribPointer(attPosition, 2, GL_FLOAT, GL_FALSE, sizeof(VertexColor), 0);
+
+		glEnableVertexAttribArray(attVelocity);
+		glVertexAttribPointer(attVelocity, 2, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, vel)));
+
+		glEnableVertexAttribArray(attTheta);
+		glVertexAttribPointer(attTheta, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, theta)));
+
+		glEnableVertexAttribArray(attVelTheta);
+		glVertexAttribPointer(attVelTheta, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, velTheta)));
+
+		glEnableVertexAttribArray(attAngle);
+		glVertexAttribPointer(attAngle, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, angle)));
+
+		glEnableVertexAttribArray(attSemiMajorAxis);
+		glVertexAttribPointer(attSemiMajorAxis, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, a)));
+
+		glEnableVertexAttribArray(attSemiMinorAxis);
+		glVertexAttribPointer(attSemiMinorAxis, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, b)));
+
+		glEnableVertexAttribArray(attCenter);
+		glVertexAttribPointer(attCenter, 2, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, center)));
+
+		glEnableVertexAttribArray(attTemperature);
+		glVertexAttribPointer(attTemperature, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, temp)));
+
+		glEnableVertexAttribArray(attMagnitude);
+		glVertexAttribPointer(attMagnitude, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, mag)));
 
 		glEnableVertexAttribArray(attColor);
-		uint64_t rgbOffset = offsetof(VertexColor, red);
-		glVertexAttribPointer(attColor, 4, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(rgbOffset));
+		glVertexAttribPointer(attColor, 4, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(VertexStar, col)));
 	}
 
 	virtual void OnReleaseAttribArray() const override
@@ -59,6 +112,15 @@ private:
 	enum AttributeIdx : int
 	{
 		attPosition = 0,
-		attColor = 1
+		attVelocity,
+		attTheta,
+		attVelTheta,
+		attAngle,
+		attSemiMajorAxis,
+		attSemiMinorAxis,
+		attCenter,
+		attTemperature,
+		attMagnitude,
+		attColor
 	};
 };

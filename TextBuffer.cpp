@@ -265,7 +265,7 @@ void TextBuffer::EndUpdate()
 	_updating = false; 
 }
 
-void TextBuffer::AddText(int idxFont, Vec2D pos, const char* fmt, ...)
+void TextBuffer::AddText(int idxFont, Vec2 pos, const char* fmt, ...)
 {
 	if (fmt == nullptr)
 		throw std::runtime_error("TextBuffer::AddText failed: bad format string!");

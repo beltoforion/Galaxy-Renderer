@@ -14,7 +14,7 @@
 #include "MathHelper.hpp"
 
 
-Vec2D SDLWindow::GetWindowPos(GLfloat x, GLfloat y, GLfloat z)
+Vec2 SDLWindow::GetWindowPos(GLfloat x, GLfloat y, GLfloat z)
 {
 	GLdouble modelview[16];
 	GLdouble projection[16];
@@ -114,28 +114,28 @@ void SDLWindow::ScaleAxis(float scale)
 	AdjustCamera();
 }
 
-const Vec3D& SDLWindow::GetCamPos() const
+const Vec3& SDLWindow::GetCamPos() const
 {
 	return _camPos;
 }
 
-const Vec3D& SDLWindow::GetCamOrient() const
+const Vec3& SDLWindow::GetCamOrient() const
 {
 	return _camOrient;
 }
 
-const Vec3D& SDLWindow::GetCamLookAt() const
+const Vec3& SDLWindow::GetCamLookAt() const
 {
 	return _camLookAt;
 }
 
-void SDLWindow::SetCameraOrientation(const Vec3D& orient)
+void SDLWindow::SetCameraOrientation(const Vec3& orient)
 {
 	_camOrient = orient;
 	AdjustCamera();
 }
 
-void SDLWindow::SetCamera(const Vec3D& pos, const Vec3D& lookAt, const Vec3D& orient)
+void SDLWindow::SetCamera(const Vec3& pos, const Vec3& lookAt, const Vec3& orient)
 {
 	_camOrient = orient;
 	_camPos = pos;

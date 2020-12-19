@@ -2,6 +2,11 @@
 
 #include "VertexBufferBase.hpp"
 
+struct VertexColor
+{
+	Vec3 pos;
+	Color col;
+};
 
 class VertexBufferLines : public VertexBufferBase<VertexColor>
 {
@@ -53,7 +58,7 @@ protected:
 		glVertexAttribPointer(attPosition, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), 0);
 
 		glEnableVertexAttribArray(attColor);
-		uint64_t rgbOffset = offsetof(VertexColor, red);
+		uint64_t rgbOffset = offsetof(VertexColor, col);
 		glVertexAttribPointer(attColor, 4, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(rgbOffset));
 	}
 

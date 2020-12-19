@@ -9,7 +9,7 @@
 #include <SDL_opengl.h> 
 #include <SDL_ttf.h>
 
-#include "Star.hpp"
+#include "Types.hpp"
 
 
 /** \brief Basic infrastructure for grafical output using SDL/OpenGL */
@@ -37,17 +37,17 @@ protected:
 	virtual void PollEvents();
 	virtual void OnProcessEvents(Uint32 type);
 
-	const Vec3D& GetCamPos() const;
-	const Vec3D& GetCamOrient() const;
-	const Vec3D& GetCamLookAt() const;
+	const Vec3& GetCamPos() const;
+	const Vec3& GetCamOrient() const;
+	const Vec3& GetCamLookAt() const;
 
-	void SetCameraOrientation(const Vec3D& orientation);
-	void SetCamera(const Vec3D& pos, const Vec3D& lookAt, const Vec3D& orient);
+	void SetCameraOrientation(const Vec3& orientation);
+	void SetCamera(const Vec3& pos, const Vec3& lookAt, const Vec3& orient);
 	void AdjustCamera();
 	int GetFPS() const;
 	void ScaleAxis(float scale);
 	double GetFOV() const;
-	static Vec2D GetWindowPos(GLfloat x, GLfloat y, GLfloat z);
+	static Vec2 GetWindowPos(GLfloat x, GLfloat y, GLfloat z);
 
 	SDL_Event _event;
 
@@ -59,9 +59,9 @@ protected:
 	int _height;		///< Height of the window in pixel
 	int _fps;
 
-	Vec3D _camPos;		///< Position of the camera
-	Vec3D _camLookAt;	///< Point atwhich the camera is aimed
-	Vec3D _camOrient;	///< orientation of the camera (rotation as it aims at its target)
+	Vec3 _camPos;		///< Position of the camera
+	Vec3 _camLookAt;	///< Point atwhich the camera is aimed
+	Vec3 _camOrient;	///< orientation of the camera (rotation as it aims at its target)
 
 	SDL_Window *_pSdlWnd;
 	SDL_Renderer *_pSdlRenderer;

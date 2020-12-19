@@ -8,7 +8,7 @@
 
 #include <SDL_ttf.h>
 
-#include "Star.hpp"
+#include "Types.hpp"
 
 
 class TextBuffer final
@@ -18,7 +18,7 @@ public:
 	~TextBuffer();
 
 	void Initialize();
-	void AddText(int idxFont, Vec2D pos, const char* fmt, ...);
+	void AddText(int idxFont, Vec2 pos, const char* fmt, ...);
 	void Draw(int width, int height, glm::mat4& matView, glm::mat4& matProjection);
 	float GetFontSize(int idxFont) const;
 
@@ -30,8 +30,8 @@ private:
 	struct TextureData
 	{
 		SDL_Surface* surface;
-		Vec2D pos;
-		Vec2D size;
+		Vec2 pos;
+		Vec2 size;
 		GLuint id;
 	};
 

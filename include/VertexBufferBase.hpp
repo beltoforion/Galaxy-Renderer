@@ -9,17 +9,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-struct Color 
-{
-	float r, g, b, a;
-};
-
-
-struct VertexColor
-{
-	float x, y, z;
-	float red, green, blue, alpha;
-};
 
 
 template<typename TVertex>
