@@ -135,6 +135,9 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
+	virtual void OnSetCustomShaderVariables()
+	{}
+
 	void Draw(glm::mat4& matView, glm::mat4& matProjection)
 	{
 		glUseProgram(_shaderProgram);
@@ -144,6 +147,8 @@ public:
 
 		GLuint projMatIdx = glGetUniformLocation(_shaderProgram, "projMat");
 		glUniformMatrix4fv(projMatIdx, 1, GL_FALSE, glm::value_ptr(matProjection));
+
+		OnSetCustomShaderVariables();
 
 		glEnable(GL_PRIMITIVE_RESTART);
 		glEnable(GL_BLEND);
@@ -181,6 +186,11 @@ protected:
 
 	GLuint _bufferMode;
 	std::vector<AttributeDefinition> _attributes;
+
+	GLuint GetShaderProgramm() const
+	{
+		return _shaderProgram;
+	}
 
 	virtual const char* GetVertexShaderSource() const = 0;
 	virtual const char* GetFragmentShaderSource() const = 0;

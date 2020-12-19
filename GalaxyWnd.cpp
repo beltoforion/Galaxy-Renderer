@@ -217,6 +217,7 @@ void GalaxyWnd::UpdateStars()
 		vert.push_back({ pStars[i], color });
 	}
 
+	_vertStars.SetDensityWavePerturbation(_galaxy.GetPertN(), _galaxy.GetPertAmp());
 	_vertStars.CreateBuffer(vert, idx, GL_POINTS);
 	_renderUpdateHint &= ~ruhSTARS;
 }
@@ -527,7 +528,6 @@ void GalaxyWnd::Render()
 	if (_flags & (int)DisplayItem::AXIS)
 	{
 		_vertAxis.Draw(_matView, _matProjection);
-		glColor3f((GLfloat)0.3, (GLfloat)0.3, (GLfloat)0.3);
 		_textAxisLabel.Draw(_width, _height, _matView, _matProjection);
 	}
 
@@ -666,8 +666,8 @@ void GalaxyWnd::DrawStars()
 				0.2f + col.b * pStars[i].mag);
 		}
 		glVertex3f(pos.x, pos.y, 0.0f);
-
 	}
+
 	glEnd();
 
 	glDisable(GL_BLEND);
@@ -676,7 +676,6 @@ void GalaxyWnd::DrawStars()
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glPointSize(1);
-
 }
 
 void GalaxyWnd::DrawDust()
