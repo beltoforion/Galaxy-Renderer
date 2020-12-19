@@ -179,8 +179,7 @@ void GalaxyWnd::UpdateStars()
 	std::vector<VertexStar> vert;
 	std::vector<int> idx;
 
-	int num = _galaxy.GetNumStars();
-	Star* pStars = _galaxy.GetStars();
+	const auto &stars = _galaxy.GetStars();
 
 	float a = 1;
 	Color color = { 1, 1, 1, a };
@@ -188,15 +187,15 @@ void GalaxyWnd::UpdateStars()
 	if (_starRenderType == 2)
 		color = { 1, 1, 1, a };
 
-	for (int i = 1; i < num; ++i)
+	for (int i = 1; i < stars.size(); ++i)
 	{
-		const Color& col = ColorFromTemperature(pStars[i].temp);
+		const Color& col = ColorFromTemperature(stars[i].temp);
 		if (_starRenderType == 1)
 		{
 			color = {
-				col.r * pStars[i].mag,
-				col.g * pStars[i].mag,
-				col.b * pStars[i].mag,
+				col.r * stars[i].mag,
+				col.g * stars[i].mag,
+				col.b * stars[i].mag,
 				a };
 		}
 		else
@@ -206,7 +205,7 @@ void GalaxyWnd::UpdateStars()
 
 		// todo: Render a small portion of the stars as bigger, brighter distinct stars
 		float size = 3;
-		if (i < num / 30)
+		if (i < stars.size() / 30)
 		{
 			size = 6;
 			color.r = std::min(.2f + color.r, 1.f);
@@ -215,7 +214,7 @@ void GalaxyWnd::UpdateStars()
 		}
 
 		idx.push_back((int)vert.size());
-		vert.push_back({ pStars[i], color });
+		vert.push_back({ stars[i], color });
 	}
 
 	_vertStars.SetOrbitParameters(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp());
@@ -361,22 +360,21 @@ void GalaxyWnd::UpdateText()
 void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 {
 	// I don't need every star for the curve.
-	int num = _galaxy.GetNumStars() / 3;
+	const auto& stars = _galaxy.GetStars();
+	int num = stars.size() / 3;
 
 	std::vector<VertexColor> vert;
 	vert.reserve(num);
 	std::vector<int> idx;
 	idx.reserve(num);
 
-	Star* pStars = _galaxy.GetStars();
-
 	float dt_in_sec = GalaxyWnd::TimeStepSize * MathHelper::SEC_PER_YEAR;
 	float r = 0, v = 0;
 	float cr = 0.5, cg = 1, cb = 1, ca = 0.15;
 	for (int i = 1; i < num; ++i)
 	{
-		const Vec2& vel = pStars[i].vel;
-		r = pStars[i].a;
+		const Vec2& vel = stars[i].vel;
+		r = stars[i].a;
 
 		// umrechnen in km/s
 		v = std::sqrt(vel.x * vel.x + vel.y * vel.y);   // pc / timestep
@@ -625,8 +623,8 @@ void GalaxyWnd::DrawStars()
 	glEnable(GL_BLEND);            // soft blending of point sprites
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	int num = _galaxy.GetNumStars();
-	Star* pStars = _galaxy.GetStars();
+	const auto &stars = _galaxy.GetStars();
+	int num = stars.size();
 
 	glPointSize(2); 
 	glBegin(GL_POINTS);
@@ -637,14 +635,14 @@ void GalaxyWnd::DrawStars()
 	// Render all Stars from the stars array
 	for (int i = 1; i < num; ++i)
 	{
-		const Vec2& pos = pStars[i].pos;
-		const Color& col = ColorFromTemperature(pStars[i].temp);
+		const Vec2& pos = stars[i].pos;
+		const Color& col = ColorFromTemperature(stars[i].temp);
 		if (_starRenderType == 1)
 		{
 			glColor3f(
-				(GLfloat)col.r * pStars[i].mag,
-				(GLfloat)col.g * pStars[i].mag,
-				(GLfloat)col.b * pStars[i].mag);
+				(GLfloat)col.r * stars[i].mag,
+				(GLfloat)col.g * stars[i].mag,
+				(GLfloat)col.b * stars[i].mag);
 		}
 		glVertex3f(pos.x, pos.y, 0.0f);
 
@@ -657,14 +655,14 @@ void GalaxyWnd::DrawStars()
 
 	for (int i = 1; i < num / 30; ++i)
 	{
-		const Vec2& pos = pStars[i].pos;
-		const Color& col = ColorFromTemperature(pStars[i].temp);
+		const Vec2& pos = stars[i].pos;
+		const Color& col = ColorFromTemperature(stars[i].temp);
 		if (_starRenderType == 1)
 		{
 			glColor3f(
-				0.2f + col.r * pStars[i].mag,
-				0.2f + col.g * pStars[i].mag,
-				0.2f + col.b * pStars[i].mag);
+				0.2f + col.r * stars[i].mag,
+				0.2f + col.g * stars[i].mag,
+				0.2f + col.b * stars[i].mag);
 		}
 		glVertex3f(pos.x, pos.y, 0.0f);
 	}
@@ -694,8 +692,8 @@ void GalaxyWnd::DrawDust()
 	glEnable(GL_BLEND);            // soft blending of point sprites
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	const Star* pDust = _galaxy.GetDust();
-	int num = _galaxy.GetNumDust();
+	const auto &dust = _galaxy.GetDust();
+	int num = dust.size();
 
 	// size 70 looks ok when the fov is 28174
 	glPointSize(std::min((float)(_galaxy.GetDustRenderSize() * 28174 / _fov), maxSize));
@@ -703,12 +701,12 @@ void GalaxyWnd::DrawDust()
 
 	for (int i = 0; i < num; ++i)
 	{
-		const Vec2& pos = pDust[i].pos;
-		const Color& col = ColorFromTemperature(pDust[i].temp);
+		const Vec2& pos = dust[i].pos;
+		const Color& col = ColorFromTemperature(dust[i].temp);
 		glColor3f(
-			col.r * (float)pDust[i].mag,
-			col.g * (float)pDust[i].mag,
-			col.b * (float)pDust[i].mag);
+			col.r * (float)dust[i].mag,
+			col.g * (float)dust[i].mag,
+			col.b * (float)dust[i].mag);
 		glVertex3f(pos.x, pos.y, 0.0f);
 
 	}

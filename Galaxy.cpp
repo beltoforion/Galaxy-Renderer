@@ -247,14 +247,14 @@ void Galaxy::SetDustRenderSize(float sz)
 	_dustRenderSize = std::min(200.0f, std::max(sz, 1.0f));
 }
 
-Star* Galaxy::GetStars()
+const std::vector<Star>& Galaxy::GetStars() const
 {
-	return _stars.data();
+	return _stars;
 }
 
-Star* Galaxy::GetDust()
+const std::vector<Star>& Galaxy::GetDust() const
 {
-	return _dust.data();
+	return _dust;
 }
 
 Star* Galaxy::GetH2()
@@ -513,7 +513,7 @@ void Galaxy::SingleTimeStep(float timeStepSize)
 
 const Vec2& Galaxy::GetStarPos(int idx)
 {
-	if (idx >= _numStars)
+	if (idx >= _stars.size())
 		throw std::runtime_error("Index out of bounds.");
 
 	return _stars[idx].pos; 
@@ -521,15 +521,6 @@ const Vec2& Galaxy::GetStarPos(int idx)
 
 int Galaxy::GetNumH2() const
 {
-	return _numH2;
+	return _H2.size();
 }
 
-int Galaxy::GetNumStars() const
-{
-	return _numStars;
-}
-
-int Galaxy::GetNumDust() const
-{
-	return _numDust;
-}

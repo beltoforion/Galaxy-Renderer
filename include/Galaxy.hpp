@@ -36,8 +36,8 @@ public:
 	void Reset(GalaxyParam param);
 	void Reset();
 
-	Star* GetStars();
-	Star* GetDust();
+	const std::vector<Star>& GetStars() const;
+	const std::vector<Star>& GetDust() const;
 	Star* GetH2();
 
 	float GetRad() const;
@@ -58,8 +58,6 @@ public:
 	float GetExOuter() const;
 	float GetTime() const;
 	float GetDustRenderSize() const;
-	int GetNumStars() const;
-	int GetNumDust() const;
 	int GetNumH2() const;
 	int GetPertN() const;
 	float GetPertAmp() const;
