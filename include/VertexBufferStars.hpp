@@ -56,37 +56,37 @@ protected:
 	virtual void OnSetupAttribArray() const override 
 	{
 		glEnableVertexAttribArray(attPosition);
-		glVertexAttribPointer(attPosition, 2, GL_FLOAT, GL_FALSE, sizeof(VertexColor), 0);
+		glVertexAttribPointer(attPosition, 2, GL_FLOAT, GL_FALSE, sizeof(VertexStar), 0);
 
 		glEnableVertexAttribArray(attVelocity);
-		glVertexAttribPointer(attVelocity, 2, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, vel)));
+		glVertexAttribPointer(attVelocity, 2, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, vel)));
 
 		glEnableVertexAttribArray(attTheta);
-		glVertexAttribPointer(attTheta, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, theta)));
+		glVertexAttribPointer(attTheta, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, theta)));
 
 		glEnableVertexAttribArray(attVelTheta);
-		glVertexAttribPointer(attVelTheta, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, velTheta)));
+		glVertexAttribPointer(attVelTheta, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, velTheta)));
 
 		glEnableVertexAttribArray(attAngle);
-		glVertexAttribPointer(attAngle, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, angle)));
+		glVertexAttribPointer(attAngle, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, angle)));
 
 		glEnableVertexAttribArray(attSemiMajorAxis);
-		glVertexAttribPointer(attSemiMajorAxis, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, a)));
+		glVertexAttribPointer(attSemiMajorAxis, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, a)));
 
 		glEnableVertexAttribArray(attSemiMinorAxis);
-		glVertexAttribPointer(attSemiMinorAxis, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, b)));
+		glVertexAttribPointer(attSemiMinorAxis, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, b)));
 
 		glEnableVertexAttribArray(attCenter);
-		glVertexAttribPointer(attCenter, 2, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, center)));
+		glVertexAttribPointer(attCenter, 2, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, center)));
 
 		glEnableVertexAttribArray(attTemperature);
-		glVertexAttribPointer(attTemperature, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, temp)));
+		glVertexAttribPointer(attTemperature, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, temp)));
 
 		glEnableVertexAttribArray(attMagnitude);
-		glVertexAttribPointer(attMagnitude, 1, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(Star, mag)));
+		glVertexAttribPointer(attMagnitude, 1, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(Star, mag)));
 
 		glEnableVertexAttribArray(attColor);
-		glVertexAttribPointer(attColor, 4, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (GLvoid*)(offsetof(VertexStar, col)));
+		glVertexAttribPointer(attColor, 4, GL_FLOAT, GL_FALSE, sizeof(VertexStar), (GLvoid*)(offsetof(VertexStar, col)));
 	}
 
 	virtual void OnReleaseAttribArray() const override
