@@ -9,6 +9,7 @@
 #include "specrend.h"
 #include "Types.hpp"
 
+const float GalaxyWnd::TimeStepSize = 100000.0f;
 
 GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
@@ -217,7 +218,7 @@ void GalaxyWnd::UpdateStars()
 		vert.push_back({ pStars[i], color });
 	}
 
-	_vertStars.SetDensityWavePerturbation(_galaxy.GetPertN(), _galaxy.GetPertAmp());
+	_vertStars.SetOrbitParameters(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp());
 	_vertStars.CreateBuffer(vert, idx, GL_POINTS);
 	_renderUpdateHint &= ~ruhSTARS;
 }
@@ -369,7 +370,7 @@ void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 
 	Star* pStars = _galaxy.GetStars();
 
-	float dt_in_sec = _galaxy.GetTimeStep() * MathHelper::SEC_PER_YEAR;
+	float dt_in_sec = GalaxyWnd::TimeStepSize * MathHelper::SEC_PER_YEAR;
 	float r = 0, v = 0;
 	float cr = 0.5, cg = 1, cb = 1, ca = 0.15;
 	for (int i = 1; i < num; ++i)
@@ -457,7 +458,7 @@ void GalaxyWnd::UpdateDensityWaves()
 void GalaxyWnd::Update()
 {
 	if (!(_flags & (int)DisplayItem::PAUSE))
-		_galaxy.SingleTimeStep(100000); // time in years
+		_galaxy.SingleTimeStep(GalaxyWnd::TimeStepSize); // time in years
 
 	if ((_renderUpdateHint & ruhDENSITY_WAVES) != 0)
 		UpdateDensityWaves();

@@ -12,9 +12,10 @@ class VertexBufferStars : public VertexBufferBase<VertexStar>
 {
 public:
 	VertexBufferStars()
-		: VertexBufferBase()
+		: VertexBufferBase(GL_STATIC_DRAW)
 		, _pertN(0)
 		, _pertAmp(0)
+		, _time(0)
 	{
 		_attributes.push_back({ attPosition,      2, 0 });
 		_attributes.push_back({ attVelocity,      2, offsetof(Star, vel) });
@@ -29,10 +30,11 @@ public:
 		_attributes.push_back({ attColor,         4, offsetof(VertexStar, col) });
 	}
 
-	void SetDensityWavePerturbation(int num, float amp)
+	void SetOrbitParameters(float time, int num, float amp)
 	{
 		_pertN = num;
 		_pertAmp = amp;
+		_time = time;
 	}
 
 protected:
@@ -41,11 +43,14 @@ protected:
 	{
 		return
 			"#version 330 core\n"
+			"\n"
 			"uniform mat4 projMat;\n"
 			"uniform mat4 viewMat;\n"
 			"uniform float pertN;\n"
 			"uniform float pertAmp;\n"
+			"uniform float time;\n"
 			"uniform float DEG_TO_RAD = 0.01745329251;\n"
+			"\n"
 			"layout(location = 0) in vec2 pos;\n"
 			"layout(location = 1) in vec2 vel;\n"
 			"layout(location = 2) in float theta;\n"
@@ -57,35 +62,13 @@ protected:
 			"layout(location = 8) in float temp;\n"
 			"layout(location = 9) in float mag;\n"
 			"layout(location = 10) in vec4 color;\n"
+			"\n"
 			"out vec4 vertexColor;\n"
-/*
-			void Galaxy::CalcXY(Star & p, int pertN, float pertAmp)
-		{
-			float beta = -p.angle;
-			float alpha = p.theta * MathHelper::DEG_TO_RAD;
-
-			// temporaries to save cpu time
-			float cosalpha = std::cos(alpha);
-			float sinalpha = std::sin(alpha);
-			float cosbeta = std::cos(beta);
-			float sinbeta = std::sin(beta);
-
-			Vec2 ps = {
-				p.center.x + (p.a * cosalpha * cosbeta - p.b * sinalpha * sinbeta),
-				p.center.y + (p.a * cosalpha * sinbeta + p.b * sinalpha * cosbeta) };
-
-			// Add small perturbations to create more spiral arms
-			if (pertAmp > 0 && pertN > 0)
-			{
-				ps.x += (p.a / pertAmp) * sin(alpha * 2 * pertN);
-				ps.y += (p.a / pertAmp) * cos(alpha * 2 * pertN);
-			}
-
-			p.pos = ps;
-		}
-*/
+			"\n"
 			"void main()\n"
 			"{\n"
+			"	gl_PointSize = 1;\n"
+//			"	theta = theta + velTheta * time;\n"
 			"	float beta = -angle;\n"
 			"	float alpha = theta * DEG_TO_RAD;\n"
 			"\n"
@@ -102,7 +85,9 @@ protected:
 			"		ps.y += (a / pertAmp) * cos(alpha * 2 * pertN);\n"
 			"	}\n"
 			"\n"
-			"	gl_Position =  projMat * vec4(pos, 0, 1);\n"
+//			"	pos = ps;\n"
+			"	gl_Position =  projMat * vec4(ps, 0, 1);\n"
+//			"	gl_Position =  projMat * vec4(pos, 0, 1);\n"
 			"	vertexColor = color;\n"
 			"}\n";
 	}
@@ -121,10 +106,13 @@ protected:
 	virtual void OnSetCustomShaderVariables() override
 	{
 		GLuint pertN = glGetUniformLocation(GetShaderProgramm(), "pertN");
-		GLuint pertAmp = glGetUniformLocation(GetShaderProgramm(), "pertAmp");
+		glUniform1f(pertN, _pertN);
 
-		//glUniformFloat(pertN, 1, GL_FALSE, _pertN);
-		//glUniformFloat(pertAmp, 1, GL_FALSE, _pertAmp);
+		GLuint pertAmp = glGetUniformLocation(GetShaderProgramm(), "pertAmp");
+		glUniform1f(pertAmp, _pertAmp);
+
+		GLuint time = glGetUniformLocation(GetShaderProgramm(), "time");
+		glUniform1f(time, time);
 	}
 
 
@@ -145,7 +133,8 @@ private:
 		attColor = 10
 	};
 
-	// Static parameters for overall density wave shape
+	// parameters for density wave computation
 	int _pertN;
 	float _pertAmp;
+	float _time;
 };

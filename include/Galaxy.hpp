@@ -44,7 +44,7 @@ public:
 	float GetCoreRad() const;
 	float GetFarFieldRad() const;
 
-	static void CalcXY(Star &pStar, int pertN, float pertAmp);
+	static void CalcXY(Star &pStar, float time, int pertN, float pertAmp);
 
 	// Properties depending on the orbital radius
 
@@ -56,7 +56,6 @@ public:
 
 	float GetExInner() const;
 	float GetExOuter() const;
-	float GetTimeStep() const;
 	float GetTime() const;
 	float GetDustRenderSize() const;
 	int GetNumStars() const;
@@ -115,7 +114,6 @@ private:
 	float _pertAmp;
 
 	float _time;
-	float _timeStep;
 
 	bool _hasDarkMatter;
 

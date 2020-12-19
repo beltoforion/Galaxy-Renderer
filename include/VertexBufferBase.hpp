@@ -10,12 +10,11 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-
 template<typename TVertex>
 class VertexBufferBase
 {
 public:
-	VertexBufferBase()
+	VertexBufferBase(GLuint bufferMode)
 		: _vbo(0)
 		, _ibo(0)
 		, _vao(0)
@@ -24,10 +23,13 @@ public:
 		, _idx()
 		, _shaderProgram(0)
 		, _primitiveType(0)
-	{}
+	{
+		_bufferMode = bufferMode;
+	}
 
 	virtual ~VertexBufferBase()
-	{}
+	{
+	}
 
 	void Initialize()
 	{
@@ -173,7 +175,9 @@ public:
 		}
 	}
 
-	virtual void OnBeforeDraw() {}
+	virtual void OnBeforeDraw() 
+	{
+	}
 
 protected:
 

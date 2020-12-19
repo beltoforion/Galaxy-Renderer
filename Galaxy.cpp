@@ -33,7 +33,6 @@ Galaxy::Galaxy(
 	, _pertN(0)
 	, _pertAmp(0)
 	, _time(0)
-	, _timeStep(0)
 	, _hasDarkMatter(true)
 	, _baseTemp(4000)
 	, _numberByRad()
@@ -435,18 +434,15 @@ void Galaxy::SetExOuter(float ex)
 	Reset();
 }
 
-float Galaxy::GetTimeStep() const
-{
-	return _timeStep;
-}
-
 float Galaxy::GetTime() const
 {
 	return _time;
 }
 
-void Galaxy::CalcXY(Star &p, int pertN, float pertAmp)
+void Galaxy::CalcXY(Star &p, float time, int pertN, float pertAmp)
 {
+	p.theta += p.velTheta * time;
+	
 	float beta = -p.angle;
 	float alpha = p.theta * MathHelper::DEG_TO_RAD;
 
@@ -456,9 +452,11 @@ void Galaxy::CalcXY(Star &p, int pertN, float pertAmp)
 	float cosbeta = std::cos(beta);
 	float sinbeta = std::sin(beta);
 
-	Vec2 ps = {
+	Vec2 ps = 
+	{
 		p.center.x + (p.a * cosalpha * cosbeta - p.b * sinalpha * sinbeta),
-		p.center.y + (p.a * cosalpha * sinbeta + p.b * sinalpha * cosbeta) };
+		p.center.y + (p.a * cosalpha * sinbeta + p.b * sinalpha * cosbeta) 
+	};
 
 	// Add small perturbations to create more spiral arms
 	if (pertAmp > 0 && pertN > 0)
@@ -470,75 +468,47 @@ void Galaxy::CalcXY(Star &p, int pertN, float pertAmp)
 	p.pos = ps;
 }
 
-void Galaxy::SingleTimeStep(float time)
+void Galaxy::SingleTimeStep(float timeStepSize)
 {
-	_timeStep = time;
-	_time += time;
+	_time += timeStepSize;
 
-#define PARALLEL_TIMESTEP_CALCULATION
-#if defined(PARALLEL_TIMESTEP_CALCULATION)
 	auto pertN = _pertN;
 	auto pertAmp = _pertAmp;
-	auto tm = time;
 
 	std::for_each(
 		std::execution::par_unseq,
 		_stars.begin(),
 		_stars.end(),
-		[pertN, pertAmp, time](auto&& star)
+		[pertN, pertAmp, timeStepSize](auto&& pt)
 		{
-			star.theta += (star.velTheta * time);
-			Vec2 posOld = star.pos;
-			Galaxy::CalcXY(star, pertN, pertAmp);
+			Vec2 posOld = pt.pos;
+			Galaxy::CalcXY(pt, timeStepSize, pertN, pertAmp);
 
 			Vec2 b = {
-				star.pos.x - posOld.x,
-				star.pos.y - posOld.y
+				pt.pos.x - posOld.x,
+				pt.pos.y - posOld.y
 			};
 
-			star.vel = b;
+			pt.vel = b;
 		});
 
 	std::for_each(
 		std::execution::par_unseq,
 		_dust.begin(),
 		_dust.end(),
-		[pertN, pertAmp, time](auto&& dust)
+		[pertN, pertAmp, timeStepSize](auto&& pt)
 		{
-			dust.theta += (dust.velTheta * time);
-			Vec2 posOld = dust.pos;
-			Galaxy::CalcXY(dust, pertN, pertAmp);
+			Galaxy::CalcXY(pt, timeStepSize, pertN, pertAmp);
 		});
-#else
-	for (int i = 0; i < _numStars; ++i)
-	{
-		_pStars[i].theta += (_pStars[i].velTheta * time);
-		Vec2D posOld = _pStars[i].pos;
-		CalcXY(_pStars[i], _pertN, _pertAmp);
 
-		Vec2D b = {
-			_pStars[i].pos.x - posOld.x,
-			_pStars[i].pos.y - posOld.y 
-		};
-
-		_pStars[i].vel = b;
-	}
-
-	for (int i = 0; i < _numDust; ++i)
-	{
-		_pDust[i].theta += (_pDust[i].velTheta * time);
-		Vec2D posOld = _pDust[i].pos;
-		CalcXY(_pDust[i], _pertN, _pertAmp);
-	}
-#endif
-
-	// There are too few H2 regions to merit parallelization
-	for (int i = 0; i < _numH2 * 2; ++i)
-	{
-		_H2[i].theta += (_H2[i].velTheta * time);
-		Vec2 posOld = _dust[i].pos;
-		CalcXY(_H2[i], _pertN, _pertAmp);
-	}
+	std::for_each(
+		std::execution::par_unseq,
+		_H2.begin(),
+		_H2.end(),
+		[pertN, pertAmp, timeStepSize](auto&& pt)
+		{
+			Galaxy::CalcXY(pt, timeStepSize, pertN, pertAmp);
+		});
 }
 
 const Vec2& Galaxy::GetStarPos(int idx)

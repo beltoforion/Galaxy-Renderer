@@ -12,11 +12,9 @@ class VertexBufferLines : public VertexBufferBase<VertexColor>
 {
 public:
 	VertexBufferLines(int lineWidth = 1, GLuint bufferMode = GL_STATIC_DRAW)
-		: VertexBufferBase()
+		: VertexBufferBase(bufferMode)
 		, _lineWidth(lineWidth)
 	{
-		_bufferMode = bufferMode;
-
 		_attributes.push_back({ attPosition, 3, 0 });
 		_attributes.push_back({ attColor, 4, offsetof(VertexColor, col) });
 	}

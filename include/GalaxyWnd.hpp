@@ -106,5 +106,7 @@ private:
 	std::vector<Galaxy::GalaxyParam> _predefinedGalaxies;
 
 	GLuint _texStar;
+
+	static const float TimeStepSize;
 };
 
