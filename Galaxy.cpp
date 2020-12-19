@@ -151,16 +151,16 @@ void Galaxy::InitStars()
 
 	for (int i = 3; i < _numStars; ++i)
 	{
-		float rad = (float)cdf.ValFromProb((float)rand() / (float)RAND_MAX);
+		float rad = (float)cdf.ValFromProb(MathHelper::rnum());
 
 		_stars[i].a = rad;
 		_stars[i].b = rad * GetExcentricity(rad);
 		_stars[i].angle = GetAngularOffset(rad);
-		_stars[i].theta = 360.0f * ((float)rand() / RAND_MAX);
+		_stars[i].theta = 360.0f * MathHelper::rnum();
 		_stars[i].velTheta = GetOrbitalVelocity(rad);
 		_stars[i].center = { 0, 0 };
-		_stars[i].temp = 6000 + (4000 * ((float)rand() / RAND_MAX)) - 2000;
-		_stars[i].mag = 0.3f + 0.2f * (float)rand() / (float)RAND_MAX;
+		_stars[i].temp = 6000 + (4000 * MathHelper::rnum() - 2000);
+		_stars[i].mag = 0.3f + 0.2f * MathHelper::rnum();
 
 		int idx = (int)std::min(1.0f / dh * (_stars[i].a + _stars[i].b) / 2.0f, 99.0f);
 		_numberByRad[idx]++;
@@ -172,19 +172,19 @@ void Galaxy::InitStars()
 	{
 		if (i % 4 == 0)
 		{
-			rad = (float)cdf.ValFromProb((float)rand() / (float)RAND_MAX);
+			rad = (float)cdf.ValFromProb(MathHelper::rnum());
 		}
 		else
 		{
-			x = 2 * _radGalaxy * ((float)rand() / (float)RAND_MAX) - _radGalaxy;
-			y = 2 * _radGalaxy * ((float)rand() / (float)RAND_MAX) - _radGalaxy;
+			x = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
+			y = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
 			rad = sqrt(x * x + y * y);
 		}
 
 		_dust[i].a = rad;
 		_dust[i].b = rad * GetExcentricity(rad);
 		_dust[i].angle = GetAngularOffset(rad);
-		_dust[i].theta = 360.0f * ((float)rand() / (float)RAND_MAX);
+		_dust[i].theta = 360.0f * MathHelper::rnum();
 		_dust[i].velTheta = GetOrbitalVelocity((_dust[i].a + _dust[i].b) / 2.0f);
 		_dust[i].center = { 0, 0 };
 
@@ -192,7 +192,7 @@ void Galaxy::InitStars()
 		// the following temperature distribution (no science here it just looks right)
 		_dust[i].temp = _baseTemp + rad / 4.5f;
 
-		_dust[i].mag = 0.015f + 0.01f * (float)rand() / (float)RAND_MAX;
+		_dust[i].mag = 0.015f + 0.01f * MathHelper::rnum();
 		int idx = (int)std::min(1.0f / dh * (_dust[i].a + _dust[i].b) / 2.0f, 99.0f);
 		_numberByRad[idx]++;
 	}
@@ -200,19 +200,19 @@ void Galaxy::InitStars()
 	// Initialise Dust
 	for (int i = 0; i < _numH2; ++i)
 	{
-		x = 2 * (_radGalaxy) * ((float)rand() / (float)RAND_MAX) - (_radGalaxy);
-		y = 2 * (_radGalaxy) * ((float)rand() / (float)RAND_MAX) - (_radGalaxy);
+		x = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
+		y = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
 		rad = sqrt(x * x + y * y);
 
 		int k1 = 2 * i;
 		_H2[k1].a = rad;
 		_H2[k1].b = rad * GetExcentricity(rad);
 		_H2[k1].angle = GetAngularOffset(rad);
-		_H2[k1].theta = 360.0f * ((float)rand() / (float)RAND_MAX);
+		_H2[k1].theta = 360.0f * MathHelper::rnum();
 		_H2[k1].velTheta = GetOrbitalVelocity((_H2[k1].a + _H2[k1].b) / 2.0f);
 		_H2[k1].center = { 0, 0 };
-		_H2[k1].temp = 6000 + (6000 * ((float)rand() / (float)RAND_MAX)) - 3000;
-		_H2[k1].mag = 0.1f + 0.05f * (float)rand() / (float)RAND_MAX;
+		_H2[k1].temp = 6000 + (6000 * MathHelper::rnum()) - 3000;
+		_H2[k1].mag = 0.1f + 0.05f * MathHelper::rnum();
 		int idx = (int)std::min(1.0f / dh * (_H2[k1].a + _H2[k1].b) / 2.0f, 99.0f);
 		_numberByRad[idx]++;
 

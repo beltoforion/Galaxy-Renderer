@@ -55,18 +55,6 @@ protected:
 
 	virtual void OnSetupAttribArray() const override 
 	{
-		//"layout(location = 0) in vec2 pos;\n"
-		//	"layout(location = 1) in vec2 vel;\n"
-		//	"layout(location = 2) in float theta;\n"
-		//	"layout(location = 3) in float velTheta;\n"
-		//	"layout(location = 4) in float angle;\n"
-		//	"layout(location = 5) in float a;\n"
-		//	"layout(location = 6) in float b;\n"
-		//	"layout(location = 7) in vec2 center;\n"
-		//	"layout(location = 8) in float temp;\n"
-		//	"layout(location = 9) in float mag;\n"
-		//	"layout(location = 10) in vec4 color;\n"
-
 		glEnableVertexAttribArray(attPosition);
 		glVertexAttribPointer(attPosition, 2, GL_FLOAT, GL_FALSE, sizeof(VertexColor), 0);
 
@@ -103,8 +91,10 @@ protected:
 
 	virtual void OnReleaseAttribArray() const override
 	{
-		glDisableVertexAttribArray(attPosition);
-		glDisableVertexAttribArray(attColor);
+		for (int i = 0; i < attLast; ++i)
+		{
+			glDisableVertexAttribArray(i);
+		}
 	}
 
 private:
@@ -112,15 +102,16 @@ private:
 	enum AttributeIdx : int
 	{
 		attPosition = 0,
-		attVelocity,
-		attTheta,
-		attVelTheta,
-		attAngle,
-		attSemiMajorAxis,
-		attSemiMinorAxis,
-		attCenter,
-		attTemperature,
-		attMagnitude,
-		attColor
+		attVelocity = 1,
+		attTheta = 2,
+		attVelTheta = 3,
+		attAngle = 4,
+		attSemiMajorAxis = 5,
+		attSemiMinorAxis = 6,
+		attCenter = 7,
+		attTemperature = 8,
+		attMagnitude = 9,
+		attColor = 10,
+		attLast
 	};
 };

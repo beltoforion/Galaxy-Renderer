@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 
 /** \brief A class to store relevant constants. */
 class MathHelper
@@ -33,5 +35,10 @@ public:
 		}
 
 		return power << 1; // power * 2;
+	}
+
+	static inline float rnum()
+	{
+		return (float)std::rand() / RAND_MAX;
 	}
 };

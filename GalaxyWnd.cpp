@@ -213,7 +213,6 @@ void GalaxyWnd::UpdateStars()
 		}
 
 		idx.push_back((int)vert.size());
-//		vert.push_back({ pos.x, pos.y, 0.0f , color.r, color.g, color.b, color.a });
 		vert.push_back({ pStars[i], color });
 	}
 
