@@ -39,7 +39,7 @@ Galaxy::Galaxy(
 	, _pos({ 0, 0 })
 	, _stars()
 	, _dust()
-	, _H2()
+	, _h2()
 	, _dustRenderSize(70)
 {}
 
@@ -101,7 +101,7 @@ void Galaxy::InitStars()
 {
 	_dust = std::vector(_numDust, Star());
 	_stars = std::vector(_numStars, Star());
-	_H2 = std::vector((int)(_numH2 * 2), Star());
+	_h2 = std::vector((size_t)(2 * _numH2), Star());
 
 	// The first three stars can be used for aligning the
 	// camera with the galaxy rotation.
@@ -109,8 +109,8 @@ void Galaxy::InitStars()
 	// First star ist the black hole at the centre
 	_stars[0].a = 0;
 	_stars[0].b = 0;
-	_stars[0].angle = 0;
-	_stars[0].theta = 0;
+	_stars[0].tiltAngle = 0;
+	_stars[0].theta0 = 0;
 	_stars[0].velTheta = 0;
 	_stars[0].center = { 0, 0 };
 	_stars[0].velTheta = GetOrbitalVelocity((_stars[0].a + _stars[0].b) / 2.0f);
@@ -119,8 +119,8 @@ void Galaxy::InitStars()
 	// second star is at the edge of the core area
 	_stars[1].a = _radCore;
 	_stars[1].b = _radCore * GetExcentricity(_radCore);
-	_stars[1].angle = GetAngularOffset(_radCore);
-	_stars[1].theta = 0;
+	_stars[1].tiltAngle = GetAngularOffset(_radCore);
+	_stars[1].theta0 = 0;
 	_stars[1].center = { 0, 0 };
 	_stars[1].velTheta = GetOrbitalVelocity((_stars[1].a + _stars[1].b) / 2.0f);
 	_stars[1].temp = 6000;
@@ -128,8 +128,8 @@ void Galaxy::InitStars()
 	// third star is at the edge of the disk
 	_stars[2].a = _radGalaxy;
 	_stars[2].b = _radGalaxy * GetExcentricity(_radGalaxy);
-	_stars[2].angle = GetAngularOffset(_radGalaxy);
-	_stars[2].theta = 0;
+	_stars[2].tiltAngle = GetAngularOffset(_radGalaxy);
+	_stars[2].theta0 = 0;
 	_stars[2].center = { 0, 0 };
 	_stars[2].velTheta = GetOrbitalVelocity((_stars[2].a + _stars[2].b) / 2.0f);
 	_stars[2].temp = 6000;
@@ -154,8 +154,8 @@ void Galaxy::InitStars()
 
 		_stars[i].a = rad;
 		_stars[i].b = rad * GetExcentricity(rad);
-		_stars[i].angle = GetAngularOffset(rad);
-		_stars[i].theta = 360.0f * MathHelper::rnum();
+		_stars[i].tiltAngle = GetAngularOffset(rad);
+		_stars[i].theta0 = 360.0f * MathHelper::rnum();
 		_stars[i].velTheta = GetOrbitalVelocity(rad);
 		_stars[i].center = { 0, 0 };
 		_stars[i].temp = 6000 + (4000 * MathHelper::rnum() - 2000);
@@ -182,8 +182,8 @@ void Galaxy::InitStars()
 
 		_dust[i].a = rad;
 		_dust[i].b = rad * GetExcentricity(rad);
-		_dust[i].angle = GetAngularOffset(rad);
-		_dust[i].theta = 360.0f * MathHelper::rnum();
+		_dust[i].tiltAngle = GetAngularOffset(rad);
+		_dust[i].theta0 = 360.0f * MathHelper::rnum();
 		_dust[i].velTheta = GetOrbitalVelocity((_dust[i].a + _dust[i].b) / 2.0f);
 		_dust[i].center = { 0, 0 };
 
@@ -204,29 +204,29 @@ void Galaxy::InitStars()
 		rad = sqrt(x * x + y * y);
 
 		int k1 = 2 * i;
-		_H2[k1].a = rad;
-		_H2[k1].b = rad * GetExcentricity(rad);
-		_H2[k1].angle = GetAngularOffset(rad);
-		_H2[k1].theta = 360.0f * MathHelper::rnum();
-		_H2[k1].velTheta = GetOrbitalVelocity((_H2[k1].a + _H2[k1].b) / 2.0f);
-		_H2[k1].center = { 0, 0 };
-		_H2[k1].temp = 6000 + (6000 * MathHelper::rnum()) - 3000;
-		_H2[k1].mag = 0.1f + 0.05f * MathHelper::rnum();
-		int idx = (int)std::min(1.0f / dh * (_H2[k1].a + _H2[k1].b) / 2.0f, 99.0f);
+		_h2[k1].a = rad;
+		_h2[k1].b = rad * GetExcentricity(rad);
+		_h2[k1].tiltAngle = GetAngularOffset(rad);
+		_h2[k1].theta0 = 360.0f * MathHelper::rnum();
+		_h2[k1].velTheta = GetOrbitalVelocity((_h2[k1].a + _h2[k1].b) / 2.0f);
+		_h2[k1].center = { 0, 0 };
+		_h2[k1].temp = 6000 + (6000 * MathHelper::rnum()) - 3000;
+		_h2[k1].mag = 0.1f + 0.05f * MathHelper::rnum();
+		int idx = (int)std::min(1.0f / dh * (_h2[k1].a + _h2[k1].b) / 2.0f, 99.0f);
 		_numberByRad[idx]++;
 
 		// Create second point 100 pc away from the first one
 		int dist = 1000;
 		int k2 = 2 * i + 1;
-		_H2[k2].a = (rad + dist);
-		_H2[k2].b = (rad /*+ dist*/)*GetExcentricity(rad /*+ dist*/);
-		_H2[k2].angle = GetAngularOffset(rad);
-		_H2[k2].theta = _H2[k1].theta;
-		_H2[k2].velTheta = _H2[k1].velTheta;
-		_H2[k2].center = _H2[k1].center;
-		_H2[k2].temp = _H2[k1].temp;
-		_H2[k2].mag = _H2[k1].mag;
-		idx = (int)std::min(1.0 / dh * ((double)_H2[k2].a + _H2[k2].b) / 2.0, 99.0);
+		_h2[k2].a = (rad + dist);
+		_h2[k2].b = (rad)*GetExcentricity(rad);
+		_h2[k2].tiltAngle = GetAngularOffset(rad);
+		_h2[k2].theta0 = _h2[k1].theta0;
+		_h2[k2].velTheta = _h2[k1].velTheta;
+		_h2[k2].center = _h2[k1].center;
+		_h2[k2].temp = _h2[k1].temp;
+		_h2[k2].mag = _h2[k1].mag;
+		idx = (int)std::min(1.0 / dh * ((double)_h2[k2].a + _h2[k2].b) / 2.0, 99.0);
 		_numberByRad[idx]++;
 	}
 }
@@ -259,7 +259,7 @@ const std::vector<Star>& Galaxy::GetDust() const
 
 const std::vector<Star>& Galaxy::GetH2() const
 {
-	return _H2;
+	return _h2;
 }
 
 float Galaxy::GetDustRenderSize() const
@@ -439,12 +439,12 @@ float Galaxy::GetTime() const
 	return _time;
 }
 
-void Galaxy::CalcXY(Star &p, float time, int pertN, float pertAmp)
+void Galaxy::CalcXy(Star &p, float time,int pertN, float pertAmp)
 {
-	p.theta += p.velTheta * time;
-	
-	float beta = -p.angle;
-	float alpha = p.theta * MathHelper::DEG_TO_RAD;
+	auto thetaActual = p.theta0 + p.velTheta * time;
+
+	float beta = -p.tiltAngle;
+	float alpha = thetaActual * MathHelper::DEG_TO_RAD;
 
 	// temporaries to save cpu time
 	float cosalpha = std::cos(alpha);
@@ -474,15 +474,16 @@ void Galaxy::SingleTimeStep(float timeStepSize)
 
 	auto pertN = _pertN;
 	auto pertAmp = _pertAmp;
+	auto time = _time;
 
 	std::for_each(
 		std::execution::par_unseq,
 		_stars.begin(),
 		_stars.end(),
-		[pertN, pertAmp, timeStepSize](auto&& pt)
+		[pertN, pertAmp, time](auto&& pt)
 		{
 			Vec2 posOld = pt.pos;
-			Galaxy::CalcXY(pt, timeStepSize, pertN, pertAmp);
+			Galaxy::CalcXy(pt, time, pertN, pertAmp);
 
 			Vec2 b = {
 				pt.pos.x - posOld.x,
@@ -496,18 +497,18 @@ void Galaxy::SingleTimeStep(float timeStepSize)
 		std::execution::par_unseq,
 		_dust.begin(),
 		_dust.end(),
-		[pertN, pertAmp, timeStepSize](auto&& pt)
+		[pertN, pertAmp, time](auto&& pt)
 		{
-			Galaxy::CalcXY(pt, timeStepSize, pertN, pertAmp);
+			Galaxy::CalcXy(pt, time, pertN, pertAmp);
 		});
 
 	std::for_each(
 		std::execution::par_unseq,
-		_H2.begin(),
-		_H2.end(),
-		[pertN, pertAmp, timeStepSize](auto&& pt)
+		_h2.begin(),
+		_h2.end(),
+		[pertN, pertAmp, time](auto&& pt)
 		{
-			Galaxy::CalcXY(pt, timeStepSize, pertN, pertAmp);
+			Galaxy::CalcXy(pt, time, pertN, pertAmp);
 		});
 }
 
@@ -519,8 +520,4 @@ const Vec2& Galaxy::GetStarPos(int idx)
 	return _stars[idx].pos; 
 }
 
-int Galaxy::GetNumH2() const
-{
-	return _H2.size();
-}
 

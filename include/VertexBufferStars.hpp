@@ -19,9 +19,9 @@ public:
 	{
 		_attributes.push_back({ attPosition,      2, 0 });
 		_attributes.push_back({ attVelocity,      2, offsetof(Star, vel) });
-		_attributes.push_back({ attTheta,         1, offsetof(Star, theta) });
+		_attributes.push_back({ attTheta0,         1, offsetof(Star, theta0) });
 		_attributes.push_back({ attVelTheta,      1, offsetof(Star, velTheta) });
-		_attributes.push_back({ attAngle,         1, offsetof(Star, angle) });
+		_attributes.push_back({ attTiltAngle,     1, offsetof(Star, tiltAngle) });
 		_attributes.push_back({ attSemiMajorAxis, 1, offsetof(Star, a) });
 		_attributes.push_back({ attSemiMinorAxis, 1, offsetof(Star, b) });
 		_attributes.push_back({ attCenter,        2, offsetof(Star, center) });
@@ -30,7 +30,7 @@ public:
 		_attributes.push_back({ attColor,         4, offsetof(VertexStar, col) });
 	}
 
-	void SetOrbitParameters(float time, int num, float amp)
+	void UpdateShaderVariables(float time, int num, float amp)
 	{
 		_pertN = num;
 		_pertAmp = amp;
@@ -46,16 +46,16 @@ protected:
 			"\n"
 			"uniform mat4 projMat;\n"
 			"uniform mat4 viewMat;\n"
-			"uniform float pertN;\n"
+			"uniform int pertN;\n"
 			"uniform float pertAmp;\n"
 			"uniform float time;\n"
 			"uniform float DEG_TO_RAD = 0.01745329251;\n"
 			"\n"
 			"layout(location = 0) in vec2 pos;\n"
 			"layout(location = 1) in vec2 vel;\n"
-			"layout(location = 2) in float theta;\n"
+			"layout(location = 2) in float theta0;\n"
 			"layout(location = 3) in float velTheta;\n"
-			"layout(location = 4) in float angle;\n"
+			"layout(location = 4) in float tiltAngle;\n"
 			"layout(location = 5) in float a;\n"
 			"layout(location = 6) in float b;\n"
 			"layout(location = 7) in vec2 center;\n"
@@ -68,9 +68,10 @@ protected:
 			"void main()\n"
 			"{\n"
 			"	gl_PointSize = 1;\n"
-//			"	theta = theta + velTheta * time;\n"
-			"	float beta = -angle;\n"
-			"	float alpha = theta * DEG_TO_RAD;\n"
+			"	float thetaActual = theta0 + velTheta * time;\n"
+			"\n"
+			"	float beta = -tiltAngle;\n"
+			"	float alpha = thetaActual * DEG_TO_RAD;\n"
 			"\n"
 			"	float cosalpha = cos(alpha);\n"
 			"	float sinalpha = sin(alpha);\n"
@@ -105,14 +106,14 @@ protected:
 
 	virtual void OnSetCustomShaderVariables() override
 	{
-		GLuint pertN = glGetUniformLocation(GetShaderProgramm(), "pertN");
-		glUniform1f(pertN, _pertN);
+		GLuint varPertN = glGetUniformLocation(GetShaderProgramm(), "pertN");
+		glUniform1i(varPertN, _pertN);
 
-		GLuint pertAmp = glGetUniformLocation(GetShaderProgramm(), "pertAmp");
-		glUniform1f(pertAmp, _pertAmp);
+		GLuint varPertAmp = glGetUniformLocation(GetShaderProgramm(), "pertAmp");
+		glUniform1f(varPertAmp, _pertAmp);
 
-		GLuint time = glGetUniformLocation(GetShaderProgramm(), "time");
-		glUniform1f(time, time);
+		GLuint varTime = glGetUniformLocation(GetShaderProgramm(), "time");
+		glUniform1f(varTime, _time);
 	}
 
 
@@ -122,9 +123,9 @@ private:
 	{
 		attPosition = 0,
 		attVelocity = 1,
-		attTheta = 2,
+		attTheta0 = 2,
 		attVelTheta = 3,
-		attAngle = 4,
+		attTiltAngle = 4,
 		attSemiMajorAxis = 5,
 		attSemiMinorAxis = 6,
 		attCenter = 7,

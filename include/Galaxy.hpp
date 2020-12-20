@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <stdexcept>
 #include "Types.hpp"
 
 
@@ -44,7 +45,7 @@ public:
 	float GetCoreRad() const;
 	float GetFarFieldRad() const;
 
-	static void CalcXY(Star &pStar, float time, int pertN, float pertAmp);
+	static void CalcXy(Star &pStar, float time, int pertN, float pertAmp);
 
 	// Properties depending on the orbital radius
 
@@ -58,7 +59,6 @@ public:
 	float GetExOuter() const;
 	float GetTime() const;
 	float GetDustRenderSize() const;
-	int GetNumH2() const;
 	int GetPertN() const;
 	float GetPertAmp() const;
 	float GetBaseTemp() const noexcept;
@@ -84,7 +84,10 @@ public:
 private:
 
 	Galaxy(const Galaxy& obj);
-	Galaxy& operator=(const Galaxy& obj);
+	Galaxy& operator=(const Galaxy& obj)
+	{
+		throw std::runtime_error("Galaxy& operator=: not implemented!");
+	}
 
 	void InitStars();
 
@@ -124,5 +127,5 @@ private:
 	Vec2 _pos;				   ///< Center of the galaxy
 	std::vector<Star> _stars;  ///< Pointer to an array of star data
 	std::vector<Star> _dust;   ///< Pointer to an array of dusty areas
-	std::vector<Star> _H2;
+	std::vector<Star> _h2;
 };

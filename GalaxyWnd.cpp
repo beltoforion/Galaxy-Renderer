@@ -217,7 +217,7 @@ void GalaxyWnd::UpdateStars()
 		vert.push_back({ stars[i], color });
 	}
 
-	_vertStars.SetOrbitParameters(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp());
+	_vertStars.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp());
 	_vertStars.CreateBuffer(vert, idx, GL_POINTS);
 	_renderUpdateHint &= ~ruhSTARS;
 }
@@ -361,7 +361,7 @@ void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 {
 	// I don't need every star for the curve.
 	const auto& stars = _galaxy.GetStars();
-	int num = stars.size() / 3;
+	std::size_t num = stars.size() / 3;
 
 	std::vector<VertexColor> vert;
 	vert.reserve(num);
@@ -537,7 +537,15 @@ void GalaxyWnd::Render()
 		DrawH2();
 
 	if (_flags & (int)DisplayItem::STARS)
+	{
+#define DIRECT_MODE_STAR_RENDERING
+#if defined(DIRECT_MODE_STAR_RENDERING)
 		DrawStars();
+#else
+		_vertStars.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp());
+		_vertStars.Draw(_matView, _matProjection);
+#endif
+	}
 
 	if (_flags & (int)DisplayItem::DENSITY_WAVES)
 	{
@@ -608,8 +616,6 @@ void GalaxyWnd::AddEllipsisVertices(
 
 void GalaxyWnd::DrawStars()
 {
-//	_vertStars.Draw(_matView, _matProjection);
-
 	glBindTexture(GL_TEXTURE_2D, _texStar);
 
 	float maxSize = 0.0f;
@@ -624,7 +630,6 @@ void GalaxyWnd::DrawStars()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 	const auto &stars = _galaxy.GetStars();
-	int num = stars.size();
 
 	glPointSize(2); 
 	glBegin(GL_POINTS);
@@ -633,7 +638,7 @@ void GalaxyWnd::DrawStars()
 		glColor3f(1, 1, 1);
 
 	// Render all Stars from the stars array
-	for (int i = 1; i < num; ++i)
+	for (int i = 1; i < stars.size(); ++i)
 	{
 		const Vec2& pos = stars[i].pos;
 		const Color& col = ColorFromTemperature(stars[i].temp);
@@ -653,7 +658,7 @@ void GalaxyWnd::DrawStars()
 	glPointSize(5); 
 	glBegin(GL_POINTS);
 
-	for (int i = 1; i < num / 30; ++i)
+	for (int i = 1; i < stars.size() / 30; ++i)
 	{
 		const Vec2& pos = stars[i].pos;
 		const Color& col = ColorFromTemperature(stars[i].temp);
@@ -744,7 +749,7 @@ void GalaxyWnd::DrawH2()
 		const Vec2& p1 = h2[k1].pos;
 		const Vec2& p2 = h2[k2].pos;
 
-		float dst = sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+		float dst = std::sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 		float size = ((1000 - dst) / 10) - 50;
 		if (size < 1)
 			continue;

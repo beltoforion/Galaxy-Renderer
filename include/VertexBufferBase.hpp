@@ -4,6 +4,7 @@
 #include <string>
 #include <stdexcept>
 #include <sstream>
+#include <cstdint>
 
 #include <gl/glew.h>
 #include <glm/glm.hpp>
@@ -185,7 +186,7 @@ protected:
 	{
 		int attribIdx;
 		int size;
-		int offset;
+		uintptr_t offset;
 	};
 
 	GLuint _bufferMode;
