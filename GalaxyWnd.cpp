@@ -530,16 +530,19 @@ void GalaxyWnd::Render()
 		_textAxisLabel.Draw(_width, _height, _matView, _matProjection);
 	}
 
+#define DIRECT_MODE_RENDERING
+#if defined(DIRECT_MODE_RENDERING)
 	if (_flags & (int)DisplayItem::DUST)
 		DrawDust();
 
 	if (_flags & (int)DisplayItem::H2)
 		DrawH2();
+#endif
 
 	if (_flags & (int)DisplayItem::STARS)
 	{
-#define DIRECT_MODE_STAR_RENDERING
-#if defined(DIRECT_MODE_STAR_RENDERING)
+
+#if defined(DIRECT_MODE_RENDERING)
 		DrawStars();
 #else
 		_vertStars.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp());
