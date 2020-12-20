@@ -732,17 +732,17 @@ void GalaxyWnd::DrawH2()
 	glEnable(GL_BLEND);            // soft blending of point sprites
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-
-	Star* pH2 = _galaxy.GetH2();
-	int num = _galaxy.GetNumH2();
-
-	for (int i = 0; i < num; ++i)
+	const auto &h2 = _galaxy.GetH2();
+	for (uint32_t i = 0; i < h2.size()/2; ++i)
 	{
-		int k1 = 2 * i;
-		int k2 = 2 * i + 1;
+		uint32_t k1 = 2 * i;
+		uint32_t k2 = 2 * i + 1;
 
-		const Vec2& p1 = pH2[k1].pos;
-		const Vec2& p2 = pH2[k2].pos;
+		if (k1 >= h2.size() || k2 >= h2.size())
+			throw std::runtime_error("GalaxyWnd::DrawH2: index out of bounds!");
+
+		const Vec2& p1 = h2[k1].pos;
+		const Vec2& p2 = h2[k2].pos;
 
 		float dst = sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 		float size = ((1000 - dst) / 10) - 50;
@@ -751,11 +751,11 @@ void GalaxyWnd::DrawH2()
 
 		glPointSize(2 * size);
 		glBegin(GL_POINTS);
-			const Color& col = ColorFromTemperature(pH2[k1].temp);
+			const Color& col = ColorFromTemperature(h2[k1].temp);
 			glColor3f(
-				col.r * pH2[i].mag * 2.0f,
-				col.g * pH2[i].mag * 0.5f,
-				col.b * pH2[i].mag * 0.5f);
+				col.r * h2[i].mag * 2.0f,
+				col.g * h2[i].mag * 0.5f,
+				col.b * h2[i].mag * 0.5f);
 			glVertex3f(p1.x, p1.y, 0.0f);
 		glEnd();
 

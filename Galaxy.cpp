@@ -257,9 +257,9 @@ const std::vector<Star>& Galaxy::GetDust() const
 	return _dust;
 }
 
-Star* Galaxy::GetH2()
+const std::vector<Star>& Galaxy::GetH2() const
 {
-	return _H2.data();
+	return _H2;
 }
 
 float Galaxy::GetDustRenderSize() const

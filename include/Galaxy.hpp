@@ -38,7 +38,7 @@ public:
 
 	const std::vector<Star>& GetStars() const;
 	const std::vector<Star>& GetDust() const;
-	Star* GetH2();
+	const std::vector<Star>& GetH2() const;
 
 	float GetRad() const;
 	float GetCoreRad() const;
