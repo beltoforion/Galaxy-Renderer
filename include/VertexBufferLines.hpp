@@ -15,8 +15,10 @@ public:
 		: VertexBufferBase(bufferMode)
 		, _lineWidth(lineWidth)
 	{
-		_attributes.push_back({ attPosition, 3, 0 });
-		_attributes.push_back({ attColor, 4, offsetof(VertexColor, col) });
+		DefineAttributes({ 
+			{ attPosition, 3, 0 },
+			{ attColor, 4, offsetof(VertexColor, col) } 
+		});
 	}
 
 	void OnBeforeDraw() override

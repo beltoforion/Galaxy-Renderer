@@ -190,17 +190,43 @@ protected:
 	};
 
 	GLuint _bufferMode;
-	std::vector<AttributeDefinition> _attributes;
+
+	void DefineAttributes(std::vector<AttributeDefinition> attribList)
+	{
+		_attributes.clear();
+		for (const auto &ad : attribList)
+		{
+			_attributes.push_back(ad);
+		}
+	}
+
+
+	int GetPrimitiveType() const
+	{
+		return _primitiveType;
+	}
+
+	int GetArrayElementCount() const
+	{
+		return (int)_idx.size();
+	}
 
 	GLuint GetShaderProgramm() const
 	{
 		return _shaderProgram;
 	}
 
+	GLuint GetVertexArrayObject() const
+	{
+		return _vao;
+	}
+
 	virtual const char* GetVertexShaderSource() const = 0;
 	virtual const char* GetFragmentShaderSource() const = 0;
 
 private:
+
+	std::vector<AttributeDefinition> _attributes;
 
 	// Vertex buffer object
 	GLuint _vbo;

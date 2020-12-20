@@ -17,17 +17,19 @@ public:
 		, _pertAmp(0)
 		, _time(0)
 	{
-		_attributes.push_back({ attPosition,      2, 0 });
-		_attributes.push_back({ attVelocity,      2, offsetof(Star, vel) });
-		_attributes.push_back({ attTheta0,         1, offsetof(Star, theta0) });
-		_attributes.push_back({ attVelTheta,      1, offsetof(Star, velTheta) });
-		_attributes.push_back({ attTiltAngle,     1, offsetof(Star, tiltAngle) });
-		_attributes.push_back({ attSemiMajorAxis, 1, offsetof(Star, a) });
-		_attributes.push_back({ attSemiMinorAxis, 1, offsetof(Star, b) });
-		_attributes.push_back({ attCenter,        2, offsetof(Star, center) });
-		_attributes.push_back({ attTemperature,   1, offsetof(Star, temp) });
-		_attributes.push_back({ attMagnitude,     1, offsetof(Star, mag) });
-		_attributes.push_back({ attColor,         4, offsetof(VertexStar, col) });
+		DefineAttributes({
+			{ attPosition,      2, 0 },
+			{ attVelocity,      2, offsetof(Star, vel) },
+			{ attTheta0,        1, offsetof(Star, theta0) },
+			{ attVelTheta,      1, offsetof(Star, velTheta) },
+			{ attTiltAngle,     1, offsetof(Star, tiltAngle) },
+			{ attSemiMajorAxis, 1, offsetof(Star, a) },
+			{ attSemiMinorAxis, 1, offsetof(Star, b) },
+			{ attCenter,        2, offsetof(Star, center) },
+			{ attTemperature,   1, offsetof(Star, temp) },
+			{ attMagnitude,     1, offsetof(Star, mag) },
+			{ attColor,         4, offsetof(VertexStar, col) }
+		});
 	}
 
 	void UpdateShaderVariables(float time, int num, float amp)
@@ -35,6 +37,30 @@ public:
 		_pertN = num;
 		_pertAmp = amp;
 		_time = time;
+	}
+
+	virtual void Draw(glm::mat4& matView, glm::mat4& matProjection)
+	{
+		glUseProgram(GetShaderProgramm());
+
+		GLuint viewMatIdx = glGetUniformLocation(GetShaderProgramm(), "viewMat");
+		glUniformMatrix4fv(viewMatIdx, 1, GL_FALSE, glm::value_ptr(matView));
+
+		GLuint projMatIdx = glGetUniformLocation(GetShaderProgramm(), "projMat");
+		glUniformMatrix4fv(projMatIdx, 1, GL_FALSE, glm::value_ptr(matProjection));
+
+		OnSetCustomShaderVariables();
+
+		glEnable(GL_BLEND);
+
+		OnBeforeDraw();
+
+		glBindVertexArray(GetVertexArrayObject());
+		glDrawElements(GetPrimitiveType(), GetArrayElementCount(), GL_UNSIGNED_INT, nullptr);
+		glBindVertexArray(0);
+
+		glDisable(GL_BLEND);
+		glUseProgram(0);
 	}
 
 protected:
