@@ -70,7 +70,7 @@ protected:
 	virtual const char* GetVertexShaderSource() const override
 	{
 		return
-			"#version 330 core\n"
+			"#version 440 core\n"
 			"\n"
 			"uniform mat4 projMat;\n"
 			"uniform mat4 viewMat;\n"
@@ -122,11 +122,12 @@ protected:
 	virtual const char* GetFragmentShaderSource() const override
 	{
 		return
-			"#version 330 core\n"
+			"#version 440 core\n"
 			"in vec4 vertexColor;\n"
+			"out vec4 FragColor;\n"
 			"void main()\n"
 			"{\n"
-			"	gl_FragColor = vertexColor;\n"
+			"	FragColor = vertexColor;\n"
 			"}\n";
 	}
 

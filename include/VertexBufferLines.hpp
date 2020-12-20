@@ -30,7 +30,7 @@ protected:
 	virtual const char* GetVertexShaderSource() const override
 	{
 		return
-			"#version 330 core\n"
+			"#version 440 core\n"
 			"uniform mat4 projMat;\n"
 			"uniform mat4 viewMat;\n"
 			"layout(location = 0) in vec3 position;\n"
@@ -46,7 +46,7 @@ protected:
 	virtual const char* GetFragmentShaderSource() const override
 	{
 		return
-			"#version 330 core\n"
+			"#version 440 core\n"
 			"out vec4 FragColor;\n"
 			"in vec4 vertexColor;\n"
 			"void main()\n"

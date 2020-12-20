@@ -518,7 +518,6 @@ void GalaxyWnd::Render()
 		_textAxisLabel.Draw(_width, _height, _matView, _matProjection);
 	}
 
-//#define DIRECT_MODE_RENDERING
 	if (_flags & (int)DisplayItem::DUST)
 		DrawDust();
 
