@@ -141,7 +141,7 @@ public:
 	virtual void OnSetCustomShaderVariables()
 	{}
 
-	void Draw(glm::mat4& matView, glm::mat4& matProjection)
+	virtual void Draw(glm::mat4& matView, glm::mat4& matProjection)
 	{
 		glUseProgram(_shaderProgram);
 

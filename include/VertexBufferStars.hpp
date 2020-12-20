@@ -67,7 +67,6 @@ protected:
 			"\n"
 			"void main()\n"
 			"{\n"
-			"	gl_PointSize = 1;\n"
 			"	float thetaActual = theta0 + velTheta * time;\n"
 			"\n"
 			"	float beta = -tiltAngle;\n"
@@ -86,9 +85,7 @@ protected:
 			"		ps.y += (a / pertAmp) * cos(alpha * 2 * pertN);\n"
 			"	}\n"
 			"\n"
-//			"	pos = ps;\n"
 			"	gl_Position =  projMat * vec4(ps, 0, 1);\n"
-//			"	gl_Position =  projMat * vec4(pos, 0, 1);\n"
 			"	vertexColor = color;\n"
 			"}\n";
 	}

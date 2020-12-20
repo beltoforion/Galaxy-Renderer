@@ -629,8 +629,6 @@ void GalaxyWnd::DrawStars()
 	glEnable(GL_BLEND);            // soft blending of point sprites
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	const auto &stars = _galaxy.GetStars();
-
 	glPointSize(2); 
 	glBegin(GL_POINTS);
 
@@ -638,19 +636,17 @@ void GalaxyWnd::DrawStars()
 		glColor3f(1, 1, 1);
 
 	// Render all Stars from the stars array
-	for (int i = 1; i < stars.size(); ++i)
+	for (const auto &star : _galaxy.GetStars())
 	{
-		const Vec2& pos = stars[i].pos;
-		const Color& col = ColorFromTemperature(stars[i].temp);
+		const Color& col = ColorFromTemperature(star.temp);
 		if (_starRenderType == 1)
 		{
 			glColor3f(
-				(GLfloat)col.r * stars[i].mag,
-				(GLfloat)col.g * stars[i].mag,
-				(GLfloat)col.b * stars[i].mag);
+				(GLfloat)col.r * star.mag,
+				(GLfloat)col.g * star.mag,
+				(GLfloat)col.b * star.mag);
 		}
-		glVertex3f(pos.x, pos.y, 0.0f);
-
+		glVertex3f(star.pos.x, star.pos.y, 0.0f);
 	}
 	glEnd();
 
@@ -658,7 +654,9 @@ void GalaxyWnd::DrawStars()
 	glPointSize(5); 
 	glBegin(GL_POINTS);
 
-	for (int i = 1; i < stars.size() / 30; ++i)
+	const auto& stars = _galaxy.GetStars();
+	int numBrightStars = stars.size() / 30;
+	for (int i = 1; i < numBrightStars; ++i)
 	{
 		const Vec2& pos = stars[i].pos;
 		const Color& col = ColorFromTemperature(stars[i].temp);
@@ -697,23 +695,18 @@ void GalaxyWnd::DrawDust()
 	glEnable(GL_BLEND);            // soft blending of point sprites
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	const auto &dust = _galaxy.GetDust();
-	int num = dust.size();
-
 	// size 70 looks ok when the fov is 28174
 	glPointSize(std::min((float)(_galaxy.GetDustRenderSize() * 28174 / _fov), maxSize));
 	glBegin(GL_POINTS);
 
-	for (int i = 0; i < num; ++i)
+	for (const auto &dustParticle : _galaxy.GetDust())
 	{
-		const Vec2& pos = dust[i].pos;
-		const Color& col = ColorFromTemperature(dust[i].temp);
+		const Color& col = ColorFromTemperature(dustParticle.temp);
 		glColor3f(
-			col.r * (float)dust[i].mag,
-			col.g * (float)dust[i].mag,
-			col.b * (float)dust[i].mag);
-		glVertex3f(pos.x, pos.y, 0.0f);
-
+			col.r * (float)dustParticle.mag,
+			col.g * (float)dustParticle.mag,
+			col.b * (float)dustParticle.mag);
+		glVertex3f(dustParticle.pos.x, dustParticle.pos.y, 0.0f);
 	}
 	glEnd();
 
