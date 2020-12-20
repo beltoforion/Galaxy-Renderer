@@ -52,14 +52,16 @@ public:
 		OnSetCustomShaderVariables();
 
 		glEnable(GL_BLEND);
-
+		glEnable(GL_PROGRAM_POINT_SIZE);
 		OnBeforeDraw();
 
 		glBindVertexArray(GetVertexArrayObject());
 		glDrawElements(GetPrimitiveType(), GetArrayElementCount(), GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
 
+		glEnable(GL_PROGRAM_POINT_SIZE);
 		glDisable(GL_BLEND);
+
 		glUseProgram(0);
 	}
 
@@ -111,8 +113,9 @@ protected:
 			"		ps.y += (a / pertAmp) * cos(alpha * 2 * pertN);\n"
 			"	}\n"
 			"\n"
+			"   gl_PointSize = mag * 3;\n"
 			"	gl_Position =  projMat * vec4(ps, 0, 1);\n"
-			"	vertexColor = color;\n"
+			"	vertexColor = color * mag;\n"
 			"}\n";
 	}
 

@@ -163,6 +163,7 @@ void TextBuffer::Clear()
 void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matProjection)
 {
 	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 	glUseProgram(_shaderProgram);
 

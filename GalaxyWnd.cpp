@@ -14,7 +14,6 @@ const float GalaxyWnd::TimeStepSize = 100000.0f;
 GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
 	, _camMode(0)
-	, _starRenderType(1)
 	, _flags((int)DisplayItem::STARS | (int)DisplayItem::AXIS | (int)DisplayItem::HELP | (int)DisplayItem::DUST | (int)DisplayItem::H2)
 	, _galaxy()
 	, _colNum(200)
@@ -184,34 +183,24 @@ void GalaxyWnd::UpdateStars()
 	float a = 1;
 	Color color = { 1, 1, 1, a };
 
-	if (_starRenderType == 2)
-		color = { 1, 1, 1, a };
-
 	for (int i = 1; i < stars.size(); ++i)
 	{
 		const Color& col = ColorFromTemperature(stars[i].temp);
-		if (_starRenderType == 1)
-		{
-			color = {
-				col.r * stars[i].mag,
-				col.g * stars[i].mag,
-				col.b * stars[i].mag,
-				a };
-		}
-		else
-		{
-			color = { 1, 1, 1, a };
-		}
+		color = { col.r, col.g, col.b, a };
 
+/*
 		// todo: Render a small portion of the stars as bigger, brighter distinct stars
 		float size = 3;
 		if (i < stars.size() / 30)
 		{
 			size = 6;
-			color.r = std::min(.2f + color.r, 1.f);
-			color.g = std::min(.2f + color.g, 1.f);
-			color.b = std::min(.2f + color.b, 1.f);
+			color = {
+				std::min(.2f + color.r, 1.f),
+				std::min(.2f + color.g, 1.f),
+				std::min(.2f + color.b, 1.f),
+				a };
 		}
+*/
 
 		idx.push_back((int)vert.size());
 		vert.push_back({ stars[i], color });
@@ -332,10 +321,9 @@ void GalaxyWnd::UpdateText()
 	y += dy1; _textHelp.AddText(2, { x0, y }, "[b],[n]  Dust render size:  %2.2lf", _galaxy.GetDustRenderSize());
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[F1] Help Screen");
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[F2] Toggle Axis");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F3] Toggle Stars");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F4] Toggle Dust");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F5] Toggle H2 Regions");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F6] Toggle Density Waves");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F3] Toggle Dust");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F4] Toggle H2 Regions");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F5] Toggle Density Waves");
 
 	y += dy1; _textHelp.AddText(1, { x0, y }, "Physics:");
 	y += dy1; _textHelp.AddText(2, { x0, y }, "[z],[h] Base Temp.:  %2.2lf K", _galaxy.GetBaseTemp());
@@ -530,24 +518,17 @@ void GalaxyWnd::Render()
 		_textAxisLabel.Draw(_width, _height, _matView, _matProjection);
 	}
 
-#define DIRECT_MODE_RENDERING
-#if defined(DIRECT_MODE_RENDERING)
+//#define DIRECT_MODE_RENDERING
 	if (_flags & (int)DisplayItem::DUST)
 		DrawDust();
 
 	if (_flags & (int)DisplayItem::H2)
 		DrawH2();
-#endif
 
 	if (_flags & (int)DisplayItem::STARS)
 	{
-
-#if defined(DIRECT_MODE_RENDERING)
-		DrawStars();
-#else
 		_vertStars.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp());
 		_vertStars.Draw(_matView, _matProjection);
-#endif
 	}
 
 	if (_flags & (int)DisplayItem::DENSITY_WAVES)
@@ -617,71 +598,6 @@ void GalaxyWnd::AddEllipsisVertices(
 	vertIdx.push_back(0xFFFF);
 }
 
-void GalaxyWnd::DrawStars()
-{
-	glBindTexture(GL_TEXTURE_2D, _texStar);
-
-	float maxSize = 0.0f;
-	glGetFloatv(GL_POINT_SIZE_MAX, &maxSize);
-	glPointParameterfARB(GL_POINT_SIZE_MAX_ARB, maxSize);
-	glPointParameterfARB(GL_POINT_SIZE_MIN_ARB, 1.0f);
-	glTexEnvf(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
-
-	glEnable(GL_POINT_SPRITE_ARB);
-	glEnable(GL_TEXTURE_2D);       // point sprite texture support
-	glEnable(GL_BLEND);            // soft blending of point sprites
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-	glPointSize(2); 
-	glBegin(GL_POINTS);
-
-	if (_starRenderType == 2)
-		glColor3f(1, 1, 1);
-
-	// Render all Stars from the stars array
-	for (const auto &star : _galaxy.GetStars())
-	{
-		const Color& col = ColorFromTemperature(star.temp);
-		if (_starRenderType == 1)
-		{
-			glColor3f(
-				(GLfloat)col.r * star.mag,
-				(GLfloat)col.g * star.mag,
-				(GLfloat)col.b * star.mag);
-		}
-		glVertex3f(star.pos.x, star.pos.y, 0.0f);
-	}
-	glEnd();
-
-	// Render a portion of the stars as bright distinct stars
-	glPointSize(5); 
-	glBegin(GL_POINTS);
-
-	const auto& stars = _galaxy.GetStars();
-	int numBrightStars = stars.size() / 30;
-	for (int i = 1; i < numBrightStars; ++i)
-	{
-		const Vec2& pos = stars[i].pos;
-		const Color& col = ColorFromTemperature(stars[i].temp);
-		if (_starRenderType == 1)
-		{
-			glColor3f(
-				0.2f + col.r * stars[i].mag,
-				0.2f + col.g * stars[i].mag,
-				0.2f + col.b * stars[i].mag);
-		}
-		glVertex3f(pos.x, pos.y, 0.0f);
-	}
-
-	glEnd();
-
-	glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_POINT_SPRITE_ARB);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glPointSize(1);
-}
 
 void GalaxyWnd::DrawDust()
 {
@@ -901,27 +817,14 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case  SDLK_F3:
-			if (_starRenderType == 2)
-			{
-				_starRenderType = 0;
-				_flags &= ~(int)DisplayItem::STARS;
-			}
-			else
-			{
-				_starRenderType++;
-				_flags |= (int)DisplayItem::STARS;
-			}
-			break;
-
-		case  SDLK_F4:
 			_flags ^= (int)DisplayItem::DUST;
 			break;
 
-		case  SDLK_F5:
+		case  SDLK_F4:
 			_flags ^= (int)DisplayItem::H2;
 			break;
 
-		case SDLK_F6:
+		case SDLK_F5:
 			_flags ^= (int)DisplayItem::DENSITY_WAVES;
 			break;
 

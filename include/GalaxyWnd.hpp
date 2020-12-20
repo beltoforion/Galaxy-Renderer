@@ -82,7 +82,7 @@ private:
 	void UpdateText();
 
 	int _camMode;    ///< Index of the camera orientation to use
-	int _starRenderType;
+
 	uint32_t _flags;   ///< The display flags
 
 	Galaxy _galaxy;

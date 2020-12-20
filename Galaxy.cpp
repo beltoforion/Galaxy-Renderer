@@ -161,6 +161,12 @@ void Galaxy::InitStars()
 		_stars[i].temp = 6000 + (4000 * MathHelper::rnum() - 2000);
 		_stars[i].mag = 0.3f + 0.2f * MathHelper::rnum();
 
+		// Make a small portion of the stars brighter
+		if (i < _numStars / 60)
+		{
+			_stars[i].mag = std::min(_stars[i].mag + 0.3f, 1.0f);
+		}
+
 		int idx = (int)std::min(1.0f / dh * (_stars[i].a + _stars[i].b) / 2.0f, 99.0f);
 		_numberByRad[idx]++;
 	}
