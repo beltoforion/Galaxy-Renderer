@@ -22,6 +22,7 @@ GalaxyWnd::GalaxyWnd()
 	, _dt((_t1 - _t0) / _colNum)
 	, _col()
 	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE | ruhCREATE_TEXT)
+	, _useDirectMode(true)
 	, _vertDensityWaves(2)
 	, _vertAxis()
 	, _vertVelocityCurve(1, GL_DYNAMIC_DRAW)
@@ -158,7 +159,7 @@ void GalaxyWnd::InitSimulation()
 
 void GalaxyWnd::UpdateDust()
 {
-	std::cout << "Updating stars" << std::endl;
+	std::cout << "Updating dust" << std::endl;
 
 	std::vector<VertexStar> vert;
 	std::vector<int> idx;
@@ -166,12 +167,10 @@ void GalaxyWnd::UpdateDust()
 	const auto& dust = _galaxy.GetDust();
 
 	float a = 1;
-	Color color = { 1, 1, 1, a };
-
 	for (int i = 1; i < dust.size(); ++i)
 	{
 		const Color& col = ColorFromTemperature(dust[i].temp);
-		color = { col.r, col.g, col.b, a };
+		Color color = { col.r, col.g, col.b, a };
 
 		idx.push_back((int)vert.size());
 		vert.push_back({ dust[i], color });
@@ -525,13 +524,15 @@ void GalaxyWnd::Render()
 
 	if (_flags & (int)DisplayItem::DUST)
 	{
-//#define USE_OLD_CODE
-#if defined(USE_OLD_CODE)
-		DrawDust();
-#else
-		_vertDust.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize());
-		_vertDust.Draw(_matView, _matProjection);
-#endif
+		if (_useDirectMode)
+		{
+			DrawDust();
+		}
+		else
+		{
+			_vertDust.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize());
+			_vertDust.Draw(_matView, _matProjection);
+		}
 	}
 
 	if (_flags & (int)DisplayItem::H2)
@@ -838,6 +839,10 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 		case SDLK_F5:
 			_flags ^= (int)DisplayItem::DENSITY_WAVES;
+			break;
+
+		case SDLK_F11:
+			_useDirectMode ^= true;
 			break;
 
 		case  SDLK_v:

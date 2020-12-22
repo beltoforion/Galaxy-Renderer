@@ -92,6 +92,7 @@ private:
 	Color _col[200];
 	
 	uint32_t _renderUpdateHint;
+	bool _useDirectMode;
 
 	VertexBufferLines _vertDensityWaves;
 	VertexBufferLines _vertAxis;
