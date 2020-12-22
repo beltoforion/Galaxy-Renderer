@@ -57,7 +57,6 @@ private:
 
 	GalaxyWnd(const GalaxyWnd& orig);
 
-	void DrawStars();
 	void DrawDust();
 	void DrawH2();
 	
@@ -81,9 +80,9 @@ private:
 	void UpdateVelocityCurve(bool updateOnly);
 	void UpdateText();
 
-	int _camMode;    ///< Index of the camera orientation to use
+	int _camMode;		///< Index of the camera orientation to use
 
-	uint32_t _flags;   ///< The display flags
+	uint32_t _flags;	///< The display flags
 
 	Galaxy _galaxy;
 
@@ -98,6 +97,7 @@ private:
 	VertexBufferLines _vertAxis;
 	VertexBufferLines _vertVelocityCurve;
 	VertexBufferStars _vertStars;
+	VertexBufferStars _vertDust;
 
 	TextBuffer _textHelp;
 	TextBuffer _textAxisLabel;

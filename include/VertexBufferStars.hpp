@@ -14,29 +14,32 @@ public:
 	VertexBufferStars()
 		: VertexBufferBase(GL_STATIC_DRAW)
 		, _pertN(0)
+		, _dustSize(0)
 		, _pertAmp(0)
 		, _time(0)
 	{
 		DefineAttributes({
-			{ attPosition,      2, 0 },
-			{ attVelocity,      2, offsetof(Star, vel) },
-			{ attTheta0,        1, offsetof(Star, theta0) },
-			{ attVelTheta,      1, offsetof(Star, velTheta) },
-			{ attTiltAngle,     1, offsetof(Star, tiltAngle) },
-			{ attSemiMajorAxis, 1, offsetof(Star, a) },
-			{ attSemiMinorAxis, 1, offsetof(Star, b) },
-			{ attCenter,        2, offsetof(Star, center) },
-			{ attTemperature,   1, offsetof(Star, temp) },
-			{ attMagnitude,     1, offsetof(Star, mag) },
-			{ attColor,         4, offsetof(VertexStar, col) }
+			{ attPosition,      2, GL_FLOAT, 0 },
+			{ attVelocity,      2, GL_FLOAT, offsetof(Star, vel) },
+			{ attTheta0,        1, GL_FLOAT, offsetof(Star, theta0) },
+			{ attVelTheta,      1, GL_FLOAT, offsetof(Star, velTheta) },
+			{ attTiltAngle,     1, GL_FLOAT, offsetof(Star, tiltAngle) },
+			{ attSemiMajorAxis, 1, GL_FLOAT, offsetof(Star, a) },
+			{ attSemiMinorAxis, 1, GL_FLOAT, offsetof(Star, b) },
+			{ attCenter,        2, GL_FLOAT, offsetof(Star, center) },
+			{ attTemperature,   1, GL_FLOAT, offsetof(Star, temp) },
+			{ attMagnitude,     1, GL_FLOAT, offsetof(Star, mag) },
+			{ attType,          1, GL_INT, offsetof(Star, type) },
+			{ attColor,         4, GL_FLOAT, offsetof(VertexStar, col) }
 		});
 	}
 
-	void UpdateShaderVariables(float time, int num, float amp)
+	void UpdateShaderVariables(float time, int num, float amp, int dustSize)
 	{
 		_pertN = num;
 		_pertAmp = amp;
 		_time = time;
+		_dustSize = dustSize;
 	}
 
 	virtual void Draw(glm::mat4& matView, glm::mat4& matProjection)
@@ -53,13 +56,17 @@ public:
 
 		glEnable(GL_BLEND);
 		glEnable(GL_PROGRAM_POINT_SIZE);
+//		glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+		glEnable(GL_POINT_SPRITE);
 		OnBeforeDraw();
 
 		glBindVertexArray(GetVertexArrayObject());
 		glDrawElements(GetPrimitiveType(), GetArrayElementCount(), GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
 
-		glEnable(GL_PROGRAM_POINT_SIZE);
+		glDisable(GL_POINT_SPRITE);
+//		glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+		glDisable(GL_PROGRAM_POINT_SIZE);
 		glDisable(GL_BLEND);
 
 		glUseProgram(0);
@@ -75,6 +82,7 @@ protected:
 			"uniform mat4 projMat;\n"
 			"uniform mat4 viewMat;\n"
 			"uniform int pertN;\n"
+			"uniform int dustSize;\n"
 			"uniform float pertAmp;\n"
 			"uniform float time;\n"
 			"uniform float DEG_TO_RAD = 0.01745329251;\n"
@@ -89,9 +97,11 @@ protected:
 			"layout(location = 7) in vec2 center;\n"
 			"layout(location = 8) in float temp;\n"
 			"layout(location = 9) in float mag;\n"
-			"layout(location = 10) in vec4 color;\n"
+			"layout(location = 10) in int type;\n"
+			"layout(location = 11) in vec4 color;\n"
 			"\n"
 			"out vec4 vertexColor;\n"
+			"out float vertexType;\n"
 			"\n"
 			"void main()\n"
 			"{\n"
@@ -113,9 +123,14 @@ protected:
 			"		ps.y += (a / pertAmp) * cos(alpha * 2 * pertN);\n"
 			"	}\n"
 			"\n"
-			"   gl_PointSize = mag * 3;\n"
+			"	if (type==0)\n"
+			"		gl_PointSize = mag * 3;\n"
+			"	else"	
+			"		gl_PointSize = dustSize;\n"
+			"\n"
 			"	gl_Position =  projMat * vec4(ps, 0, 1);\n"
 			"	vertexColor = color * mag;\n"
+			"	vertexType = float(type);\n"
 			"}\n";
 	}
 
@@ -124,15 +139,25 @@ protected:
 		return
 			"#version 440 core\n"
 			"in vec4 vertexColor;\n"
+			"in float vertexType;\n"
 			"out vec4 FragColor;\n"
 			"void main()\n"
 			"{\n"
-			"	FragColor = vertexColor;\n"
+			"	if (vertexType==0) {\n"
+			"		FragColor = vertexColor;\n"
+			"	} else {\n"
+			"		vec2 circCoord = 2.0 * gl_PointCoord - 1.0;\n"
+			"		float alpha = 1-length(circCoord);\n"
+			"		FragColor = vec4(vertexColor.xyz, alpha);\n"
+			"	}\n"
 			"}\n";
 	}
 
 	virtual void OnSetCustomShaderVariables() override
 	{
+		GLuint varDustSize = glGetUniformLocation(GetShaderProgramm(), "dustSize");
+		glUniform1i(varDustSize, _dustSize);
+
 		GLuint varPertN = glGetUniformLocation(GetShaderProgramm(), "pertN");
 		glUniform1i(varPertN, _pertN);
 
@@ -158,11 +183,13 @@ private:
 		attCenter = 7,
 		attTemperature = 8,
 		attMagnitude = 9,
-		attColor = 10
+		attType = 10,
+		attColor = 11
 	};
 
 	// parameters for density wave computation
 	int _pertN;
+	int _dustSize;
 	float _pertAmp;
 	float _time;
 };

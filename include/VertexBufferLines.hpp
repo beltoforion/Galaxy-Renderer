@@ -16,8 +16,8 @@ public:
 		, _lineWidth(lineWidth)
 	{
 		DefineAttributes({ 
-			{ attPosition, 3, 0 },
-			{ attColor, 4, offsetof(VertexColor, col) } 
+			{ attPosition, 3, GL_FLOAT, 0 },
+			{ attColor,    4, GL_FLOAT, offsetof(VertexColor, col) }
 		});
 	}
 

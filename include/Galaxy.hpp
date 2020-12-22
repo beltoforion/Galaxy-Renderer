@@ -113,7 +113,6 @@ private:
 
 	int _pertN;
 	float _pertAmp;
-
 	float _time;
 
 	bool _hasDarkMatter;

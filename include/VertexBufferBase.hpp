@@ -32,7 +32,7 @@ public:
 	{
 	}
 
-	void Initialize()
+	virtual void Initialize()
 	{
 		glGenBuffers(1, &_vbo);
 		glGenBuffers(1, &_ibo);
@@ -110,7 +110,7 @@ public:
 		for (const AttributeDefinition &attrib : _attributes)
 		{
 			glEnableVertexAttribArray(attrib.attribIdx);
-			glVertexAttribPointer(attrib.attribIdx, attrib.size, GL_FLOAT, GL_FALSE, sizeof(TVertex), (GLvoid*)attrib.offset);
+			glVertexAttribPointer(attrib.attribIdx, attrib.size, attrib.type, GL_FALSE, sizeof(TVertex), (GLvoid*)attrib.offset);
 		}
 
 		// Set up index buffer array
@@ -186,6 +186,7 @@ protected:
 	{
 		int attribIdx;
 		int size;
+		int type;
 		uintptr_t offset;
 	};
 

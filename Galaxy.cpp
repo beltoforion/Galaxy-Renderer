@@ -114,6 +114,7 @@ void Galaxy::InitStars()
 	_stars[0].velTheta = 0;
 	_stars[0].center = { 0, 0 };
 	_stars[0].velTheta = GetOrbitalVelocity((_stars[0].a + _stars[0].b) / 2.0f);
+	_stars[0].type = 0;
 	_stars[0].temp = 6000;
 
 	// second star is at the edge of the core area
@@ -123,6 +124,7 @@ void Galaxy::InitStars()
 	_stars[1].theta0 = 0;
 	_stars[1].center = { 0, 0 };
 	_stars[1].velTheta = GetOrbitalVelocity((_stars[1].a + _stars[1].b) / 2.0f);
+	_stars[1].type = 0;
 	_stars[1].temp = 6000;
 
 	// third star is at the edge of the disk
@@ -132,6 +134,7 @@ void Galaxy::InitStars()
 	_stars[2].theta0 = 0;
 	_stars[2].center = { 0, 0 };
 	_stars[2].velTheta = GetOrbitalVelocity((_stars[2].a + _stars[2].b) / 2.0f);
+	_stars[2].type = 0;
 	_stars[2].temp = 6000;
 
 	// cell width of the histogramm
@@ -160,6 +163,7 @@ void Galaxy::InitStars()
 		_stars[i].center = { 0, 0 };
 		_stars[i].temp = 6000 + (4000 * MathHelper::rnum() - 2000);
 		_stars[i].mag = 0.3f + 0.2f * MathHelper::rnum();
+		_stars[i].type = 0;
 
 		// Make a small portion of the stars brighter
 		if (i < _numStars / 60)
@@ -192,6 +196,7 @@ void Galaxy::InitStars()
 		_dust[i].theta0 = 360.0f * MathHelper::rnum();
 		_dust[i].velTheta = GetOrbitalVelocity((_dust[i].a + _dust[i].b) / 2.0f);
 		_dust[i].center = { 0, 0 };
+		_dust[i].type = 1;
 
 		// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
 		// the following temperature distribution (no science here it just looks right)

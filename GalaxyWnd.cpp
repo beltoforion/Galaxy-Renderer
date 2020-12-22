@@ -26,6 +26,7 @@ GalaxyWnd::GalaxyWnd()
 	, _vertAxis()
 	, _vertVelocityCurve(1, GL_DYNAMIC_DRAW)
 	, _vertStars()
+	, _vertDust()
 	, _textHelp()
 	, _textAxisLabel()
 	, _textGalaxyLabels()
@@ -63,6 +64,7 @@ GalaxyWnd::~GalaxyWnd()
 	_vertAxis.Release();
 	_vertVelocityCurve.Release();
 	_vertStars.Release();
+	_vertDust.Release();
 }
 
 void GalaxyWnd::InitGL() noexcept(false)
@@ -125,6 +127,7 @@ void GalaxyWnd::InitGL() noexcept(false)
 	_vertAxis.Initialize();
 	_vertVelocityCurve.Initialize();
 	_vertStars.Initialize();
+	_vertDust.Initialize();
 	
 	// Font initialization
 	_textHelp.Initialize();
@@ -155,11 +158,28 @@ void GalaxyWnd::InitSimulation()
 
 void GalaxyWnd::UpdateDust()
 {
-	std::cout << "Updating dust" << std::endl;
-	std::vector<VertexColor> vert;
+	std::cout << "Updating stars" << std::endl;
+
+	std::vector<VertexStar> vert;
 	std::vector<int> idx;
 
+	const auto& dust = _galaxy.GetDust();
+
+	float a = 1;
+	Color color = { 1, 1, 1, a };
+
+	for (int i = 1; i < dust.size(); ++i)
+	{
+		const Color& col = ColorFromTemperature(dust[i].temp);
+		color = { col.r, col.g, col.b, a };
+
+		idx.push_back((int)vert.size());
+		vert.push_back({ dust[i], color });
+	}
+
+	_vertDust.CreateBuffer(vert, idx, GL_POINTS);
 	_renderUpdateHint &= ~ruhDUST;
+
 }
 
 void GalaxyWnd::UpdateH2()
@@ -188,25 +208,10 @@ void GalaxyWnd::UpdateStars()
 		const Color& col = ColorFromTemperature(stars[i].temp);
 		color = { col.r, col.g, col.b, a };
 
-/*
-		// todo: Render a small portion of the stars as bigger, brighter distinct stars
-		float size = 3;
-		if (i < stars.size() / 30)
-		{
-			size = 6;
-			color = {
-				std::min(.2f + color.r, 1.f),
-				std::min(.2f + color.g, 1.f),
-				std::min(.2f + color.b, 1.f),
-				a };
-		}
-*/
-
 		idx.push_back((int)vert.size());
 		vert.push_back({ stars[i], color });
 	}
 
-	_vertStars.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp());
 	_vertStars.CreateBuffer(vert, idx, GL_POINTS);
 	_renderUpdateHint &= ~ruhSTARS;
 }
@@ -519,14 +524,22 @@ void GalaxyWnd::Render()
 	}
 
 	if (_flags & (int)DisplayItem::DUST)
+	{
+//#define USE_OLD_CODE
+#if defined(USE_OLD_CODE)
 		DrawDust();
+#else
+		_vertDust.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize());
+		_vertDust.Draw(_matView, _matProjection);
+#endif
+	}
 
 	if (_flags & (int)DisplayItem::H2)
 		DrawH2();
 
 	if (_flags & (int)DisplayItem::STARS)
 	{
-		_vertStars.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp());
+		_vertStars.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize());
 		_vertStars.Draw(_matView, _matProjection);
 	}
 

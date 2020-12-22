@@ -31,4 +31,6 @@ struct Star
 
 	float temp;       // star temperature
 	float mag;        // brightness;
+
+	int32_t type;	  // Type 0 for star, 1 for dust	
 };
