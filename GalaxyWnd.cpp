@@ -13,7 +13,6 @@ const float GalaxyWnd::TimeStepSize = 100000.0f;
 
 GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
-	, _camMode(0)
 	, _flags((int)DisplayItem::STARS | (int)DisplayItem::AXIS | (int)DisplayItem::HELP | (int)DisplayItem::DUST | (int)DisplayItem::H2)
 	, _galaxy()
 	, _colNum(200)
@@ -338,11 +337,6 @@ void GalaxyWnd::UpdateText()
 	y += dy1; _textHelp.AddText(2, { x0, y }, "[KP1] - [KP8] Predefined Galaxies");
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[Pause]       Halt simulation");
 
-	y += dy1; _textHelp.AddText(1, { x0, y }, "Camera Control:");
-	y += dy1; _textHelp.AddText(2, { x0, y }, "[1] fixed");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[2] rotating with core");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[3] rotating with outer disc");
-
 	_textHelp.AddText(1, { (float)_width - 180, (float)_height - 30 }, " (C) 2020 Ingo Berg");
 	_textHelp.EndUpdate();
 
@@ -474,32 +468,7 @@ void GalaxyWnd::Update()
 	if ((_renderUpdateHint & ruhCREATE_TEXT) != 0)
 		UpdateText();
 
-	Vec3 orient = { 0,1,0 };
-	switch (_camMode)
-	{
-		// Default orientation
-	default:
-		orient = { 0, 1, 0 };
-		break;
-
-		// Rotate with galaxy core
-	case 1:
-	{
-		auto& p = _galaxy.GetStarPos(1);
-		orient = { p.x, p.y, 0 };
-	}
-	break;
-
-	// Rotate with edge of disk
-	case 2:
-	{
-		auto& p = _galaxy.GetStarPos(2);
-		orient = { p.x, p.y, 0 };
-	}
-	break;
-	}
-
-	_camOrient = orient;
+	_camOrient = { 0, 1, 0 };
 	_camPos = { 0, 0, 5000 };
 	_camLookAt = { 0, 0, 0 };
 }
@@ -737,18 +706,6 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 		case SDLK_PAGEUP:
 			_galaxy.SetPertAmp(_galaxy.GetPertAmp() + 2);
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
-			break;
-
-		case SDLK_1:
-			_camMode = 0;
-			break;
-
-		case SDLK_2:
-			_camMode = 1;
-			break;
-
-		case SDLK_3:
-			_camMode = 2;
 			break;
 
 		case SDLK_q:

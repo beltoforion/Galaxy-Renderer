@@ -126,7 +126,7 @@ protected:
 			"	if (type==0)\n"
 			"		gl_PointSize = mag * 3;\n"
 			"	else"	
-			"		gl_PointSize = dustSize;\n"
+			"		gl_PointSize = dustSize * mag * 50;\n"
 			"\n"
 			"	gl_Position =  projMat * vec4(ps, 0, 1);\n"
 			"	vertexColor = color * mag;\n"
@@ -147,7 +147,7 @@ protected:
 			"		FragColor = vertexColor;\n"
 			"	} else {\n"
 			"		vec2 circCoord = 2.0 * gl_PointCoord - 1.0;\n"
-			"		float alpha = 1-length(circCoord);\n"
+			"		float alpha = 0.3 * (1-length(circCoord));\n"
 			"		FragColor = vec4(vertexColor.xyz, alpha);\n"
 			"	}\n"
 			"}\n";

@@ -36,7 +36,6 @@ Galaxy::Galaxy(
 	, _hasDarkMatter(true)
 	, _baseTemp(4000)
 	, _numberByRad()
-	, _pos({ 0, 0 })
 	, _stars()
 	, _dust()
 	, _h2()
@@ -179,7 +178,9 @@ void Galaxy::InitStars()
 	float x, y, rad;
 	for (int i = 0; i < _numDust; ++i)
 	{
-		if (i % 4 == 0)
+		// original:
+		//if (i % 4 == 0)
+		if (i % 2 == 0)
 		{
 			rad = (float)cdf.ValFromProb(MathHelper::rnum());
 		}
@@ -207,7 +208,7 @@ void Galaxy::InitStars()
 		_numberByRad[idx]++;
 	}
 
-	// Initialise Dust
+	// Initialise H2 regions
 	for (int i = 0; i < _numH2; ++i)
 	{
 		x = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
@@ -522,13 +523,3 @@ void Galaxy::SingleTimeStep(float timeStepSize)
 			Galaxy::CalcXy(pt, time, pertN, pertAmp);
 		});
 }
-
-const Vec2& Galaxy::GetStarPos(int idx)
-{
-	if (idx >= _stars.size())
-		throw std::runtime_error("Index out of bounds.");
-
-	return _stars[idx].pos; 
-}
-
-

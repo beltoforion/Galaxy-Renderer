@@ -31,7 +31,7 @@ public:
 		float deltaAng = 0.019,
 		float ex1 = 0.8,
 		float ex2 = 1,
-		int numStars = 40000);
+		int numStars = 60000);
 	~Galaxy();
 
 	void Reset(GalaxyParam param);
@@ -67,8 +67,6 @@ public:
 
 	void SingleTimeStep(float time);
 
-	const Vec2& GetStarPos(int idx);
-
 	void SetPertN(int n);
 	void SetPertAmp(float amp);
 	void SetAngularOffset(float offset);
@@ -83,10 +81,14 @@ public:
 
 private:
 
-	Galaxy(const Galaxy& obj);
+	Galaxy(const Galaxy& obj) 
+	{
+		throw std::runtime_error("Galaxy(const Galaxy& obj): not implemented!");
+	}
+
 	Galaxy& operator=(const Galaxy& obj)
 	{
-		throw std::runtime_error("Galaxy& operator=: not implemented!");
+		throw std::runtime_error("Galaxy& operator=(const Galaxy& obj): not implemented!");
 	}
 
 	void InitStars();
@@ -123,7 +125,6 @@ public:
 	int _numberByRad[100];  ///< Historgramm showing distribution of stars
 
 private:
-	Vec2 _pos;				   ///< Center of the galaxy
 	std::vector<Star> _stars;  ///< Pointer to an array of star data
 	std::vector<Star> _dust;   ///< Pointer to an array of dusty areas
 	std::vector<Star> _h2;
