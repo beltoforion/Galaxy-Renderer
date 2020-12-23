@@ -1,8 +1,6 @@
 #pragma once
 
-#include <memory>
 #include <vector>
-#include <stdexcept>
 #include "Types.hpp"
 
 
@@ -95,7 +93,6 @@ private:
 	float _dustRenderSize;
 
 	int _numStars;          ///< Total number of stars
-	int _numDust;           ///< Number of Dust Particles
 	int _numH2;             ///< Number of H2 Regions
 
 	int _pertN;

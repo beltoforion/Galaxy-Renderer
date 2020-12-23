@@ -28,8 +28,7 @@ Galaxy::Galaxy(
 	, _radFarField(_radGalaxy * 2)
 	, _velAngle(0.000001f)
 	, _numStars(numStars)
-	, _numDust(numStars)
-	, _numH2(500)
+	, _numH2(400)
 	, _pertN(0)
 	, _pertAmp(0)
 	, _hasDarkMatter(true)
@@ -68,7 +67,6 @@ void Galaxy::Reset(GalaxyParam param)
 	_radGalaxy = param.rad;
 	_radFarField = _radGalaxy * 2;  // there is no science behind this threshold it just looks nice
 	_numStars = param.numStars;
-	_numDust = param.numStars;
 	_dustRenderSize = param.dustRenderSize;
 	_hasDarkMatter = param.hasDarkMatter;
 	_pertN = param.pertN;
