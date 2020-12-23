@@ -21,14 +21,11 @@ public:
 		, _blendEquation(blendEquation)
 	{
 		DefineAttributes({
-			{ attPosition,      2, GL_FLOAT, 0 },
-			{ attVelocity,      2, GL_FLOAT, offsetof(Star, vel) },
 			{ attTheta0,        1, GL_FLOAT, offsetof(Star, theta0) },
 			{ attVelTheta,      1, GL_FLOAT, offsetof(Star, velTheta) },
 			{ attTiltAngle,     1, GL_FLOAT, offsetof(Star, tiltAngle) },
 			{ attSemiMajorAxis, 1, GL_FLOAT, offsetof(Star, a) },
 			{ attSemiMinorAxis, 1, GL_FLOAT, offsetof(Star, b) },
-			{ attCenter,        2, GL_FLOAT, offsetof(Star, center) },
 			{ attTemperature,   1, GL_FLOAT, offsetof(Star, temp) },
 			{ attMagnitude,     1, GL_FLOAT, offsetof(Star, mag) },
 			{ attType,          1, GL_INT, offsetof(Star, type) },
@@ -92,18 +89,15 @@ protected:
 			"uniform float time;\n"
 			"uniform float DEG_TO_RAD = 0.01745329251;\n"
 			"\n"
-			"layout(location = 0) in vec2 pos;\n"
-			"layout(location = 1) in vec2 vel;\n"
-			"layout(location = 2) in float theta0;\n"
-			"layout(location = 3) in float velTheta;\n"
-			"layout(location = 4) in float tiltAngle;\n"
-			"layout(location = 5) in float a;\n"
-			"layout(location = 6) in float b;\n"
-			"layout(location = 7) in vec2 center;\n"
-			"layout(location = 8) in float temp;\n"
-			"layout(location = 9) in float mag;\n"
-			"layout(location = 10) in int type;\n"
-			"layout(location = 11) in vec4 color;\n"
+			"layout(location = 0) in float theta0;\n"
+			"layout(location = 1) in float velTheta;\n"
+			"layout(location = 2) in float tiltAngle;\n"
+			"layout(location = 3) in float a;\n"
+			"layout(location = 4) in float b;\n"
+			"layout(location = 5) in float temp;\n"
+			"layout(location = 6) in float mag;\n"
+			"layout(location = 7) in int type;\n"
+			"layout(location = 8) in vec4 color;\n"
 			"\n"
 			"out vec4 vertexColor;\n"
 			"flat out int vertexType;\n"
@@ -118,6 +112,7 @@ protected:
 			"	float sinalpha = sin(alpha);\n"
 			"	float cosbeta = cos(beta);\n"
 			"	float sinbeta = sin(beta);\n"
+			"	vec2 center = vec2(0,0);\n"	
 			"	vec2 ps = vec2(center.x + (a * cosalpha * cosbeta - b * sinalpha * sinbeta),\n"
 			"			       center.y + (a * cosalpha * sinbeta + b * sinalpha * cosbeta));\n"
 			"	if (pertAmp > 0 && pertN > 0) {\n"
@@ -228,18 +223,15 @@ private:
 
 	enum AttributeIdx : int
 	{
-		attPosition = 0,
-		attVelocity = 1,
-		attTheta0 = 2,
-		attVelTheta = 3,
-		attTiltAngle = 4,
-		attSemiMajorAxis = 5,
-		attSemiMinorAxis = 6,
-		attCenter = 7,
-		attTemperature = 8,
-		attMagnitude = 9,
-		attType = 10,
-		attColor = 11
+		attTheta0 = 0,
+		attVelTheta,
+		attTiltAngle,
+		attSemiMajorAxis,
+		attSemiMinorAxis,
+		attTemperature,
+		attMagnitude,
+		attType,
+		attColor
 	};
 
 	// parameters for density wave computation

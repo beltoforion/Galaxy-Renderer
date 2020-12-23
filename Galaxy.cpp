@@ -131,7 +131,6 @@ void Galaxy::InitH2AndFilaments()
 			dustParticle.tiltAngle = GetAngularOffset(rad);
 			dustParticle.theta0 = theta + 10 - 20 * Helper::rnum();
 			dustParticle.velTheta = GetOrbitalVelocity((dustParticle.a + dustParticle.b) / 2.0f);
-			dustParticle.center = { 0, 0 };
 
 			// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
 			// the following temperature distribution (no science here it just looks right)
@@ -155,7 +154,6 @@ void Galaxy::InitH2AndFilaments()
 		particleH2.tiltAngle = GetAngularOffset(rad);
 		particleH2.theta0 = 360.0f * Helper::rnum();
 		particleH2.velTheta = GetOrbitalVelocity((particleH2.a + particleH2.b) / 2.0f);
-		particleH2.center = { 0, 0 };
 		particleH2.temp = 6000 + (6000 * Helper::rnum()) - 3000;
 		particleH2.mag = 0.1f + 0.05f * Helper::rnum();
 		particleH2.type = 3;
@@ -180,7 +178,6 @@ void Galaxy::InitStarsAndDust()
 	star.tiltAngle = 0;
 	star.theta0 = 0;
 	star.velTheta = 0;
-	star.center = { 0, 0 };
 	star.velTheta = GetOrbitalVelocity((star.a + star.b) / 2.0f);
 	star.type = 0;
 	star.temp = 6000;
@@ -206,7 +203,6 @@ void Galaxy::InitStarsAndDust()
 		star.tiltAngle = GetAngularOffset(rad);
 		star.theta0 = 360.0f * Helper::rnum();
 		star.velTheta = GetOrbitalVelocity(rad);
-		star.center = { 0, 0 };
 		star.temp = 6000 + (4000 * Helper::rnum() - 2000);
 		star.mag = 0.1f + 0.4f * Helper::rnum();
 		star.type = 0;
@@ -242,7 +238,6 @@ void Galaxy::InitStarsAndDust()
 		dustParticle.tiltAngle = GetAngularOffset(rad);
 		dustParticle.theta0 = 360.0f * Helper::rnum();
 		dustParticle.velTheta = GetOrbitalVelocity((dustParticle.a + dustParticle.b) / 2.0f);
-		dustParticle.center = { 0, 0 };
 		dustParticle.type = 1;
 
 		// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
@@ -311,55 +306,19 @@ void Galaxy::SetAngularOffset(float offset)
 */
 float Galaxy::GetOrbitalVelocity(float rad) const
 {
-	float vel_kms(0);  // velovity in kilometer per seconds
-
-	// Realistically looking velocity curves for the Wikipedia models.
-	struct VelocityCurve
-	{
-		static double MS(double r)
-		{
-			float d = 2000;  // Dicke der Scheibe
-			float rho_so = 1;  // Dichte im Mittelpunkt
-			float rH = 2000; // Radius auf dem die Dichte um die Hälfte gefallen ist
-			return (float)rho_so * (float)std::exp(-r / rH) * (r * r) * Helper::PI * d;
-		}
-
-		static float MH(float r)
-		{
-			float rho_h0 = 0.15f; // Dichte des Halos im Zentrum
-			float rC = 2500;     // typische skalenlänge im Halo
-			return (float)rho_h0 * 1 / (float)(1 + std::pow(r / rC, 2)) * (float)(4 * Helper::PI * std::pow(r, 3) / 3);
-		}
-
-		// Velocity curve with dark matter
-		static float v(float r)
-		{
-			float MZ = 100;
-			return 20000.0f * (float)std::sqrt(Helper::CONTANT_OF_GRAVITY * (MH(r) + MS(r) + MZ) / r);
-		}
-
-		// velocity curve without dark matter
-		static float vd(float r)
-		{
-			float MZ = 100;
-			return 20000.0f * (float)std::sqrt(Helper::CONTANT_OF_GRAVITY * (MS(r) + MZ) / r);
-		}
-	};
-
+	float vel_kms = 0;  // velovity in kilometer per seconds
 	if (_hasDarkMatter)
 	{
-		//  with dark matter
-		vel_kms = VelocityCurve::v(rad);
+		vel_kms = Helper::VelocityWithDarkMatter(rad);
 	}
 	else
 	{
-		// without dark matter:
-		vel_kms = VelocityCurve::vd(rad);
+		vel_kms = Helper::VelocityWithoutDarkMatter(rad);
 	}
 
 	// Calculate velocity in degree per year
-	float u = 2.0f * Helper::PI * rad * Helper::PC_TO_KM;        // Umfang in km
-	float time = u / (vel_kms * Helper::SEC_PER_YEAR);  // Umlaufzeit in Jahren
+	float u = 2.0f * Helper::PI * rad * Helper::PC_TO_KM;   // Umfang in km
+	float time = u / (vel_kms * Helper::SEC_PER_YEAR);		// Umlaufzeit in Jahren
 
 	return 360.0f / time;                                   // Grad pro Jahr
 }

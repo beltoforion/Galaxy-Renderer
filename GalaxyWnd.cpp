@@ -278,18 +278,14 @@ void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 	float dt_in_sec = GalaxyWnd::TimeStepSize * Helper::SEC_PER_YEAR;
 	float r = 0, v = 0;
 	float cr = 0.5, cg = 1, cb = 1, ca = 0.15;
-	for (int i = 1; i < num; ++i)
+	for (int r = 0; r < _galaxy.GetFarFieldRad(); r += 10)
 	{
-		const Vec2& vel = stars[i].vel;
-		r = stars[i].a;
-
-		// umrechnen in km/s
-		v = std::sqrt(vel.x * vel.x + vel.y * vel.y);   // pc / timestep
-		v /= dt_in_sec;            // v in pc/sec
-		v *= Helper::PC_TO_KM; // v in km/s
-
 		idx.push_back((int)vert.size());
-		vert.push_back({ r, v * 10.f, 0,  cr, cg, cb, ca });
+
+		if (_galaxy.HasDarkMatter())
+			vert.push_back({ (float)r, Helper::VelocityWithDarkMatter((float)r) * 10.f, 0,  cr, cg, cb, ca });
+		else
+			vert.push_back({ (float)r, Helper::VelocityWithoutDarkMatter((float)r) * 10.f, 0,  cr, cg, cb, ca });
 	}
 
 	if (!updateOnly)
@@ -585,12 +581,12 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case SDLK_z:
-			_galaxy.SetBaseTemp(std::min(_galaxy.GetBaseTemp() + 100, 1000.0f));
+			_galaxy.SetBaseTemp(std::min(_galaxy.GetBaseTemp() + 100, 10000.0f));
 			_renderUpdateHint |= ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_h:
-			_galaxy.SetBaseTemp(std::max(_galaxy.GetBaseTemp() - 100, 10000.0f));
+			_galaxy.SetBaseTemp(std::max(_galaxy.GetBaseTemp() - 100, 1000.0f));
 			_renderUpdateHint |= ruhSTARS | ruhDUST;
 			break;
 

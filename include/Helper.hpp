@@ -250,12 +250,42 @@ public:
 			{ 0.612469, 0.70006, 1, 1 },
 			{ 0.609848, 0.698231, 1, 1 },
 			{ 0.607266, 0.696426, 1, 1 },
-			{ 0.60472, 0.694643, 1, 1 } 
+			{ 0.60472, 0.694643, 1, 1 }
 		};
 
 		int idx = (int)((temp - MinTemp) / (MaxTemp - MinTemp) * colNum);
 		idx = std::min(colNum - 1, idx);
 		idx = std::max(0, idx);
 		return col[idx];
+	}
+
+	// Velocity curve with dark matter
+	static float VelocityWithDarkMatter(float r)
+	{
+		float MZ = 100;
+		return 20000.0f * (float)std::sqrt(Helper::CONTANT_OF_GRAVITY * (MassHalo(r) + MassDisc(r) + MZ) / r);
+	}
+
+	// velocity curve without dark matter
+	static float VelocityWithoutDarkMatter(float r)
+	{
+		float MZ = 100;
+		return 20000.0f * (float)std::sqrt(Helper::CONTANT_OF_GRAVITY * (MassDisc(r) + MZ) / r);
+	}
+
+private:
+	static double MassDisc(double r)
+	{
+		float d = 2000;		// Dicke der Scheibe
+		float rho_so = 1;	// Dichte im Mittelpunkt
+		float rH = 2000;	// Radius auf dem die Dichte um die Hälfte gefallen ist
+		return (float)rho_so * (float)std::exp(-r / rH) * (r * r) * Helper::PI * d;
+	}
+
+	static float MassHalo(float r)
+	{
+		float rho_h0 = 0.15f;	// Dichte des Halos im Zentrum
+		float rC = 2500;		// typische skalenlänge im Halo
+		return (float)rho_h0 * 1 / (float)(1 + std::pow(r / rC, 2)) * (float)(4 * Helper::PI * std::pow(r, 3) / 3);
 	}
 };
