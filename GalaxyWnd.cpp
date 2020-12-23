@@ -406,15 +406,17 @@ void GalaxyWnd::Render()
 	}
 
 	int features = 0;
-	if (_flags & (int)DisplayItem::FILAMENTS)
-	{
+	if (_flags & (int)DisplayItem::STARS)
 		features |= 1 << 0;
-	}
+
+	if (_flags & (int)DisplayItem::DUST)
+		features |= 1 << 1;
+
+	if (_flags & (int)DisplayItem::FILAMENTS)
+		features |= 1 << 2;
 
 	if (_flags & (int)DisplayItem::H2)
-	{
-		features |= 1 << 1;
-	}
+		features |= 1 << 3;
 
 	if (_flags & (int)DisplayItem::DUST)
 	{

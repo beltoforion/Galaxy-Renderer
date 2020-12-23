@@ -24,10 +24,7 @@ struct Star
 	float tiltAngle;  // tilt angle of the ellipse
 	float a;          // kleine halbachse
 	float b;          // große halbachse
-//	Vec2 center;      // center of the elliptical orbit
-
 	float temp;       // star temperature
 	float mag;        // brightness;
-
-	int32_t type;	  // Type 0 for star, 1 for dust	
+	int32_t type;	  // Type 0:star, 1:dust, 2 and 3: h2 regions	
 };
