@@ -21,12 +21,12 @@ GalaxyWnd::GalaxyWnd()
 	, _dt((_t1 - _t0) / _colNum)
 	, _col()
 	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE | ruhCREATE_TEXT)
-	, _useDirectMode(true)
+	, _useDirectMode(false)
 	, _vertDensityWaves(2)
 	, _vertAxis()
 	, _vertVelocityCurve(1, GL_DYNAMIC_DRAW)
-	, _vertStars()
-	, _vertDust()
+	, _vertStars(GL_FUNC_ADD, GL_ONE)
+	, _vertDust(GL_FUNC_ADD, GL_ONE)// GL_FUNC_SUBTRACT) //) //GL_ONE_MINUS_SRC_COLOR) //)
 	, _textHelp()
 	, _textAxisLabel()
 	, _textGalaxyLabels()
@@ -48,13 +48,13 @@ GalaxyWnd::GalaxyWnd()
 	}
 
 	_predefinedGalaxies.push_back({ 13000, 4000, .0004f, .85f, .95f, 40000, true, 2, 40, 90, 3600 });
-	_predefinedGalaxies.push_back({	16000, 4000, .0003f, .8f, .85f, 40000, true, 0, 40, 100, 4500 });
+	_predefinedGalaxies.push_back({ 16000, 4000, .0003f, .8f, .85f, 40000, true, 0, 40, 100, 4500 });
 	_predefinedGalaxies.push_back({ 13000, 4000, .00064f, .9f, .9f, 40000, true, 0, 0, 85, 4100 });
-	_predefinedGalaxies.push_back({	13000, 4000, .0004f, 1.35f, 1.05f, 40000, true, 0, 0, 70, 4500 });
-	_predefinedGalaxies.push_back({	13000, 4500, .0002f, .65f, .95f, 40000, true, 3, 72, 90, 4000 });
-	_predefinedGalaxies.push_back({	15000, 4000, .0003f, 1.45f, 1.0f, 40000, true, 0, 0, 100, 4500 });
+	_predefinedGalaxies.push_back({ 13000, 4000, .0004f, 1.35f, 1.05f, 40000, true, 0, 0, 70, 4500 });
+	_predefinedGalaxies.push_back({ 13000, 4500, .0002f, .65f, .95f, 40000, true, 3, 72, 90, 4000 });
+	_predefinedGalaxies.push_back({ 15000, 4000, .0003f, 1.45f, 1.0f, 40000, true, 0, 0, 100, 4500 });
 	_predefinedGalaxies.push_back({ 14000, 12500, .0002f, 0.65f, 0.95f, 40000, true, 3, 72, 85, 2200 });
-	_predefinedGalaxies.push_back({	13000, 1500, .0004f, 1.1f, 1.0f, 40000, true, 1, 20, 80, 2800 });
+	_predefinedGalaxies.push_back({ 13000, 1500, .0004f, 1.1f, 1.0f, 40000, true, 1, 20, 80, 2800 });
 	_predefinedGalaxies.push_back({ 13000, 4000, .0004f, .85f, .95f, 40000, true, 1, 20, 80, 4500 });
 }
 
@@ -128,7 +128,7 @@ void GalaxyWnd::InitGL() noexcept(false)
 	_vertVelocityCurve.Initialize();
 	_vertStars.Initialize();
 	_vertDust.Initialize();
-	
+
 	// Font initialization
 	_textHelp.Initialize();
 	_textAxisLabel.Initialize();
@@ -136,13 +136,13 @@ void GalaxyWnd::InitGL() noexcept(false)
 
 	glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 	glDisable(GL_DEPTH_TEST);
-	glClearColor(0.0f, .0f, 0.1f, 0.0f);
+	glClearColor(0.0f, .0f, 0.f, 0.0f);
 	SetCameraOrientation({ 0, 1, 0 });
 }
 
 void GalaxyWnd::InitSimulation()
 {
-	_galaxy.Reset({ 
+	_galaxy.Reset({
 			13000,		// radius of the galaxy
 			4000,		// radius of the core
 			0.0004f,	// angluar offset of the density wave per parsec of radius
@@ -153,7 +153,7 @@ void GalaxyWnd::InitSimulation()
 			2,			// Perturbations per full ellipse
 			40,			// Amplitude damping factor of perturbation
 			70,			// dust render size in pixel
-			4000 });  
+			4000 });
 }
 
 void GalaxyWnd::UpdateDust()
@@ -196,7 +196,7 @@ void GalaxyWnd::UpdateStars()
 	std::vector<VertexStar> vert;
 	std::vector<int> idx;
 
-	const auto &stars = _galaxy.GetStars();
+	const auto& stars = _galaxy.GetStars();
 
 	float a = 1;
 	Color color = { 1, 1, 1, a };
@@ -278,7 +278,7 @@ void GalaxyWnd::UpdateAxis()
 		p += s;
 		if (i % 2 == 0)
 		{
-			_textAxisLabel.AddText(1, GetWindowPos( p - l, -4.f * l, 0), "%2.0f", p);
+			_textAxisLabel.AddText(1, GetWindowPos(p - l, -4.f * l, 0), "%2.0f", p);
 		}
 		else
 		{
@@ -491,17 +491,16 @@ void GalaxyWnd::Render()
 		_textAxisLabel.Draw(_width, _height, _matView, _matProjection);
 	}
 
+	int features = 0;
+	if (_flags & (int)DisplayItem::FILAMENTS)
+	{
+		features = 1;
+	}
+
 	if (_flags & (int)DisplayItem::DUST)
 	{
-		if (_useDirectMode)
-		{
-			DrawDust();
-		}
-		else
-		{
-			_vertDust.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize());
-			_vertDust.Draw(_matView, _matProjection);
-		}
+		_vertDust.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize(), features);
+		_vertDust.Draw(_matView, _matProjection);
 	}
 
 	if (_flags & (int)DisplayItem::H2)
@@ -509,7 +508,7 @@ void GalaxyWnd::Render()
 
 	if (_flags & (int)DisplayItem::STARS)
 	{
-		_vertStars.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize());
+		_vertStars.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize(), features);
 		_vertStars.Draw(_matView, _matProjection);
 	}
 
@@ -581,41 +580,6 @@ void GalaxyWnd::AddEllipsisVertices(
 }
 
 
-void GalaxyWnd::DrawDust()
-{
-	glBindTexture(GL_TEXTURE_2D, _texStar);
-
-	float maxSize = 0.0f;
-	glGetFloatv(GL_POINT_SIZE_MAX_ARB, &maxSize);
-	glPointParameterfARB(GL_POINT_SIZE_MAX_ARB, maxSize);
-	glPointParameterfARB(GL_POINT_SIZE_MIN_ARB, 1.0f);
-	glTexEnvf(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
-
-	glEnable(GL_POINT_SPRITE_ARB);
-	glEnable(GL_TEXTURE_2D);       // point sprite texture support
-	glEnable(GL_BLEND);            // soft blending of point sprites
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-	// size 70 looks ok when the fov is 28174
-	glPointSize(std::min((float)(_galaxy.GetDustRenderSize() * 28174 / _fov), maxSize));
-	glBegin(GL_POINTS);
-
-	for (const auto &dustParticle : _galaxy.GetDust())
-	{
-		const Color& col = ColorFromTemperature(dustParticle.temp);
-		glColor3f(
-			col.r * (float)dustParticle.mag,
-			col.g * (float)dustParticle.mag,
-			col.b * (float)dustParticle.mag);
-		glVertex3f(dustParticle.pos.x, dustParticle.pos.y, 0.0f);
-	}
-	glEnd();
-
-	glDisable(GL_POINT_SPRITE_ARB);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);
-}
-
 void GalaxyWnd::DrawH2()
 {
 	glBindTexture(GL_TEXTURE_2D, _texStar);
@@ -631,8 +595,8 @@ void GalaxyWnd::DrawH2()
 	glEnable(GL_BLEND);            // soft blending of point sprites
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	const auto &h2 = _galaxy.GetH2();
-	for (uint32_t i = 0; i < h2.size()/2; ++i)
+	const auto& h2 = _galaxy.GetH2();
+	for (uint32_t i = 0; i < h2.size() / 2; ++i)
 	{
 		uint32_t k1 = 2 * i;
 		uint32_t k2 = 2 * i + 1;
@@ -650,18 +614,18 @@ void GalaxyWnd::DrawH2()
 
 		glPointSize(2 * size);
 		glBegin(GL_POINTS);
-			const Color& col = ColorFromTemperature(h2[k1].temp);
-			glColor3f(
-				col.r * h2[i].mag * 2.0f,
-				col.g * h2[i].mag * 0.5f,
-				col.b * h2[i].mag * 0.5f);
-			glVertex3f(p1.x, p1.y, 0.0f);
+		const Color& col = ColorFromTemperature(h2[k1].temp);
+		glColor3f(
+			col.r * h2[i].mag * 2.0f,
+			col.g * h2[i].mag * 0.5f,
+			col.b * h2[i].mag * 0.5f);
+		glVertex3f(p1.x, p1.y, 0.0f);
 		glEnd();
 
 		glPointSize(size / 6);
 		glBegin(GL_POINTS);
-			glColor3f(1, 1, 1);
-			glVertex3f(p1.x, p1.y, 0.0f);
+		glColor3f(1, 1, 1);
+		glVertex3f(p1.x, p1.y, 0.0f);
 		glEnd();
 	}
 
@@ -764,10 +728,12 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 		case SDLK_z:
 			_galaxy.SetBaseTemp(std::min(_galaxy.GetBaseTemp() + 100, 15000.0f));
+			_renderUpdateHint |= ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_h:
 			_galaxy.SetBaseTemp(std::max(_galaxy.GetBaseTemp() - 100, 500.0f));
+			_renderUpdateHint |= ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_b:
@@ -794,7 +760,11 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			_flags ^= (int)DisplayItem::H2;
 			break;
 
-		case SDLK_F5:
+		case  SDLK_F5:
+			_flags ^= (int)DisplayItem::FILAMENTS;
+			break;
+
+		case SDLK_F6:
 			_flags ^= (int)DisplayItem::DENSITY_WAVES;
 			break;
 

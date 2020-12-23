@@ -65,7 +65,7 @@ public:
 			glDeleteShader(vertexShader);
 			glDeleteShader(fragmentShader);
 
-			throw std::runtime_error("VertexBuffer: shader program linking failed!");
+			throw std::runtime_error("VertexBufferBase: shader program linking failed!\r\n" + std::string(infoLog.data()));
 		}
 
 		// Always detach shaders after a successful link.
@@ -110,7 +110,14 @@ public:
 		for (const AttributeDefinition &attrib : _attributes)
 		{
 			glEnableVertexAttribArray(attrib.attribIdx);
-			glVertexAttribPointer(attrib.attribIdx, attrib.size, attrib.type, GL_FALSE, sizeof(TVertex), (GLvoid*)attrib.offset);
+			if (attrib.type == GL_INT)
+			{
+				glVertexAttribIPointer(attrib.attribIdx, attrib.size, GL_INT, sizeof(TVertex), (GLvoid*)attrib.offset);
+			}
+			else
+			{
+				glVertexAttribPointer(attrib.attribIdx, attrib.size, attrib.type, GL_FALSE, sizeof(TVertex), (GLvoid*)attrib.offset);
+			}
 		}
 
 		// Set up index buffer array

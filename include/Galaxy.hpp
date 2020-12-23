@@ -91,7 +91,8 @@ private:
 		throw std::runtime_error("Galaxy& operator=(const Galaxy& obj): not implemented!");
 	}
 
-	void InitStars();
+	void InitStarsAndDust();
+	void InitH2AndFilaments();
 
 	// Parameters needed for defining the general structure of the galaxy
 
@@ -120,9 +121,6 @@ private:
 	bool _hasDarkMatter;
 
 	float _baseTemp;
-
-public:
-	int _numberByRad[100];  ///< Historgramm showing distribution of stars
 
 private:
 	std::vector<Star> _stars;  ///< Pointer to an array of star data

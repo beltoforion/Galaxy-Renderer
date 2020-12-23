@@ -11,12 +11,14 @@ struct VertexStar
 class VertexBufferStars : public VertexBufferBase<VertexStar>
 {
 public:
-	VertexBufferStars()
+	VertexBufferStars(GLuint blendEquation, GLuint blendFunc)
 		: VertexBufferBase(GL_STATIC_DRAW)
 		, _pertN(0)
 		, _dustSize(0)
 		, _pertAmp(0)
 		, _time(0)
+		, _blendFunc(blendFunc)
+		, _blendEquation(blendEquation)
 	{
 		DefineAttributes({
 			{ attPosition,      2, GL_FLOAT, 0 },
@@ -34,12 +36,13 @@ public:
 		});
 	}
 
-	void UpdateShaderVariables(float time, int num, float amp, int dustSize)
+	void UpdateShaderVariables(float time, int num, float amp, int dustSize, int displayFeatures)
 	{
 		_pertN = num;
 		_pertAmp = amp;
 		_time = time;
 		_dustSize = dustSize;
+		_displayFeatures = displayFeatures;
 	}
 
 	virtual void Draw(glm::mat4& matView, glm::mat4& matProjection)
@@ -55,8 +58,9 @@ public:
 		OnSetCustomShaderVariables();
 
 		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, _blendFunc);
+		glBlendEquation(_blendEquation);
 		glEnable(GL_PROGRAM_POINT_SIZE);
-//		glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 		glEnable(GL_POINT_SPRITE);
 		OnBeforeDraw();
 
@@ -65,9 +69,9 @@ public:
 		glBindVertexArray(0);
 
 		glDisable(GL_POINT_SPRITE);
-//		glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
 		glDisable(GL_PROGRAM_POINT_SIZE);
 		glDisable(GL_BLEND);
+		glBlendEquation(GL_FUNC_ADD);
 
 		glUseProgram(0);
 	}
@@ -83,6 +87,7 @@ protected:
 			"uniform mat4 viewMat;\n"
 			"uniform int pertN;\n"
 			"uniform int dustSize;\n"
+			"uniform int displayFeatures;\n"
 			"uniform float pertAmp;\n"
 			"uniform float time;\n"
 			"uniform float DEG_TO_RAD = 0.01745329251;\n"
@@ -101,7 +106,8 @@ protected:
 			"layout(location = 11) in vec4 color;\n"
 			"\n"
 			"out vec4 vertexColor;\n"
-			"out float vertexType;\n"
+			"flat out int vertexType;\n"
+			"flat out int showFilaments;\n"
 			"\n"
 			"void main()\n"
 			"{\n"
@@ -123,14 +129,22 @@ protected:
 			"		ps.y += (a / pertAmp) * cos(alpha * 2 * pertN);\n"
 			"	}\n"
 			"\n"
-			"	if (type==0)\n"
-			"		gl_PointSize = mag * 3;\n"
-			"	else"	
-			"		gl_PointSize = dustSize * mag * 50;\n"
-			"\n"
+			"	if (type==0) {\n"
+			"		gl_PointSize = mag * 4;\n"
+			"	    vertexColor = color * mag ;\n"
+			"	} else if (type==1) {"	
+			"		gl_PointSize = mag * 5 * dustSize;\n"
+			"	    vertexColor = color * mag;\n"
+			"	} else {"
+			"		gl_PointSize = mag * 2 * dustSize;\n"
+			"	    vertexColor = color * mag;\n"
+			"   }\n"
 			"	gl_Position =  projMat * vec4(ps, 0, 1);\n"
-			"	vertexColor = color * mag;\n"
-			"	vertexType = float(type);\n"
+			"	vertexType = type;\n"
+			"	if ( displayFeatures==0)\n"
+			"		showFilaments = 0;\n"
+			"	else\n"
+			"		showFilaments = 1;\n"
 			"}\n";
 	}
 
@@ -139,17 +153,27 @@ protected:
 		return
 			"#version 440 core\n"
 			"in vec4 vertexColor;\n"
-			"in float vertexType;\n"
+			"flat in int vertexType;\n"
+			"flat in int showFilaments;\n"
 			"out vec4 FragColor;\n"
 			"void main()\n"
 			"{\n"
 			"	if (vertexType==0) {\n"
 			"		FragColor = vertexColor;\n"
-			"	} else {\n"
 			"		vec2 circCoord = 2.0 * gl_PointCoord - 1.0;\n"
-			"		float alpha = 0.3 * (1-length(circCoord));\n"
+			"		float alpha =1-length(circCoord);\n"
 			"		FragColor = vec4(vertexColor.xyz, alpha);\n"
-			"	}\n"
+			"	} else if (vertexType==1) {\n"
+			"		vec2 circCoord = 2.0 * gl_PointCoord - 1.0;\n"
+			"		float alpha = 0.05 * (1-length(circCoord));\n"
+			"		FragColor = vec4(vertexColor.xyz, alpha);\n"
+			"	} else {\n"
+			"		if (showFilaments==0)\n"
+			"			discard;\n"	
+			"		vec2 circCoord = 2.0 * gl_PointCoord - 1.0;\n"
+			"		float alpha = 0.07 * (1-length(circCoord));\n"
+			"		FragColor = vec4(vertexColor.xyz, alpha);\n"
+			"   }\n"
 			"}\n";
 	}
 
@@ -166,6 +190,9 @@ protected:
 
 		GLuint varTime = glGetUniformLocation(GetShaderProgramm(), "time");
 		glUniform1f(varTime, _time);
+
+		GLuint varDisplayFeatures = glGetUniformLocation(GetShaderProgramm(), "displayFeatures");
+		glUniform1i(varDisplayFeatures, _displayFeatures);
 	}
 
 
@@ -192,4 +219,7 @@ private:
 	int _dustSize;
 	float _pertAmp;
 	float _time;
+	GLuint _blendFunc;
+	GLuint _blendEquation;
+	int _displayFeatures;
 };

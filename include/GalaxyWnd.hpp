@@ -33,14 +33,15 @@ private:
 	enum class DisplayItem : uint32_t
 	{
 		NONE          = 0,
-		AXIS          = 0b000000001,
-		STARS         = 0b000000010,
-		PAUSE         = 0b000000100,
-		HELP          = 0b000001000,
-		DENSITY_WAVES = 0b000100000,
-		VELOCITY      = 0b001000000,
-		DUST          = 0b010000000,
-		H2            = 0b100000000
+		AXIS          = 0b0000000001,
+		STARS         = 0b0000000010,
+		PAUSE         = 0b0000000100,
+		HELP          = 0b0000001000,
+		DENSITY_WAVES = 0b0000100000,
+		VELOCITY      = 0b0001000000,
+		DUST          = 0b0010000000,
+		H2            = 0b0100000000,
+		FILAMENTS     = 0b1000000000,
 	};
 
 	enum RenderUpdateHint : uint32_t
@@ -57,7 +58,6 @@ private:
 
 	GalaxyWnd(const GalaxyWnd& orig);
 
-	void DrawDust();
 	void DrawH2();
 	
 	void AddEllipsisVertices(
@@ -105,7 +105,6 @@ private:
 	std::vector<Galaxy::GalaxyParam> _predefinedGalaxies;
 
 	GLuint _texStar;
-
 	static const float TimeStepSize;
 };
 

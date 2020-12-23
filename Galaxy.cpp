@@ -35,7 +35,6 @@ Galaxy::Galaxy(
 	, _time(0)
 	, _hasDarkMatter(true)
 	, _baseTemp(4000)
-	, _numberByRad()
 	, _stars()
 	, _dust()
 	, _h2()
@@ -72,17 +71,15 @@ void Galaxy::Reset(GalaxyParam param)
 	_radGalaxy = param.rad;
 	_radFarField = _radGalaxy * 2;  // there is no science behind this threshold it just looks nice
 	_numStars = param.numStars;
-	_numDust = param.numStars / 2;
+	_numDust = param.numStars;
 	_time = 0;
 	_dustRenderSize = param.dustRenderSize;
 	_hasDarkMatter = param.hasDarkMatter;
 	_pertN = param.pertN;
 	_pertAmp = param.pertAmp;
 
-	for (int i = 0; i < 100; ++i)
-		_numberByRad[i] = 0;
-
-	InitStars();
+	InitStarsAndDust();
+	InitH2AndFilaments();
 }
 
 bool Galaxy::HasDarkMatter() const noexcept
@@ -96,48 +93,12 @@ void Galaxy::ToggleDarkMatter()
 	Reset();
 }
 
-void Galaxy::InitStars()
+void Galaxy::InitH2AndFilaments()
 {
-	_dust = std::vector(_numDust, Star());
-	_stars = std::vector(_numStars, Star());
+	_dust = std::vector<Star>();
+	_dust.reserve(_numStars);
+
 	_h2 = std::vector((size_t)(2 * _numH2), Star());
-
-	// The first three stars can be used for aligning the
-	// camera with the galaxy rotation.
-
-	// First star ist the black hole at the centre
-	_stars[0].a = 0;
-	_stars[0].b = 0;
-	_stars[0].tiltAngle = 0;
-	_stars[0].theta0 = 0;
-	_stars[0].velTheta = 0;
-	_stars[0].center = { 0, 0 };
-	_stars[0].velTheta = GetOrbitalVelocity((_stars[0].a + _stars[0].b) / 2.0f);
-	_stars[0].type = 0;
-	_stars[0].temp = 6000;
-
-	// second star is at the edge of the core area
-	_stars[1].a = _radCore;
-	_stars[1].b = _radCore * GetExcentricity(_radCore);
-	_stars[1].tiltAngle = GetAngularOffset(_radCore);
-	_stars[1].theta0 = 0;
-	_stars[1].center = { 0, 0 };
-	_stars[1].velTheta = GetOrbitalVelocity((_stars[1].a + _stars[1].b) / 2.0f);
-	_stars[1].type = 0;
-	_stars[1].temp = 6000;
-
-	// third star is at the edge of the disk
-	_stars[2].a = _radGalaxy;
-	_stars[2].b = _radGalaxy * GetExcentricity(_radGalaxy);
-	_stars[2].tiltAngle = GetAngularOffset(_radGalaxy);
-	_stars[2].theta0 = 0;
-	_stars[2].center = { 0, 0 };
-	_stars[2].velTheta = GetOrbitalVelocity((_stars[2].a + _stars[2].b) / 2.0f);
-	_stars[2].type = 0;
-	_stars[2].temp = 6000;
-
-	// cell width of the histogramm
-	float dh = _radFarField / 100.0f;
 
 	// Initialize the stars
 	CumulativeDistributionFunction cdf;
@@ -150,62 +111,41 @@ void Galaxy::InitStars()
 		_radFarField,		// end of the intensity curve
 		1000);				// number of supporting points
 
-	for (int i = 3; i < _numStars; ++i)
-	{
-		float rad = (float)cdf.ValFromProb(MathHelper::rnum());
-
-		_stars[i].a = rad;
-		_stars[i].b = rad * GetExcentricity(rad);
-		_stars[i].tiltAngle = GetAngularOffset(rad);
-		_stars[i].theta0 = 360.0f * MathHelper::rnum();
-		_stars[i].velTheta = GetOrbitalVelocity(rad);
-		_stars[i].center = { 0, 0 };
-		_stars[i].temp = 6000 + (4000 * MathHelper::rnum() - 2000);
-		_stars[i].mag = 0.3f + 0.2f * MathHelper::rnum();
-		_stars[i].type = 0;
-
-		// Make a small portion of the stars brighter
-		if (i < _numStars / 60)
-		{
-			_stars[i].mag = std::min(_stars[i].mag + 0.2f, 1.0f);
-		}
-
-		int idx = (int)std::min(1.0f / dh * (_stars[i].a + _stars[i].b) / 2.0f, 99.0f);
-		_numberByRad[idx]++;
-	}
-
-	// Initialise Dust
+	// Initialize Filaments
 	float x, y, rad;
-	for (int i = 0; i < _numDust; ++i)
+	for (int i = 0; i < _numStars / 100; ++i)
 	{
-		// original:
-		//if (i % 4 == 0)
-		if (i % 2 == 0)
+		rad = (float)cdf.ValFromProb(MathHelper::rnum());
+
+		x = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
+		y = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
+		rad = sqrt(x * x + y * y);
+
+		auto theta = 360.0f * MathHelper::rnum();
+		auto mag = 0.1f + 0.05f * MathHelper::rnum();
+		auto a = rad;
+		auto b = rad * GetExcentricity(rad);
+		auto num = (int)(100 * MathHelper::rnum());
+		auto temp = _baseTemp + rad / 4.5f - 2000;
+		for (int i = 0; i < num; ++i)
 		{
-			rad = (float)cdf.ValFromProb(MathHelper::rnum());
+			rad = rad + 200 - 400 * MathHelper::rnum();
+			auto dustParticle = Star();
+			dustParticle.a = rad;
+			dustParticle.b = rad * GetExcentricity(rad);
+			dustParticle.tiltAngle = GetAngularOffset(rad);
+			dustParticle.theta0 = theta + 10 - 20 * MathHelper::rnum();
+			dustParticle.velTheta = GetOrbitalVelocity((dustParticle.a + dustParticle.b) / 2.0f);
+			dustParticle.center = { 0, 0 };
+
+			// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
+			// the following temperature distribution (no science here it just looks right)
+			dustParticle.temp = _baseTemp + rad / 4.5f - 1000;;
+			dustParticle.mag = mag + 0.025f * MathHelper::rnum();
+			dustParticle.type = 2;
+
+			_dust.push_back(dustParticle);
 		}
-		else
-		{
-			x = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
-			y = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
-			rad = sqrt(x * x + y * y);
-		}
-
-		_dust[i].a = rad;
-		_dust[i].b = rad * GetExcentricity(rad);
-		_dust[i].tiltAngle = GetAngularOffset(rad);
-		_dust[i].theta0 = 360.0f * MathHelper::rnum();
-		_dust[i].velTheta = GetOrbitalVelocity((_dust[i].a + _dust[i].b) / 2.0f);
-		_dust[i].center = { 0, 0 };
-		_dust[i].type = 1;
-
-		// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
-		// the following temperature distribution (no science here it just looks right)
-		_dust[i].temp = _baseTemp + rad / 4.5f;
-
-		_dust[i].mag = 0.015f + 0.01f * MathHelper::rnum();
-		int idx = (int)std::min(1.0f / dh * (_dust[i].a + _dust[i].b) / 2.0f, 99.0f);
-		_numberByRad[idx]++;
 	}
 
 	// Initialise H2 regions
@@ -224,8 +164,6 @@ void Galaxy::InitStars()
 		_h2[k1].center = { 0, 0 };
 		_h2[k1].temp = 6000 + (6000 * MathHelper::rnum()) - 3000;
 		_h2[k1].mag = 0.1f + 0.05f * MathHelper::rnum();
-		int idx = (int)std::min(1.0f / dh * (_h2[k1].a + _h2[k1].b) / 2.0f, 99.0f);
-		_numberByRad[idx]++;
 
 		// Create second point 100 pc away from the first one
 		int dist = 1000;
@@ -238,8 +176,91 @@ void Galaxy::InitStars()
 		_h2[k2].center = _h2[k1].center;
 		_h2[k2].temp = _h2[k1].temp;
 		_h2[k2].mag = _h2[k1].mag;
-		idx = (int)std::min(1.0 / dh * ((double)_h2[k2].a + _h2[k2].b) / 2.0, 99.0);
-		_numberByRad[idx]++;
+	}
+}
+
+void Galaxy::InitStarsAndDust()
+{
+	_stars = std::vector<Star>();
+	_stars.reserve(_numStars);
+
+	// First star ist the black hole at the centre
+	auto star = Star();
+	star.a = 0;
+	star.b = 0;
+	star.tiltAngle = 0;
+	star.theta0 = 0;
+	star.velTheta = 0;
+	star.center = { 0, 0 };
+	star.velTheta = GetOrbitalVelocity((star.a + star.b) / 2.0f);
+	star.type = 0;
+	star.temp = 6000;
+	_stars.push_back(star);
+
+	// Initialize the stars
+	CumulativeDistributionFunction cdf;
+	cdf.SetupRealistic(
+		1.0,				// maximum intensity
+		0.02,				// k (bulge)
+		_radGalaxy / 3.0f,	// disc scale length
+		_radCore,			// bulge radius
+		0,					// start  of the intnesity curve
+		_radFarField,		// end of the intensity curve
+		1000);				// number of supporting points
+
+	for (int i = 1; i < _numStars; ++i)
+	{
+		float rad = (float)cdf.ValFromProb(MathHelper::rnum());
+		auto star = Star();
+		star.a = rad;
+		star.b = rad * GetExcentricity(rad);
+		star.tiltAngle = GetAngularOffset(rad);
+		star.theta0 = 360.0f * MathHelper::rnum();
+		star.velTheta = GetOrbitalVelocity(rad);
+		star.center = { 0, 0 };
+		star.temp = 6000 + (4000 * MathHelper::rnum() - 2000);
+		star.mag = 0.1f + 0.4f * MathHelper::rnum();
+		star.type = 0;
+
+		// Make a small portion of the stars brighter
+		if (i < _numStars / 60)
+		{
+			star.mag = std::min(star.mag + 0.1f + MathHelper::rnum() * 0.4f, 1.0f);
+		}
+
+		_stars.push_back(star);
+	}
+
+	// Initialise Dust:
+	// The galaxy gets as many dust clouds as stars
+	float x, y, rad;
+	for (int i = 0; i < _numStars; ++i)
+	{
+		if (i % 2 == 0)
+		{
+			rad = (float)cdf.ValFromProb(MathHelper::rnum());
+		}
+		else
+		{
+			x = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
+			y = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
+			rad = sqrt(x * x + y * y);
+		}
+
+		auto dustParticle = Star();
+		dustParticle.a = rad;
+		dustParticle.b = rad * GetExcentricity(rad);
+		dustParticle.tiltAngle = GetAngularOffset(rad);
+		dustParticle.theta0 = 360.0f * MathHelper::rnum();
+		dustParticle.velTheta = GetOrbitalVelocity((dustParticle.a + dustParticle.b) / 2.0f);
+		dustParticle.center = { 0, 0 };
+		dustParticle.type = 1;
+
+		// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
+		// the following temperature distribution (no science here it just looks right)
+		dustParticle.temp = _baseTemp + rad / 4.5f;
+		dustParticle.mag = 0.02f + 0.15f * MathHelper::rnum();
+		_stars.push_back(dustParticle);
 	}
 }
 
@@ -251,7 +272,8 @@ float Galaxy::GetBaseTemp() const noexcept
 void Galaxy::SetBaseTemp(float baseTemp)
 {
 	_baseTemp = baseTemp;
-	InitStars();
+	InitStarsAndDust();
+	InitH2AndFilaments();
 }
 
 void Galaxy::SetDustRenderSize(float sz)
@@ -451,7 +473,7 @@ float Galaxy::GetTime() const
 	return _time;
 }
 
-void Galaxy::CalcXy(Star &p, float time,int pertN, float pertAmp)
+void Galaxy::CalcXy(Star& p, float time, int pertN, float pertAmp)
 {
 	auto thetaActual = p.theta0 + p.velTheta * time;
 
@@ -464,10 +486,10 @@ void Galaxy::CalcXy(Star &p, float time,int pertN, float pertAmp)
 	float cosbeta = std::cos(beta);
 	float sinbeta = std::sin(beta);
 
-	Vec2 ps = 
+	Vec2 ps =
 	{
 		p.center.x + (p.a * cosalpha * cosbeta - p.b * sinalpha * sinbeta),
-		p.center.y + (p.a * cosalpha * sinbeta + p.b * sinalpha * cosbeta) 
+		p.center.y + (p.a * cosalpha * sinbeta + p.b * sinalpha * cosbeta)
 	};
 
 	// Add small perturbations to create more spiral arms
