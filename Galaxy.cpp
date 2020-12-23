@@ -29,7 +29,7 @@ Galaxy::Galaxy(
 	, _velAngle(0.000001f)
 	, _numStars(numStars)
 	, _numDust(numStars)
-	, _numH2(300)
+	, _numH2(500)
 	, _pertN(0)
 	, _pertAmp(0)
 	, _time(0)
@@ -143,10 +143,35 @@ void Galaxy::InitH2AndFilaments()
 			dustParticle.temp = _baseTemp + rad / 4.5f - 1000;;
 			dustParticle.mag = mag + 0.025f * MathHelper::rnum();
 			dustParticle.type = 2;
-
 			_dust.push_back(dustParticle);
 		}
 	}
+
+	// Initialise H2 regions
+	for (int i = 0; i < _numH2; ++i)
+	{
+		x = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
+		y = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
+		rad = sqrt(x * x + y * y);
+
+		auto particleH2 = Star();
+		particleH2.a = rad;
+		particleH2.b = rad * GetExcentricity(rad);
+		particleH2.tiltAngle = GetAngularOffset(rad);
+		particleH2.theta0 = 360.0f * MathHelper::rnum();
+		particleH2.velTheta = GetOrbitalVelocity((particleH2.a + particleH2.b) / 2.0f);
+		particleH2.center = { 0, 0 };
+		particleH2.temp = 6000 + (6000 * MathHelper::rnum()) - 3000;
+		particleH2.mag = 0.1f + 0.05f * MathHelper::rnum();
+		particleH2.type = 3;
+
+		_dust.push_back(particleH2);
+		
+		// Push particle again with type 4 (bright red core of an h2 region)
+		particleH2.type = 4;
+		_dust.push_back(particleH2);
+	}
+
 
 	// Initialise H2 regions
 	for (int i = 0; i < _numH2; ++i)

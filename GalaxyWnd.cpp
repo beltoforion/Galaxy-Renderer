@@ -13,7 +13,7 @@ const float GalaxyWnd::TimeStepSize = 100000.0f;
 
 GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
-	, _flags((int)DisplayItem::STARS | (int)DisplayItem::AXIS | (int)DisplayItem::HELP | (int)DisplayItem::DUST | (int)DisplayItem::H2)
+	, _flags((int)DisplayItem::STARS | (int)DisplayItem::AXIS | (int)DisplayItem::HELP | (int)DisplayItem::DUST | (int)DisplayItem::H2 | (int)DisplayItem::FILAMENTS)
 	, _galaxy()
 	, _colNum(200)
 	, _t0(1000)
@@ -30,7 +30,6 @@ GalaxyWnd::GalaxyWnd()
 	, _textHelp()
 	, _textAxisLabel()
 	, _textGalaxyLabels()
-	, _texStar(0)
 {
 	double x, y, z;
 	double r, g, b;
@@ -73,56 +72,6 @@ void GalaxyWnd::InitGL() noexcept(false)
 	glShadeModel(GL_SMOOTH);
 	glViewport(0, 0, GetWidth(), GetHeight());
 
-	SDL_Surface* tex;
-
-	tex = SDL_LoadBMP("particle.bmp");
-	if (!tex)
-		throw std::runtime_error("Can't load star texture (particle.bmp).");
-
-	// Check that the image's width is a power of 2
-	if (tex->w & (tex->w - 1))
-		throw std::runtime_error("texture width is not a power of 2.");
-
-	// Also check if the height is a power of 2
-	if (tex->h & (tex->h - 1))
-		throw std::runtime_error("texture height is not a power of 2.");
-
-	// get the number of channels in the SDL surface
-	GLint  nOfColors = tex->format->BytesPerPixel;
-	GLenum texture_format;
-	if (nOfColors == 4)     // contains an alpha channel
-	{
-		texture_format = GL_RGBA;
-	}
-	else if (nOfColors == 3)     // no alpha channel
-	{
-		texture_format = GL_RGB;
-	}
-	else
-		throw std::runtime_error("image is not truecolor");
-
-	// Have OpenGL generate a texture object handle for us
-	glGenTextures(1, &_texStar);
-
-	// Bind the texture object
-	glBindTexture(GL_TEXTURE_2D, _texStar);
-
-	// Set the texture's stretching properties
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Edit the texture object's image data using the information SDL_Surface gives us
-	glTexImage2D(
-		GL_TEXTURE_2D,
-		0,
-		nOfColors,
-		tex->w,
-		tex->h,
-		0,
-		texture_format,
-		GL_UNSIGNED_BYTE,
-		tex->pixels);
-
 	_vertDensityWaves.Initialize();
 	_vertAxis.Initialize();
 	_vertVelocityCurve.Initialize();
@@ -136,7 +85,7 @@ void GalaxyWnd::InitGL() noexcept(false)
 
 	glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 	glDisable(GL_DEPTH_TEST);
-	glClearColor(0.0f, .0f, 0.f, 0.0f);
+	glClearColor(0.0f, .0f, 0.08f, 0.0f);
 	SetCameraOrientation({ 0, 1, 0 });
 }
 
@@ -495,7 +444,12 @@ void GalaxyWnd::Render()
 	int features = 0;
 	if (_flags & (int)DisplayItem::FILAMENTS)
 	{
-		features = 1;
+		features |= 1 << 0;
+	}
+
+	if (_flags & (int)DisplayItem::H2)
+	{
+		features |= 1 << 1;
 	}
 
 	if (_flags & (int)DisplayItem::DUST)
@@ -503,9 +457,6 @@ void GalaxyWnd::Render()
 		_vertDust.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize(), features);
 		_vertDust.Draw(_matView, _matProjection);
 	}
-
-	if (_flags & (int)DisplayItem::H2)
-		DrawH2();
 
 	if (_flags & (int)DisplayItem::STARS)
 	{
@@ -578,60 +529,6 @@ void GalaxyWnd::AddEllipsisVertices(
 	// Close the loop and reset the element index array
 	vertIdx.push_back(firstPointIdx);
 	vertIdx.push_back(0xFFFF);
-}
-
-void GalaxyWnd::DrawH2()
-{
-	glBindTexture(GL_TEXTURE_2D, _texStar);
-
-	float maxSize = 0.0f;
-	glGetFloatv(GL_POINT_SIZE_MAX_ARB, &maxSize);
-	glPointParameterfARB(GL_POINT_SIZE_MAX_ARB, maxSize);
-	glPointParameterfARB(GL_POINT_SIZE_MIN_ARB, 1.0f);
-	glTexEnvf(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
-
-	glEnable(GL_POINT_SPRITE_ARB);
-	glEnable(GL_TEXTURE_2D);       // point sprite texture support
-	glEnable(GL_BLEND);            // soft blending of point sprites
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-	const auto& h2 = _galaxy.GetH2();
-	for (uint32_t i = 0; i < h2.size() / 2; ++i)
-	{
-		uint32_t k1 = 2 * i;
-		uint32_t k2 = 2 * i + 1;
-
-		if (k1 >= h2.size() || k2 >= h2.size())
-			throw std::runtime_error("GalaxyWnd::DrawH2: index out of bounds!");
-
-		const Vec2& p1 = h2[k1].pos;
-		const Vec2& p2 = h2[k2].pos;
-
-		float dst = std::sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
-		float size = ((1000 - dst) / 10) - 50;
-		if (size < 1)
-			continue;
-
-		glPointSize(2 * size);
-		glBegin(GL_POINTS);
-		const Color& col = ColorFromTemperature(h2[k1].temp);
-		glColor3f(
-			col.r * h2[i].mag * 2.0f,
-			col.g * h2[i].mag * 0.5f,
-			col.b * h2[i].mag * 0.5f);
-		glVertex3f(p1.x, p1.y, 0.0f);
-		glEnd();
-
-		glPointSize(size / 6);
-		glBegin(GL_POINTS);
-		glColor3f(1, 1, 1);
-		glVertex3f(p1.x, p1.y, 0.0f);
-		glEnd();
-	}
-
-	glDisable(GL_POINT_SPRITE_ARB);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);
 }
 
 Color GalaxyWnd::ColorFromTemperature(float temp) const

@@ -58,8 +58,6 @@ private:
 
 	GalaxyWnd(const GalaxyWnd& orig);
 
-	void DrawH2();
-	
 	void AddEllipsisVertices(
 		std::vector<VertexColor>& vert, 
 		std::vector<int>& vertIdx, 
@@ -104,7 +102,6 @@ private:
 
 	std::vector<Galaxy::GalaxyParam> _predefinedGalaxies;
 
-	GLuint _texStar;
 	static const float TimeStepSize;
 };
 
