@@ -326,7 +326,8 @@ void GalaxyWnd::UpdateText()
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[F2] Toggle Axis");
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[F3] Toggle Dust");
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[F4] Toggle H2 Regions");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F5] Toggle Density Waves");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F5] Toggle Filaments");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F6] Toggle Density Waves");
 
 	y += dy1; _textHelp.AddText(1, { x0, y }, "Physics:");
 	y += dy1; _textHelp.AddText(2, { x0, y }, "[z],[h] Base Temp.:  %2.2lf K", _galaxy.GetBaseTemp());
@@ -579,7 +580,6 @@ void GalaxyWnd::AddEllipsisVertices(
 	vertIdx.push_back(0xFFFF);
 }
 
-
 void GalaxyWnd::DrawH2()
 {
 	glBindTexture(GL_TEXTURE_2D, _texStar);
@@ -709,6 +709,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 		case SDLK_m:
 			_galaxy.ToggleDarkMatter();
+			_renderUpdateHint |= ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_f:
