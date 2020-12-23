@@ -46,7 +46,7 @@ GalaxyWnd::~GalaxyWnd()
 void GalaxyWnd::InitGL() noexcept(false)
 {
 	// GL initialization
-	glShadeModel(GL_SMOOTH);
+//	glShadeModel(GL_SMOOTH);
 	glViewport(0, 0, GetWidth(), GetHeight());
 
 	_vertDensityWaves.Initialize();
@@ -59,7 +59,7 @@ void GalaxyWnd::InitGL() noexcept(false)
 	_textAxisLabel.Initialize();
 	_textGalaxyLabels.Initialize();
 
-	glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
+//	glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 	glDisable(GL_DEPTH_TEST);
 	glClearColor(0.0f, .0f, 0.08f, 0.0f);
 	SetCameraOrientation({ 0, 1, 0 });
@@ -194,10 +194,6 @@ void GalaxyWnd::UpdateText()
 
 	_textHelp.BeginUpdate();
 	_textHelp.AddText(0, { x0, y0 - 60 }, "Spiral Galaxy Renderer");
-
-	//y = y0;	  _textHelp.AddText(1, { x0, y }, "Simulation Controls:");
-	//y += dy1; _textHelp.AddText(2, { x0, y }, "FPS:  %d", GetFPS());
-	//y += dy2; _textHelp.AddText(2, { x0, y }, "Time: %2.2e y", _galaxy.GetTime());
 
 	y = y0; _textHelp.AddText(1, { x0, y }, "Geometry:");
 	y += dy1; _textHelp.AddText(2, { x0, y }, "[r],[f] RadCore:     %d pc", (int)_galaxy.GetCoreRad());

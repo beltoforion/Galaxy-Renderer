@@ -74,15 +74,8 @@ public:
 
 private:
 
-	Galaxy(const Galaxy& obj) 
-	{
-		throw std::runtime_error("Galaxy(const Galaxy& obj): not implemented!");
-	}
-
-	Galaxy& operator=(const Galaxy& obj)
-	{
-		throw std::runtime_error("Galaxy& operator=(const Galaxy& obj): not implemented!");
-	}
+	Galaxy(const Galaxy& obj);
+	Galaxy& operator=(const Galaxy& obj);
 
 	void InitStarsAndDust();
 
@@ -92,7 +85,6 @@ private:
 	float _elEx2;          ///< Excentricity of the outermost ellipse
 
 	float _velOrigin;      ///< Velovity at the innermost core in km/s
-
 	float _angleOffset;    ///< Angular offset per parsec
 
 	float _radCore;        ///< Radius of the inner core
@@ -110,9 +102,8 @@ private:
 	float _pertAmp;
 
 	bool _hasDarkMatter;
-
 	float _baseTemp;
 
 private:
-	std::vector<Star> _stars;  ///< Pointer to an array of star data
+	std::vector<Star> _stars;  ///< Pointer to an array of star and dust data
 };

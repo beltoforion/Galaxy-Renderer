@@ -56,6 +56,23 @@ private:
 	};
 
 	float _time;
+	uint32_t _flags;	///< The display flags
+	Galaxy _galaxy;
+
+	uint32_t _renderUpdateHint;
+
+	VertexBufferLines _vertDensityWaves;
+	VertexBufferLines _vertAxis;
+	VertexBufferLines _vertVelocityCurve;
+	VertexBufferStars _vertStars;
+
+	TextBuffer _textHelp;
+	TextBuffer _textAxisLabel;
+	TextBuffer _textGalaxyLabels;
+
+	std::vector<Galaxy::GalaxyParam> _predefinedGalaxies;
+
+	static const float TimeStepSize;
 
 	GalaxyWnd(const GalaxyWnd& orig);
 
@@ -74,23 +91,5 @@ private:
 	void UpdateStars();
 	void UpdateVelocityCurve(bool updateOnly);
 	void UpdateText();
-
-	uint32_t _flags;	///< The display flags
-	Galaxy _galaxy;
-
-	uint32_t _renderUpdateHint;
-
-	VertexBufferLines _vertDensityWaves;
-	VertexBufferLines _vertAxis;
-	VertexBufferLines _vertVelocityCurve;
-	VertexBufferStars _vertStars;
-
-	TextBuffer _textHelp;
-	TextBuffer _textAxisLabel;
-	TextBuffer _textGalaxyLabels;
-
-	std::vector<Galaxy::GalaxyParam> _predefinedGalaxies;
-
-	static const float TimeStepSize;
 };
 

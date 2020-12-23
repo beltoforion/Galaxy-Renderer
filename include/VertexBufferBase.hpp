@@ -128,7 +128,7 @@ public:
 		if (errc != GL_NO_ERROR)
 		{
 			std::stringstream ss;
-			ss << "VertexBuffer: Cannot create vbo! (Error 0x" << std::hex << errc << ")" << std::endl;
+			ss << "VertexBufferBase: Cannot create vbo! (Error 0x" << std::hex << errc << ")" << std::endl;
 			throw std::runtime_error(ss.str());
 		}
 

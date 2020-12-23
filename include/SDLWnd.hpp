@@ -47,7 +47,7 @@ protected:
 	int GetFPS() const;
 	void ScaleAxis(float scale);
 	double GetFOV() const;
-	static Vec2 GetWindowPos(GLfloat x, GLfloat y, GLfloat z);
+	Vec2 GetWindowPos(GLfloat x, GLfloat y, GLfloat z);
 
 	SDL_Event _event;
 

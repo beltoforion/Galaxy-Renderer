@@ -9,6 +9,9 @@
 #include <cmath>
 
 #include <SDL_ttf.h>
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Helper.hpp"
@@ -16,17 +19,11 @@
 
 Vec2 SDLWindow::GetWindowPos(GLfloat x, GLfloat y, GLfloat z)
 {
-	GLdouble modelview[16];
-	GLdouble projection[16];
-	GLdouble screen[3];
-	GLint viewport[4];
-
-	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-	glGetIntegerv(GL_VIEWPORT, viewport);
-	gluProject(x, y, z,	modelview, projection, viewport, screen + 0, screen + 1, screen + 2);
-
-	return { (float)screen[0], (float)screen[1] };
+	glm::vec3 pos = glm::vec3(x, y, z);
+	glm::mat4 matModel = glm::mat4(1.0);
+	glm::vec4 viewPort = glm::vec4(0.0f, 0.0f, (float)_width, (float)_height);
+	glm::vec3 projected = glm::project(pos, matModel, _matProjection, viewPort);
+	return { projected.x, projected.y };
 }
 
 
@@ -159,17 +156,6 @@ void SDLWindow::AdjustCamera()
 	glm::dvec3 camLookAt(_camLookAt.x, _camLookAt.y, _camLookAt.z);
 	glm::dvec3 camOrient(_camOrient.x, _camOrient.y, _camOrient.z);
 	_matView = glm::lookAt(camPos, camLookAt, camOrient);
-
-	// old stuff (legacy):
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	glOrtho(-l* aspect, l * aspect, -l, l, -l, l);
-
-	gluLookAt(
-		_camPos.x, _camPos.y, _camPos.z,
-		_camLookAt.x, _camLookAt.y, _camLookAt.z,
-		_camOrient.x, _camOrient.y, _camOrient.z);
 }
 
 double SDLWindow::GetFOV() const
