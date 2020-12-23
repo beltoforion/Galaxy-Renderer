@@ -35,7 +35,6 @@ Galaxy::Galaxy(
 	, _hasDarkMatter(true)
 	, _baseTemp(4000)
 	, _stars()
-	, _dust()
 	, _dustRenderSize(70)
 {}
 
@@ -76,7 +75,6 @@ void Galaxy::Reset(GalaxyParam param)
 	_pertAmp = param.pertAmp;
 
 	InitStarsAndDust();
-	InitH2AndFilaments();
 }
 
 bool Galaxy::HasDarkMatter() const noexcept
@@ -88,82 +86,6 @@ void Galaxy::ToggleDarkMatter()
 {
 	_hasDarkMatter ^= true;
 	Reset();
-}
-
-void Galaxy::InitH2AndFilaments()
-{
-	_dust = std::vector<Star>();
-	_dust.reserve(_numStars);
-
-	// Initialize the stars
-	CumulativeDistributionFunction cdf;
-	cdf.SetupRealistic(
-		1.0,				// maximum intensity
-		0.02,				// k (bulge)
-		_radGalaxy / 3.0f,	// disc scale length
-		_radCore,			// bulge radius
-		0,					// start  of the intnesity curve
-		_radFarField,		// end of the intensity curve
-		1000);				// number of supporting points
-
-	// Initialize Filaments
-	float x, y, rad;
-	for (int i = 0; i < _numStars / 100; ++i)
-	{
-		rad = (float)cdf.ValFromProb(Helper::rnum());
-
-		x = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
-		y = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
-		rad = sqrt(x * x + y * y);
-
-		auto theta = 360.0f * Helper::rnum();
-		auto mag = 0.1f + 0.05f * Helper::rnum();
-		auto a = rad;
-		auto b = rad * GetExcentricity(rad);
-		auto num = (int)(100 * Helper::rnum());
-		auto temp = _baseTemp + rad / 4.5f - 2000;
-		for (int i = 0; i < num; ++i)
-		{
-			rad = rad + 200 - 400 * Helper::rnum();
-			auto dustParticle = Star();
-			dustParticle.a = rad;
-			dustParticle.b = rad * GetExcentricity(rad);
-			dustParticle.tiltAngle = GetAngularOffset(rad);
-			dustParticle.theta0 = theta + 10 - 20 * Helper::rnum();
-			dustParticle.velTheta = GetOrbitalVelocity((dustParticle.a + dustParticle.b) / 2.0f);
-
-			// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
-			// the following temperature distribution (no science here it just looks right)
-			dustParticle.temp = _baseTemp + rad / 4.5f - 1000;;
-			dustParticle.mag = mag + 0.025f * Helper::rnum();
-			dustParticle.type = 2;
-			_dust.push_back(dustParticle);
-		}
-	}
-
-	// Initialise H2 regions
-	for (int i = 0; i < _numH2; ++i)
-	{
-		x = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
-		y = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
-		rad = sqrt(x * x + y * y);
-
-		auto particleH2 = Star();
-		particleH2.a = rad;
-		particleH2.b = rad * GetExcentricity(rad);
-		particleH2.tiltAngle = GetAngularOffset(rad);
-		particleH2.theta0 = 360.0f * Helper::rnum();
-		particleH2.velTheta = GetOrbitalVelocity((particleH2.a + particleH2.b) / 2.0f);
-		particleH2.temp = 6000 + (6000 * Helper::rnum()) - 3000;
-		particleH2.mag = 0.1f + 0.05f * Helper::rnum();
-		particleH2.type = 3;
-
-		_dust.push_back(particleH2);
-		
-		// Push particle again with type 4 (bright red core of an h2 region)
-		particleH2.type = 4;
-		_dust.push_back(particleH2);
-	}
 }
 
 void Galaxy::InitStarsAndDust()
@@ -183,7 +105,10 @@ void Galaxy::InitStarsAndDust()
 	star.temp = 6000;
 	_stars.push_back(star);
 
-	// Initialize the stars
+	//
+	// 1.) Initialize the stars
+	//
+
 	CumulativeDistributionFunction cdf;
 	cdf.SetupRealistic(
 		1.0,				// maximum intensity
@@ -216,8 +141,11 @@ void Galaxy::InitStarsAndDust()
 		_stars.push_back(star);
 	}
 
-	// Initialise Dust:
-	// The galaxy gets as many dust clouds as stars
+	//
+	// 2.) Initialise Dust:
+	//
+	//	The galaxy gets as many dust clouds as stars
+
 	float x, y, rad;
 	for (int i = 0; i < _numStars; ++i)
 	{
@@ -246,6 +174,70 @@ void Galaxy::InitStarsAndDust()
 		dustParticle.mag = 0.02f + 0.15f * Helper::rnum();
 		_stars.push_back(dustParticle);
 	}
+
+	//
+	// 3.) Initialize additional dust filaments
+	//
+
+	for (int i = 0; i < _numStars / 100; ++i)
+	{
+		rad = (float)cdf.ValFromProb(Helper::rnum());
+
+		x = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
+		y = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
+		rad = sqrt(x * x + y * y);
+
+		auto theta = 360.0f * Helper::rnum();
+		auto mag = 0.1f + 0.05f * Helper::rnum();
+		auto a = rad;
+		auto b = rad * GetExcentricity(rad);
+		auto num = (int)(100 * Helper::rnum());
+		auto temp = _baseTemp + rad / 4.5f - 2000;
+		for (int i = 0; i < num; ++i)
+		{
+			rad = rad + 200 - 400 * Helper::rnum();
+			auto dustParticle = Star();
+			dustParticle.a = rad;
+			dustParticle.b = rad * GetExcentricity(rad);
+			dustParticle.tiltAngle = GetAngularOffset(rad);
+			dustParticle.theta0 = theta + 10 - 20 * Helper::rnum();
+			dustParticle.velTheta = GetOrbitalVelocity((dustParticle.a + dustParticle.b) / 2.0f);
+
+			// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
+			// the following temperature distribution (no science here it just looks right)
+			dustParticle.temp = _baseTemp + rad / 4.5f - 1000;;
+			dustParticle.mag = mag + 0.025f * Helper::rnum();
+			dustParticle.type = 2;
+			_stars.push_back(dustParticle);
+		}
+	}
+	
+	//
+	// 4.) Initialise H2 regions
+	// 
+
+	for (int i = 0; i < _numH2; ++i)
+	{
+		x = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
+		y = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
+		rad = sqrt(x * x + y * y);
+
+		auto particleH2 = Star();
+		particleH2.a = rad;
+		particleH2.b = rad * GetExcentricity(rad);
+		particleH2.tiltAngle = GetAngularOffset(rad);
+		particleH2.theta0 = 360.0f * Helper::rnum();
+		particleH2.velTheta = GetOrbitalVelocity((particleH2.a + particleH2.b) / 2.0f);
+		particleH2.temp = 6000 + (6000 * Helper::rnum()) - 3000;
+		particleH2.mag = 0.1f + 0.05f * Helper::rnum();
+		particleH2.type = 3;
+
+		_stars.push_back(particleH2);
+
+		// Push particle again with type 4 (bright red core of an h2 region)
+		particleH2.type = 4;
+		_stars.push_back(particleH2);
+	}
 }
 
 float Galaxy::GetBaseTemp() const noexcept
@@ -257,7 +249,6 @@ void Galaxy::SetBaseTemp(float baseTemp)
 {
 	_baseTemp = baseTemp;
 	InitStarsAndDust();
-	InitH2AndFilaments();
 }
 
 void Galaxy::SetDustRenderSize(float sz)
@@ -268,11 +259,6 @@ void Galaxy::SetDustRenderSize(float sz)
 const std::vector<Star>& Galaxy::GetStars() const
 {
 	return _stars;
-}
-
-const std::vector<Star>& Galaxy::GetDust() const
-{
-	return _dust;
 }
 
 float Galaxy::GetDustRenderSize() const

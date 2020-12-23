@@ -72,7 +72,6 @@ private:
 	void UpdateDensityWaves();
 	void UpdateAxis();
 	void UpdateStars();
-	void UpdateDust();
 	void UpdateVelocityCurve(bool updateOnly);
 	void UpdateText();
 
@@ -85,7 +84,6 @@ private:
 	VertexBufferLines _vertAxis;
 	VertexBufferLines _vertVelocityCurve;
 	VertexBufferStars _vertStars;
-	VertexBufferStars _vertDust;
 
 	TextBuffer _textHelp;
 	TextBuffer _textAxisLabel;

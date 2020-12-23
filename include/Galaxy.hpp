@@ -38,7 +38,6 @@ public:
 	void Reset();
 
 	const std::vector<Star>& GetStars() const;
-	const std::vector<Star>& GetDust() const;
 
 	float GetRad() const;
 	float GetCoreRad() const;
@@ -86,7 +85,6 @@ private:
 	}
 
 	void InitStarsAndDust();
-	void InitH2AndFilaments();
 
 	// Parameters needed for defining the general structure of the galaxy
 
@@ -117,5 +115,4 @@ private:
 
 private:
 	std::vector<Star> _stars;  ///< Pointer to an array of star data
-	std::vector<Star> _dust;   ///< Pointer to an array of dusty areas
 };

@@ -19,7 +19,6 @@ GalaxyWnd::GalaxyWnd()
 	, _vertAxis()
 	, _vertVelocityCurve(1, GL_DYNAMIC_DRAW)
 	, _vertStars(GL_FUNC_ADD, GL_ONE)
-	, _vertDust(GL_FUNC_ADD, GL_ONE)
 	, _textHelp()
 	, _textAxisLabel()
 	, _textGalaxyLabels()
@@ -42,7 +41,6 @@ GalaxyWnd::~GalaxyWnd()
 	_vertAxis.Release();
 	_vertVelocityCurve.Release();
 	_vertStars.Release();
-	_vertDust.Release();
 }
 
 void GalaxyWnd::InitGL() noexcept(false)
@@ -55,7 +53,6 @@ void GalaxyWnd::InitGL() noexcept(false)
 	_vertAxis.Initialize();
 	_vertVelocityCurve.Initialize();
 	_vertStars.Initialize();
-	_vertDust.Initialize();
 
 	// Font initialization
 	_textHelp.Initialize();
@@ -82,29 +79,6 @@ void GalaxyWnd::InitSimulation()
 			40,			// Amplitude damping factor of perturbation
 			70,			// dust render size in pixel
 			4000 });
-}
-
-void GalaxyWnd::UpdateDust()
-{
-	std::cout << "Updating dust" << std::endl;
-
-	std::vector<VertexStar> vert;
-	std::vector<int> idx;
-
-	const auto& dust = _galaxy.GetDust();
-
-	float a = 1;
-	for (int i = 1; i < dust.size(); ++i)
-	{
-		const Color& col = Helper::ColorFromTemperature(dust[i].temp);
-		Color color = { col.r, col.g, col.b, a };
-
-		idx.push_back((int)vert.size());
-		vert.push_back({ dust[i], color });
-	}
-
-	_vertDust.CreateBuffer(vert, idx, GL_POINTS);
-	_renderUpdateHint &= ~ruhDUST;
 }
 
 void GalaxyWnd::UpdateStars()
@@ -370,9 +344,6 @@ void GalaxyWnd::Update()
 	if ((_renderUpdateHint & ruhSTARS) != 0)
 		UpdateStars();
 
-	if ( (_renderUpdateHint & ruhDUST) != 0)
-		UpdateDust();
-
 	if ((_renderUpdateHint & ruhCREATE_VELOCITY_CURVE) != 0)
 		UpdateVelocityCurve(false);
 
@@ -418,13 +389,7 @@ void GalaxyWnd::Render()
 	if (_flags & (int)DisplayItem::H2)
 		features |= 1 << 3;
 
-	if (_flags & (int)DisplayItem::DUST)
-	{
-		_vertDust.UpdateShaderVariables(_time, _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize(), features);
-		_vertDust.Draw(_matView, _matProjection);
-	}
-
-	if (_flags & (int)DisplayItem::STARS)
+	if (features != 0)
 	{
 		_vertStars.UpdateShaderVariables(_time, _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize(), features);
 		_vertStars.Draw(_matView, _matProjection);
