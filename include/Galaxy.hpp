@@ -40,23 +40,16 @@ public:
 	float GetRad() const;
 	float GetCoreRad() const;
 	float GetFarFieldRad() const;
-
-	// Properties depending on the orbital radius
-
 	float GetExcentricity(float rad) const;
 	float GetOrbitalVelocity(float rad) const;
-
 	float GetAngularOffset(float rad) const;
 	float GetAngularOffset() const;
-
 	float GetExInner() const;
 	float GetExOuter() const;
 	float GetDustRenderSize() const;
 	int GetPertN() const;
 	float GetPertAmp() const;
 	float GetBaseTemp() const noexcept;
-
-	void ToggleDarkMatter();
 
 	void SetPertN(int n);
 	void SetPertAmp(float amp);
@@ -68,6 +61,7 @@ public:
 	void SetDustRenderSize(float sz);
 	void SetBaseTemp(float temp);
 
+	void ToggleDarkMatter();
 	bool HasDarkMatter() const noexcept;
 
 private:
@@ -76,8 +70,6 @@ private:
 	Galaxy& operator=(const Galaxy& obj);
 
 	void InitStarsAndDust();
-
-	// Parameters needed for defining the general structure of the galaxy
 
 	float _elEx1;          ///< Excentricity of the innermost ellipse
 	float _elEx2;          ///< Excentricity of the outermost ellipse
