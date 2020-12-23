@@ -210,9 +210,8 @@ xcopy /Y $(SolutionDir)..\assets\consola.ttf $(OutDir)</Command>
     <ClCompile Include="..\Galaxy.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\GalaxyWnd.cpp" />
-    <ClCompile Include="..\MathHelper.cpp" />
+    <ClCompile Include="..\Helper.cpp" />
     <ClCompile Include="..\SDLWnd.cpp" />
-    <ClCompile Include="..\specrend.cpp" />
     <ClCompile Include="..\TextBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -222,9 +221,8 @@ xcopy /Y $(SolutionDir)..\assets\consola.ttf $(OutDir)</Command>
     <ClInclude Include="..\include\CumulativeDistributionFunction.hpp" />
     <ClInclude Include="..\include\Galaxy.hpp" />
     <ClInclude Include="..\include\GalaxyWnd.hpp" />
-    <ClInclude Include="..\include\MathHelper.hpp" />
+    <ClInclude Include="..\include\Helper.hpp" />
     <ClInclude Include="..\include\SDLWnd.hpp" />
-    <ClInclude Include="..\include\specrend.h" />
     <ClInclude Include="..\include\Types.hpp" />
     <ClInclude Include="..\include\TextBuffer.hpp" />
     <ClInclude Include="..\include\VertexBufferBase.hpp" />

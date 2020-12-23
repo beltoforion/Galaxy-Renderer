@@ -4,7 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "MathHelper.hpp"
+#include "Helper.hpp"
 
 TextBuffer::TextBuffer()
 	: _textureData()
@@ -290,8 +290,8 @@ void TextBuffer::AddText(int idxFont, Vec2 pos, const char* fmt, ...)
 	// It seems textures must be powers of 2 in dimension: 
 	// https://stackoverflow.com/questions/30016083/sdl2-opengl-sdl2-ttf-displaying-text
 	// Create a surface to the correct size in RGB format, and copy the old image
-	int w = MathHelper::PowerTwoFloor(pSurface->w) << 1;
-	int h = MathHelper::PowerTwoFloor(pSurface->h) << 1;
+	int w = Helper::PowerTwoFloor(pSurface->w) << 1;
+	int h = Helper::PowerTwoFloor(pSurface->h) << 1;
 
 	s = SDL_CreateRGBSurface(0, w, h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 	SDL_BlitSurface(pSurface, nullptr, s, nullptr);

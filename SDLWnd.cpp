@@ -11,7 +11,7 @@
 #include <SDL_ttf.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "MathHelper.hpp"
+#include "Helper.hpp"
 
 
 Vec2 SDLWindow::GetWindowPos(GLfloat x, GLfloat y, GLfloat z)

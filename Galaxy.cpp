@@ -7,7 +7,7 @@
 #include <execution>
 #include <algorithm>
 
-#include "MathHelper.hpp"
+#include "Helper.hpp"
 #include "Types.hpp"
 #include "CumulativeDistributionFunction.hpp"
 
@@ -115,33 +115,33 @@ void Galaxy::InitH2AndFilaments()
 	float x, y, rad;
 	for (int i = 0; i < _numStars / 100; ++i)
 	{
-		rad = (float)cdf.ValFromProb(MathHelper::rnum());
+		rad = (float)cdf.ValFromProb(Helper::rnum());
 
-		x = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
-		y = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
+		x = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
+		y = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
 		rad = sqrt(x * x + y * y);
 
-		auto theta = 360.0f * MathHelper::rnum();
-		auto mag = 0.1f + 0.05f * MathHelper::rnum();
+		auto theta = 360.0f * Helper::rnum();
+		auto mag = 0.1f + 0.05f * Helper::rnum();
 		auto a = rad;
 		auto b = rad * GetExcentricity(rad);
-		auto num = (int)(100 * MathHelper::rnum());
+		auto num = (int)(100 * Helper::rnum());
 		auto temp = _baseTemp + rad / 4.5f - 2000;
 		for (int i = 0; i < num; ++i)
 		{
-			rad = rad + 200 - 400 * MathHelper::rnum();
+			rad = rad + 200 - 400 * Helper::rnum();
 			auto dustParticle = Star();
 			dustParticle.a = rad;
 			dustParticle.b = rad * GetExcentricity(rad);
 			dustParticle.tiltAngle = GetAngularOffset(rad);
-			dustParticle.theta0 = theta + 10 - 20 * MathHelper::rnum();
+			dustParticle.theta0 = theta + 10 - 20 * Helper::rnum();
 			dustParticle.velTheta = GetOrbitalVelocity((dustParticle.a + dustParticle.b) / 2.0f);
 			dustParticle.center = { 0, 0 };
 
 			// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
 			// the following temperature distribution (no science here it just looks right)
 			dustParticle.temp = _baseTemp + rad / 4.5f - 1000;;
-			dustParticle.mag = mag + 0.025f * MathHelper::rnum();
+			dustParticle.mag = mag + 0.025f * Helper::rnum();
 			dustParticle.type = 2;
 			_dust.push_back(dustParticle);
 		}
@@ -150,19 +150,19 @@ void Galaxy::InitH2AndFilaments()
 	// Initialise H2 regions
 	for (int i = 0; i < _numH2; ++i)
 	{
-		x = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
-		y = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
+		x = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
+		y = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
 		rad = sqrt(x * x + y * y);
 
 		auto particleH2 = Star();
 		particleH2.a = rad;
 		particleH2.b = rad * GetExcentricity(rad);
 		particleH2.tiltAngle = GetAngularOffset(rad);
-		particleH2.theta0 = 360.0f * MathHelper::rnum();
+		particleH2.theta0 = 360.0f * Helper::rnum();
 		particleH2.velTheta = GetOrbitalVelocity((particleH2.a + particleH2.b) / 2.0f);
 		particleH2.center = { 0, 0 };
-		particleH2.temp = 6000 + (6000 * MathHelper::rnum()) - 3000;
-		particleH2.mag = 0.1f + 0.05f * MathHelper::rnum();
+		particleH2.temp = 6000 + (6000 * Helper::rnum()) - 3000;
+		particleH2.mag = 0.1f + 0.05f * Helper::rnum();
 		particleH2.type = 3;
 
 		_dust.push_back(particleH2);
@@ -176,19 +176,19 @@ void Galaxy::InitH2AndFilaments()
 	// Initialise H2 regions
 	for (int i = 0; i < _numH2; ++i)
 	{
-		x = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
-		y = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
+		x = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
+		y = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
 		rad = sqrt(x * x + y * y);
 
 		int k1 = 2 * i;
 		_h2[k1].a = rad;
 		_h2[k1].b = rad * GetExcentricity(rad);
 		_h2[k1].tiltAngle = GetAngularOffset(rad);
-		_h2[k1].theta0 = 360.0f * MathHelper::rnum();
+		_h2[k1].theta0 = 360.0f * Helper::rnum();
 		_h2[k1].velTheta = GetOrbitalVelocity((_h2[k1].a + _h2[k1].b) / 2.0f);
 		_h2[k1].center = { 0, 0 };
-		_h2[k1].temp = 6000 + (6000 * MathHelper::rnum()) - 3000;
-		_h2[k1].mag = 0.1f + 0.05f * MathHelper::rnum();
+		_h2[k1].temp = 6000 + (6000 * Helper::rnum()) - 3000;
+		_h2[k1].mag = 0.1f + 0.05f * Helper::rnum();
 
 		// Create second point 100 pc away from the first one
 		int dist = 1000;
@@ -235,22 +235,22 @@ void Galaxy::InitStarsAndDust()
 
 	for (int i = 1; i < _numStars; ++i)
 	{
-		float rad = (float)cdf.ValFromProb(MathHelper::rnum());
+		float rad = (float)cdf.ValFromProb(Helper::rnum());
 		auto star = Star();
 		star.a = rad;
 		star.b = rad * GetExcentricity(rad);
 		star.tiltAngle = GetAngularOffset(rad);
-		star.theta0 = 360.0f * MathHelper::rnum();
+		star.theta0 = 360.0f * Helper::rnum();
 		star.velTheta = GetOrbitalVelocity(rad);
 		star.center = { 0, 0 };
-		star.temp = 6000 + (4000 * MathHelper::rnum() - 2000);
-		star.mag = 0.1f + 0.4f * MathHelper::rnum();
+		star.temp = 6000 + (4000 * Helper::rnum() - 2000);
+		star.mag = 0.1f + 0.4f * Helper::rnum();
 		star.type = 0;
 
 		// Make a small portion of the stars brighter
 		if (i < _numStars / 60)
 		{
-			star.mag = std::min(star.mag + 0.1f + MathHelper::rnum() * 0.4f, 1.0f);
+			star.mag = std::min(star.mag + 0.1f + Helper::rnum() * 0.4f, 1.0f);
 		}
 
 		_stars.push_back(star);
@@ -263,12 +263,12 @@ void Galaxy::InitStarsAndDust()
 	{
 		if (i % 2 == 0)
 		{
-			rad = (float)cdf.ValFromProb(MathHelper::rnum());
+			rad = (float)cdf.ValFromProb(Helper::rnum());
 		}
 		else
 		{
-			x = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
-			y = 2 * _radGalaxy * MathHelper::rnum() - _radGalaxy;
+			x = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
+			y = 2 * _radGalaxy * Helper::rnum() - _radGalaxy;
 			rad = sqrt(x * x + y * y);
 		}
 
@@ -276,7 +276,7 @@ void Galaxy::InitStarsAndDust()
 		dustParticle.a = rad;
 		dustParticle.b = rad * GetExcentricity(rad);
 		dustParticle.tiltAngle = GetAngularOffset(rad);
-		dustParticle.theta0 = 360.0f * MathHelper::rnum();
+		dustParticle.theta0 = 360.0f * Helper::rnum();
 		dustParticle.velTheta = GetOrbitalVelocity((dustParticle.a + dustParticle.b) / 2.0f);
 		dustParticle.center = { 0, 0 };
 		dustParticle.type = 1;
@@ -284,7 +284,7 @@ void Galaxy::InitStarsAndDust()
 		// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
 		// the following temperature distribution (no science here it just looks right)
 		dustParticle.temp = _baseTemp + rad / 4.5f;
-		dustParticle.mag = 0.02f + 0.15f * MathHelper::rnum();
+		dustParticle.mag = 0.02f + 0.15f * Helper::rnum();
 		_stars.push_back(dustParticle);
 	}
 }
@@ -362,28 +362,28 @@ float Galaxy::GetOrbitalVelocity(float rad) const
 			float d = 2000;  // Dicke der Scheibe
 			float rho_so = 1;  // Dichte im Mittelpunkt
 			float rH = 2000; // Radius auf dem die Dichte um die Hälfte gefallen ist
-			return (float)rho_so * (float)std::exp(-r / rH) * (r * r) * MathHelper::PI * d;
+			return (float)rho_so * (float)std::exp(-r / rH) * (r * r) * Helper::PI * d;
 		}
 
 		static float MH(float r)
 		{
 			float rho_h0 = 0.15f; // Dichte des Halos im Zentrum
 			float rC = 2500;     // typische skalenlänge im Halo
-			return (float)rho_h0 * 1 / (float)(1 + std::pow(r / rC, 2)) * (float)(4 * MathHelper::PI * std::pow(r, 3) / 3);
+			return (float)rho_h0 * 1 / (float)(1 + std::pow(r / rC, 2)) * (float)(4 * Helper::PI * std::pow(r, 3) / 3);
 		}
 
 		// Velocity curve with dark matter
 		static float v(float r)
 		{
 			float MZ = 100;
-			return 20000.0f * (float)std::sqrt(MathHelper::CONTANT_OF_GRAVITY * (MH(r) + MS(r) + MZ) / r);
+			return 20000.0f * (float)std::sqrt(Helper::CONTANT_OF_GRAVITY * (MH(r) + MS(r) + MZ) / r);
 		}
 
 		// velocity curve without dark matter
 		static float vd(float r)
 		{
 			float MZ = 100;
-			return 20000.0f * (float)std::sqrt(MathHelper::CONTANT_OF_GRAVITY * (MS(r) + MZ) / r);
+			return 20000.0f * (float)std::sqrt(Helper::CONTANT_OF_GRAVITY * (MS(r) + MZ) / r);
 		}
 	};
 
@@ -399,8 +399,8 @@ float Galaxy::GetOrbitalVelocity(float rad) const
 	}
 
 	// Calculate velocity in degree per year
-	float u = 2.0f * MathHelper::PI * rad * MathHelper::PC_TO_KM;        // Umfang in km
-	float time = u / (vel_kms * MathHelper::SEC_PER_YEAR);  // Umlaufzeit in Jahren
+	float u = 2.0f * Helper::PI * rad * Helper::PC_TO_KM;        // Umfang in km
+	float time = u / (vel_kms * Helper::SEC_PER_YEAR);  // Umlaufzeit in Jahren
 
 	return 360.0f / time;                                   // Grad pro Jahr
 }
@@ -503,7 +503,7 @@ void Galaxy::CalcXy(Star& p, float time, int pertN, float pertAmp)
 	auto thetaActual = p.theta0 + p.velTheta * time;
 
 	float beta = -p.tiltAngle;
-	float alpha = thetaActual * MathHelper::DEG_TO_RAD;
+	float alpha = thetaActual * Helper::DEG_TO_RAD;
 
 	// temporaries to save cpu time
 	float cosalpha = std::cos(alpha);

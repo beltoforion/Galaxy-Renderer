@@ -68,8 +68,6 @@ private:
 		float pertAmp,
 		Color col) const;
 
-	Color ColorFromTemperature(float temp) const;
-
 	void UpdateDensityWaves();
 	void UpdateAxis();
 	void UpdateStars();
@@ -79,16 +77,9 @@ private:
 	void UpdateText();
 
 	uint32_t _flags;	///< The display flags
-
 	Galaxy _galaxy;
 
-	// Star color management
-	int _colNum;
-	double _t0, _t1, _dt;
-	Color _col[200];
-	
 	uint32_t _renderUpdateHint;
-	bool _useDirectMode;
 
 	VertexBufferLines _vertDensityWaves;
 	VertexBufferLines _vertAxis;

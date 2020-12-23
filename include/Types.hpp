@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 struct Vec2 final
 {
 	float x, y;

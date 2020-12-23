@@ -5,8 +5,7 @@
 #include <cstddef>
 #include <iostream>
 
-#include "MathHelper.hpp"
-#include "specrend.h"
+#include "Helper.hpp"
 #include "Types.hpp"
 
 const float GalaxyWnd::TimeStepSize = 100000.0f;
@@ -15,37 +14,16 @@ GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
 	, _flags((int)DisplayItem::STARS | (int)DisplayItem::AXIS | (int)DisplayItem::HELP | (int)DisplayItem::DUST | (int)DisplayItem::H2 | (int)DisplayItem::FILAMENTS)
 	, _galaxy()
-	, _colNum(200)
-	, _t0(1000)
-	, _t1(10000)
-	, _dt((_t1 - _t0) / _colNum)
-	, _col()
 	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE | ruhCREATE_TEXT)
-	, _useDirectMode(false)
 	, _vertDensityWaves(2)
 	, _vertAxis()
 	, _vertVelocityCurve(1, GL_DYNAMIC_DRAW)
 	, _vertStars(GL_FUNC_ADD, GL_ONE)
-	, _vertDust(GL_FUNC_ADD, GL_ONE)// GL_FUNC_SUBTRACT) //) //GL_ONE_MINUS_SRC_COLOR) //)
+	, _vertDust(GL_FUNC_ADD, GL_ONE)
 	, _textHelp()
 	, _textAxisLabel()
 	, _textGalaxyLabels()
 {
-	double x, y, z;
-	double r, g, b;
-	for (int i = 0; i < _colNum; ++i)
-	{
-		Color& col = _col[i];
-		colourSystem* cs = &SMPTEsystem;
-		bbTemp = _t0 + _dt * i;
-		spectrum_to_xyz(bb_spectrum, &x, &y, &z);
-
-		xyz_to_rgb(cs, x, y, z, &r, &g, &b);
-		norm_rgb(&r, &g, &b);
-
-		col = { (float)r, (float)g, (float)b, 1.f };
-	}
-
 	_predefinedGalaxies.push_back({ 13000, 4000, .0004f, .85f, .95f, 40000, true, 2, 40, 90, 3600 });
 	_predefinedGalaxies.push_back({ 16000, 4000, .0003f, .8f, .85f, 40000, true, 0, 40, 100, 4500 });
 	_predefinedGalaxies.push_back({ 13000, 4000, .00064f, .9f, .9f, 40000, true, 0, 0, 85, 4100 });
@@ -56,6 +34,7 @@ GalaxyWnd::GalaxyWnd()
 	_predefinedGalaxies.push_back({ 13000, 1500, .0004f, 1.1f, 1.0f, 40000, true, 1, 20, 80, 2800 });
 	_predefinedGalaxies.push_back({ 13000, 4000, .0004f, .85f, .95f, 40000, true, 1, 20, 80, 4500 });
 }
+
 
 GalaxyWnd::~GalaxyWnd()
 {
@@ -117,7 +96,7 @@ void GalaxyWnd::UpdateDust()
 	float a = 1;
 	for (int i = 1; i < dust.size(); ++i)
 	{
-		const Color& col = ColorFromTemperature(dust[i].temp);
+		const Color& col = Helper::ColorFromTemperature(dust[i].temp);
 		Color color = { col.r, col.g, col.b, a };
 
 		idx.push_back((int)vert.size());
@@ -152,7 +131,7 @@ void GalaxyWnd::UpdateStars()
 
 	for (int i = 1; i < stars.size(); ++i)
 	{
-		const Color& col = ColorFromTemperature(stars[i].temp);
+		const Color& col = Helper::ColorFromTemperature(stars[i].temp);
 		color = { col.r, col.g, col.b, a };
 
 		idx.push_back((int)vert.size());
@@ -304,7 +283,7 @@ void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 	std::vector<int> idx;
 	idx.reserve(num);
 
-	float dt_in_sec = GalaxyWnd::TimeStepSize * MathHelper::SEC_PER_YEAR;
+	float dt_in_sec = GalaxyWnd::TimeStepSize * Helper::SEC_PER_YEAR;
 	float r = 0, v = 0;
 	float cr = 0.5, cg = 1, cb = 1, ca = 0.15;
 	for (int i = 1; i < num; ++i)
@@ -315,7 +294,7 @@ void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 		// umrechnen in km/s
 		v = std::sqrt(vel.x * vel.x + vel.y * vel.y);   // pc / timestep
 		v /= dt_in_sec;            // v in pc/sec
-		v *= MathHelper::PC_TO_KM; // v in km/s
+		v *= Helper::PC_TO_KM; // v in km/s
 
 		idx.push_back((int)vert.size());
 		vert.push_back({ r, v * 10.f, 0,  cr, cg, cb, ca });
@@ -353,7 +332,7 @@ void GalaxyWnd::UpdateDensityWaves()
 			idx,
 			r,
 			r * _galaxy.GetExcentricity(r),
-			MathHelper::RAD_TO_DEG * _galaxy.GetAngularOffset(r),
+			Helper::RAD_TO_DEG * _galaxy.GetAngularOffset(r),
 			_galaxy.GetPertN(),
 			_galaxy.GetPertAmp(),
 			{ 1, 1, 1, 0.2f });
@@ -500,14 +479,14 @@ void GalaxyWnd::AddEllipsisVertices(
 	const float y = 0;
 
 	// Angle is given by Degree Value
-	float beta = -angle * MathHelper::DEG_TO_RAD;
+	float beta = -angle * Helper::DEG_TO_RAD;
 	float sinbeta = std::sin(beta);
 	float cosbeta = std::cos(beta);
 
 	int firstPointIdx = static_cast<int>(vert.size());
 	for (int i = 0; i < 360; i += 360 / steps)
 	{
-		float alpha = i * MathHelper::DEG_TO_RAD;
+		float alpha = i * Helper::DEG_TO_RAD;
 		float sinalpha = std::sin(alpha);
 		float cosalpha = std::cos(alpha);
 
@@ -529,14 +508,6 @@ void GalaxyWnd::AddEllipsisVertices(
 	// Close the loop and reset the element index array
 	vertIdx.push_back(firstPointIdx);
 	vertIdx.push_back(0xFFFF);
-}
-
-Color GalaxyWnd::ColorFromTemperature(float temp) const
-{
-	int idx = (int)((temp - _t0) / (_t1 - _t0) * _colNum);
-	idx = std::min(_colNum - 1, idx);
-	idx = std::max(0, idx);
-	return _col[idx];
 }
 
 void GalaxyWnd::OnProcessEvents(Uint32 type)
@@ -625,12 +596,12 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case SDLK_z:
-			_galaxy.SetBaseTemp(std::min(_galaxy.GetBaseTemp() + 100, 15000.0f));
+			_galaxy.SetBaseTemp(std::min(_galaxy.GetBaseTemp() + 100, 1000.0f));
 			_renderUpdateHint |= ruhSTARS | ruhDUST | ruhH2;
 			break;
 
 		case SDLK_h:
-			_galaxy.SetBaseTemp(std::max(_galaxy.GetBaseTemp() - 100, 500.0f));
+			_galaxy.SetBaseTemp(std::max(_galaxy.GetBaseTemp() - 100, 10000.0f));
 			_renderUpdateHint |= ruhSTARS | ruhDUST | ruhH2;
 			break;
 
@@ -664,10 +635,6 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 		case SDLK_F6:
 			_flags ^= (int)DisplayItem::DENSITY_WAVES;
-			break;
-
-		case SDLK_F11:
-			_useDirectMode ^= true;
 			break;
 
 		case  SDLK_v:
