@@ -19,11 +19,9 @@ struct Color
 
 struct Star
 {
-	// Position, Velocity
 	Vec2 pos;         // current position in kartesian coordinates
 	Vec2 vel;         // current velocity (calculated)
 
-	// Density Wave Data
 	float theta0;     // initial angular position on the ellipse
 	float velTheta;   // angular velocity
 	float tiltAngle;  // tilt angle of the ellipse

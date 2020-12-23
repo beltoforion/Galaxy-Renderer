@@ -39,13 +39,10 @@ public:
 
 	const std::vector<Star>& GetStars() const;
 	const std::vector<Star>& GetDust() const;
-	const std::vector<Star>& GetH2() const;
 
 	float GetRad() const;
 	float GetCoreRad() const;
 	float GetFarFieldRad() const;
-
-	static void CalcXy(Star &pStar, float time, int pertN, float pertAmp);
 
 	// Properties depending on the orbital radius
 
@@ -57,15 +54,12 @@ public:
 
 	float GetExInner() const;
 	float GetExOuter() const;
-	float GetTime() const;
 	float GetDustRenderSize() const;
 	int GetPertN() const;
 	float GetPertAmp() const;
 	float GetBaseTemp() const noexcept;
 
 	void ToggleDarkMatter();
-
-	void SingleTimeStep(float time);
 
 	void SetPertN(int n);
 	void SetPertAmp(float amp);
@@ -116,7 +110,6 @@ private:
 
 	int _pertN;
 	float _pertAmp;
-	float _time;
 
 	bool _hasDarkMatter;
 
@@ -125,5 +118,4 @@ private:
 private:
 	std::vector<Star> _stars;  ///< Pointer to an array of star data
 	std::vector<Star> _dust;   ///< Pointer to an array of dusty areas
-	std::vector<Star> _h2;
 };

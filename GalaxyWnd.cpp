@@ -14,7 +14,7 @@ GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
 	, _flags((int)DisplayItem::STARS | (int)DisplayItem::AXIS | (int)DisplayItem::HELP | (int)DisplayItem::DUST | (int)DisplayItem::H2 | (int)DisplayItem::FILAMENTS)
 	, _galaxy()
-	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE | ruhCREATE_TEXT)
+	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE | ruhCREATE_TEXT)
 	, _vertDensityWaves(2)
 	, _vertAxis()
 	, _vertVelocityCurve(1, GL_DYNAMIC_DRAW)
@@ -105,16 +105,6 @@ void GalaxyWnd::UpdateDust()
 
 	_vertDust.CreateBuffer(vert, idx, GL_POINTS);
 	_renderUpdateHint &= ~ruhDUST;
-
-}
-
-void GalaxyWnd::UpdateH2()
-{
-	std::cout << "Updating H2 Regions" << std::endl;
-	std::vector<VertexColor> vert;
-	std::vector<int> idx;
-
-	_renderUpdateHint &= ~ruhH2;
 }
 
 void GalaxyWnd::UpdateStars()
@@ -276,10 +266,12 @@ void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 {
 	// I don't need every star for the curve.
 	const auto& stars = _galaxy.GetStars();
-	std::size_t num = stars.size() / 3;
+	// Limit the number of stars to use for the velovity curve. Updateing the buffer is too slow
+	std::size_t num = 5000; 
 
 	std::vector<VertexColor> vert;
 	vert.reserve(num);
+
 	std::vector<int> idx;
 	idx.reserve(num);
 
@@ -371,7 +363,7 @@ void GalaxyWnd::UpdateDensityWaves()
 void GalaxyWnd::Update()
 {
 	if (!(_flags & (int)DisplayItem::PAUSE))
-		_galaxy.SingleTimeStep(GalaxyWnd::TimeStepSize); // time in years
+		_time += GalaxyWnd::TimeStepSize;
 
 	if ((_renderUpdateHint & ruhDENSITY_WAVES) != 0)
 		UpdateDensityWaves();
@@ -382,11 +374,8 @@ void GalaxyWnd::Update()
 	if ((_renderUpdateHint & ruhSTARS) != 0)
 		UpdateStars();
 
-	if ((_renderUpdateHint & ruhDUST) != 0)
+	if ( (_renderUpdateHint & ruhDUST) != 0)
 		UpdateDust();
-
-	if ((_renderUpdateHint & ruhH2) != 0)
-		UpdateH2();
 
 	if ((_renderUpdateHint & ruhCREATE_VELOCITY_CURVE) != 0)
 		UpdateVelocityCurve(false);
@@ -433,13 +422,13 @@ void GalaxyWnd::Render()
 
 	if (_flags & (int)DisplayItem::DUST)
 	{
-		_vertDust.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize(), features);
+		_vertDust.UpdateShaderVariables(_time, _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize(), features);
 		_vertDust.Draw(_matView, _matProjection);
 	}
 
 	if (_flags & (int)DisplayItem::STARS)
 	{
-		_vertStars.UpdateShaderVariables(_galaxy.GetTime(), _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize(), features);
+		_vertStars.UpdateShaderVariables(_time, _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize(), features);
 		_vertStars.Draw(_matView, _matProjection);
 	}
 
@@ -522,52 +511,52 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 		{
 		case SDLK_END:
 			_galaxy.SetPertN(std::max(_galaxy.GetPertN() - 1, 0));
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_HOME:
 			_galaxy.SetPertN(std::min(_galaxy.GetPertN() + 1, 5));
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_PAGEDOWN:
 			_galaxy.SetPertAmp(_galaxy.GetPertAmp() - 2);
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_PAGEUP:
 			_galaxy.SetPertAmp(_galaxy.GetPertAmp() + 2);
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_q:
 			_galaxy.SetExInner(_galaxy.GetExInner() + 0.05f);
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_a:
 			_galaxy.SetExInner(std::max(_galaxy.GetExInner() - 0.05f, 0.0f));
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_w:
 			_galaxy.SetExOuter(_galaxy.GetExOuter() + 0.05f);
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_s:
 			_galaxy.SetExOuter(std::max(_galaxy.GetExOuter() - 0.05f, 0.0f));
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_e:
 			_galaxy.SetAngularOffset(_galaxy.GetAngularOffset() + 0.00002f);
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_d:
 			_galaxy.SetAngularOffset(std::max(_galaxy.GetAngularOffset() - 0.00002f, 0.0f));
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_r:
@@ -577,32 +566,32 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 		case SDLK_m:
 			_galaxy.ToggleDarkMatter();
-			_renderUpdateHint |= ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_f:
 			_galaxy.SetCoreRad(std::max(_galaxy.GetCoreRad() - 500, 0.0f));
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_t:
 			_galaxy.SetRad(_galaxy.GetRad() + 1000);
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_g:
 			_galaxy.SetRad(std::max(_galaxy.GetRad() - 1000, 0.0f));
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_z:
 			_galaxy.SetBaseTemp(std::min(_galaxy.GetBaseTemp() + 100, 1000.0f));
-			_renderUpdateHint |= ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_h:
 			_galaxy.SetBaseTemp(std::max(_galaxy.GetBaseTemp() - 100, 10000.0f));
-			_renderUpdateHint |= ruhSTARS | ruhDUST | ruhH2;
+			_renderUpdateHint |= ruhSTARS | ruhDUST;
 			break;
 
 		case SDLK_b:
@@ -648,54 +637,54 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 		case SDLK_KP_0:
 			_galaxy.Reset(_predefinedGalaxies[0]);      // dust render size in pixel
 			_fov = 33960;
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST| ruhCREATE_VELOCITY_CURVE;
 			break;
 
 		case SDLK_KP_1:
 			_galaxy.Reset(_predefinedGalaxies[1]);
 			_fov = 46585;
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST| ruhCREATE_VELOCITY_CURVE;
 			break;
 
 		case SDLK_KP_2:
 			_galaxy.Reset(_predefinedGalaxies[2]);
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
 			break;
 		case SDLK_KP_3:
 			_galaxy.Reset(_predefinedGalaxies[3]);
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 		case SDLK_KP_4:
 			_galaxy.Reset(_predefinedGalaxies[4]);
 			_fov = 35000;
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 			// Typ SBb
 		case SDLK_KP_5:
 			_galaxy.Reset(_predefinedGalaxies[5]);
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 		case SDLK_KP_6:
 			_galaxy.Reset(_predefinedGalaxies[6]);
 			_fov = 36982;
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 
 		case SDLK_KP_7:
 			_galaxy.Reset(_predefinedGalaxies[7]);    // dust render size in pixel
 			_fov = 41091;
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 
 		case SDLK_KP_8:
 			_galaxy.Reset(_predefinedGalaxies[8]);
 			_fov = 41091;
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhH2 | ruhCREATE_VELOCITY_CURVE;
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 		case SDLK_PLUS:
