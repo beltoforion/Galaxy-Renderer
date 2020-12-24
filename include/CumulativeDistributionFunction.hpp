@@ -7,8 +7,6 @@
 class CumulativeDistributionFunction final
 {
 public:
-	typedef double (CumulativeDistributionFunction::* dist_fun_t)(double x);
-
 	CumulativeDistributionFunction();
 
 	double ProbFromVal(double fVal);
@@ -17,10 +15,8 @@ public:
 	void SetupRealistic(double I0, double k, double a, double RBulge, double min, double max, int nSteps);
 
 private:
-	dist_fun_t _pDistFun;
 	double _fMin;
 	double _fMax;
-	double _fWidth;
 	int _nSteps;
 
 	// parameters for realistic star distribution

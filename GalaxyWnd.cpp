@@ -83,8 +83,6 @@ void GalaxyWnd::InitSimulation()
 
 void GalaxyWnd::UpdateStars()
 {
-	std::cout << "Updating stars" << std::endl;
-
 	std::vector<VertexStar> vert;
 	std::vector<int> idx;
 

@@ -7,8 +7,7 @@
 
 
 CumulativeDistributionFunction::CumulativeDistributionFunction()
-	: _pDistFun(nullptr)
-	, _vM1()
+	: _vM1()
 	, _vY1()
 	, _vX1()
 	, _vM2()
@@ -16,7 +15,6 @@ CumulativeDistributionFunction::CumulativeDistributionFunction()
 	, _vX2()
 	, _fMin()
 	, _fMax()
-	, _fWidth()
 	, _nSteps()
 	, _I0()
 	, _k()
@@ -36,9 +34,6 @@ void CumulativeDistributionFunction::SetupRealistic(double I0, double k, double 
 	_a = a;
 	_RBulge = RBulge;
 
-	_pDistFun = &CumulativeDistributionFunction::Intensity;
-
-	// build the distribution function
 	BuildCDF(_nSteps);
 }
 
@@ -60,7 +55,7 @@ void CumulativeDistributionFunction::BuildCDF(int nSteps)
 	for (int i = 0; i < nSteps; i += 2)
 	{
 		x = h * (i + 2);
-		y += h / 3 * ((this->*_pDistFun)(_fMin + i * h) + 4 * (this->*_pDistFun)(_fMin + (i + 1) * h) + (this->*_pDistFun)(_fMin + (i + 2) * h));
+		y += h / 3 * (Intensity(_fMin + i * h) + 4 * Intensity(_fMin + (i + 1) * h) + Intensity(_fMin + (i + 2) * h));
 
 		_vM1.push_back((y - _vY1.back()) / (2 * h));
 		_vX1.push_back(x);
