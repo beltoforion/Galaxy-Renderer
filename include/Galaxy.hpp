@@ -73,14 +73,11 @@ private:
 	float _elEx1;          ///< Excentricity of the innermost ellipse
 	float _elEx2;          ///< Excentricity of the outermost ellipse
 
-	float _velOrigin;      ///< Velovity at the innermost core in km/s
 	float _angleOffset;    ///< Angular offset per parsec
 
 	float _radCore;        ///< Radius of the inner core
 	float _radGalaxy;      ///< Radius of the galaxy
 	float _radFarField;    ///< The radius after which all density waves must have circular shape
-	float _velAngle;       ///< Angular velocity of the density waves
-
 	float _dustRenderSize;
 
 	int _numStars;          ///< Total number of stars
