@@ -40,22 +40,6 @@ Galaxy::Galaxy(
 Galaxy::~Galaxy()
 {}
 
-void Galaxy::Reset()
-{
-	Reset({
-		_radGalaxy,
-		_radCore,
-		_angleOffset,
-		_elEx1,
-		_elEx2,
-		_numStars,
-		_hasDarkMatter,
-		_pertN,
-		_pertAmp,
-		_dustRenderSize,
-		_baseTemp });
-}
-
 void Galaxy::Reset(GalaxyParam param)
 {
 	_baseTemp = param.baseTemp;
@@ -83,7 +67,7 @@ bool Galaxy::HasDarkMatter() const noexcept
 void Galaxy::ToggleDarkMatter()
 {
 	_hasDarkMatter ^= true;
-	Reset();
+	InitStarsAndDust();
 }
 
 void Galaxy::InitStarsAndDust()
@@ -98,7 +82,6 @@ void Galaxy::InitStarsAndDust()
 	star.tiltAngle = 0;
 	star.theta0 = 0;
 	star.velTheta = 0;
-	star.velTheta = GetOrbitalVelocity((star.a + star.b) / 2.0f);
 	star.type = 0;
 	star.temp = 6000;
 	_stars.push_back(star);
@@ -282,7 +265,7 @@ float Galaxy::GetFarFieldRad() const
 void Galaxy::SetAngularOffset(float offset)
 {
 	_angleOffset = offset;
-	Reset();
+	InitStarsAndDust();
 }
 
 /** \brief Returns the orbital velocity in degrees per year.
@@ -374,23 +357,23 @@ void Galaxy::SetPertAmp(float amp)
 void Galaxy::SetRad(float rad)
 {
 	_radGalaxy = rad;
-	Reset();
+	InitStarsAndDust();
 }
 
 void Galaxy::SetCoreRad(float rad)
 {
 	_radCore = rad;
-	Reset();
+	InitStarsAndDust();
 }
 
 void Galaxy::SetExInner(float ex)
 {
 	_elEx1 = ex;
-	Reset();
+	InitStarsAndDust();
 }
 
 void Galaxy::SetExOuter(float ex)
 {
 	_elEx2 = ex;
-	Reset();
+	InitStarsAndDust();
 }

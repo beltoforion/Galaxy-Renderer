@@ -33,7 +33,6 @@ public:
 	~Galaxy();
 
 	void Reset(GalaxyParam param);
-	void Reset();
 
 	const std::vector<Star>& GetStars() const;
 
