@@ -46,7 +46,6 @@ GalaxyWnd::~GalaxyWnd()
 void GalaxyWnd::InitGL() noexcept(false)
 {
 	// GL initialization
-//	glShadeModel(GL_SMOOTH);
 	glViewport(0, 0, GetWidth(), GetHeight());
 
 	_vertDensityWaves.Initialize();
@@ -59,7 +58,6 @@ void GalaxyWnd::InitGL() noexcept(false)
 	_textAxisLabel.Initialize();
 	_textGalaxyLabels.Initialize();
 
-//	glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 	glDisable(GL_DEPTH_TEST);
 	glClearColor(0.0f, .0f, 0.08f, 0.0f);
 	SetCameraOrientation({ 0, 1, 0 });
