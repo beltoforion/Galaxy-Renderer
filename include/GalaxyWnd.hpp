@@ -11,6 +11,7 @@
 #include "VertexBufferStars.hpp"
 #include "TextBuffer.hpp"
 
+
 /** \brief Main window of th n-body simulation. */
 class GalaxyWnd final : public SDLWindow
 {
@@ -33,15 +34,15 @@ private:
 	enum class DisplayItem : uint32_t
 	{
 		NONE          = 0,
-		AXIS          = 0b0000000001,
-		STARS         = 0b0000000010,
-		PAUSE         = 0b0000000100,
-		HELP          = 0b0000001000,
-		DENSITY_WAVES = 0b0000100000,
-		VELOCITY      = 0b0001000000,
-		DUST          = 0b0010000000,
-		H2            = 0b0100000000,
-		FILAMENTS     = 0b1000000000,
+		AXIS          = 1 << 1,
+		STARS         = 1 << 2,
+		PAUSE         = 1 << 3,
+		HELP          = 1 << 4,
+		DENSITY_WAVES = 1 << 5,
+		VELOCITY      = 1 << 6,
+		DUST          = 1 << 7,
+		H2            = 1 << 8,
+		FILAMENTS     = 1 << 9,
 	};
 
 	enum RenderUpdateHint : uint32_t

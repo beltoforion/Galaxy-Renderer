@@ -34,9 +34,17 @@ public:
 
 	virtual void Initialize()
 	{
-		glGenBuffers(1, &_vbo);
-		glGenBuffers(1, &_ibo);
+		// 
+		// Initialize Buffers
+		//
+
+		glCreateBuffers(1, &_vbo);
+		glCreateBuffers(1, &_ibo);
 		glGenVertexArrays(1, &_vao);
+
+		//
+		// initialize Shaders and Shader Program
+		//
 
 		const char* srcVertex = GetVertexShaderSource();
 		GLuint vertexShader = CreateShader(GL_VERTEX_SHADER, &srcVertex);
