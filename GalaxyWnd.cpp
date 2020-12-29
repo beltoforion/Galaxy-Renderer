@@ -382,15 +382,10 @@ void GalaxyWnd::Render()
 	}
 
 	if (_flags & (int)DisplayItem::VELOCITY)
-	{
-		glPointSize(2);
 		_vertVelocityCurve.Draw(_matView, _matProjection);
-	}
 
 	if (_flags & (int)DisplayItem::HELP)
-	{
 		_textHelp.Draw(_width, _height, _matView, _matProjection);
-	}
 
 	SDL_GL_SwapWindow(_pSdlWnd);
 	SDL_Delay(1);

@@ -23,7 +23,7 @@ public:
 
 	void OnBeforeDraw() override
 	{
-		glLineWidth((GLfloat)_lineWidth);
+//		glLineWidth((GLfloat)_lineWidth);
 	}
 
 protected:
@@ -40,6 +40,7 @@ protected:
 			"{\n"
 			"	gl_Position =  projMat * vec4(position, 1);\n"
 			"	vertexColor = color;\n"
+			"	gl_PointSize = 3;\n"	// point size is only used for the velocity curve
 			"}\n";
 	}
 

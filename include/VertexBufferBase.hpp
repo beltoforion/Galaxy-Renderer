@@ -172,11 +172,17 @@ public:
 		glEnable(GL_BLEND);
 		glPrimitiveRestartIndex(0xFFFF);
 
+		glEnable(GL_PROGRAM_POINT_SIZE);
+		glEnable(GL_POINT_SPRITE);
+
 		OnBeforeDraw();
 
 		glBindVertexArray(_vao);
 		glDrawElements(_primitiveType, (int)_idx.size(), GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
+
+		glDisable(GL_POINT_SPRITE);
+		glDisable(GL_PROGRAM_POINT_SIZE);
 
 		glDisable(GL_BLEND);
 		glDisable(GL_PRIMITIVE_RESTART);
