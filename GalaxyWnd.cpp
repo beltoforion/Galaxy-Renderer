@@ -228,23 +228,21 @@ void GalaxyWnd::UpdateText()
 	_renderUpdateHint &= ~ruhCREATE_TEXT;
 }
 
-void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
+void GalaxyWnd::UpdateVelocityCurve()
 {
 	// I don't need every star for the curve.
 	const auto& stars = _galaxy.GetStars();
-	// Limit the number of stars to use for the velovity curve. Updateing the buffer is too slow
-	std::size_t num = 5000; 
 
 	std::vector<VertexColor> vert;
-	vert.reserve(num);
+	vert.reserve(1000);
 
 	std::vector<int> idx;
-	idx.reserve(num);
+	idx.reserve(1000);
 
 	float dt_in_sec = GalaxyWnd::TimeStepSize * Helper::SEC_PER_YEAR;
 	float r = 0, v = 0;
-	float cr = 0.5, cg = 1, cb = 1, ca = 0.15;
-	for (int r = 0; r < _galaxy.GetFarFieldRad(); r += 10)
+	float cr = 0.5, cg = 1, cb = 1, ca = 1;
+	for (int r = 0; r < _galaxy.GetFarFieldRad(); r += 100)
 	{
 		idx.push_back((int)vert.size());
 
@@ -254,15 +252,8 @@ void GalaxyWnd::UpdateVelocityCurve(bool updateOnly)
 			vert.push_back({ (float)r, Helper::VelocityWithoutDarkMatter((float)r) * 10.f, 0,  cr, cg, cb, ca });
 	}
 
-	if (!updateOnly)
-	{
-		_vertVelocityCurve.CreateBuffer(vert, idx, GL_POINTS);
-		_renderUpdateHint &= ~ruhCREATE_VELOCITY_CURVE;
-	}
-	else
-	{
-		_vertVelocityCurve.UpdateBuffer(vert);
-	}
+	_vertVelocityCurve.CreateBuffer(vert, idx, GL_POINTS);
+	_renderUpdateHint &= ~ruhCREATE_VELOCITY_CURVE;
 }
 
 /** \brief Update the density wave vertex buffers
@@ -337,10 +328,7 @@ void GalaxyWnd::Update()
 		UpdateStars();
 
 	if ((_renderUpdateHint & ruhCREATE_VELOCITY_CURVE) != 0)
-		UpdateVelocityCurve(false);
-
-	if ((_flags & (int)DisplayItem::VELOCITY) != 0)
-		UpdateVelocityCurve(true); // Update Data Only, no buffer recreation!
+		UpdateVelocityCurve();
 
 	if ((_renderUpdateHint & ruhCREATE_TEXT) != 0)
 		UpdateText();
@@ -521,7 +509,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 		case SDLK_m:
 			_galaxy.ToggleDarkMatter();
-			_renderUpdateHint |= ruhSTARS | ruhDUST;
+			_renderUpdateHint |= ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
 			break;
 
 		case SDLK_f:

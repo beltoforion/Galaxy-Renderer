@@ -90,7 +90,7 @@ private:
 	void UpdateDensityWaves();
 	void UpdateAxis();
 	void UpdateStars();
-	void UpdateVelocityCurve(bool updateOnly);
+	void UpdateVelocityCurve();
 	void UpdateText();
 };
 
