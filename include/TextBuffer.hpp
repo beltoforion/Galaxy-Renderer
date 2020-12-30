@@ -3,7 +3,7 @@
 #include <vector>
 #include <stdexcept>
 
-#include <gl/glew.h>
+#include <GL/glew.h>
 #include <glm/glm.hpp>
 
 #include <SDL_ttf.h>
