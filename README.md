@@ -12,6 +12,16 @@ For more Details please read the Articles.
 * https://beltoforion.de/en/spiral_galaxy_renderer [english]
 * https://beltoforion.de/de/rendern_von_spiralgalaxien [german]
 
+A typescript implementation of this code is available here:
+
+* https://github.com/beltoforion/Galaxy-Renderer-Typescript
+
+An online demo of the typescript version can be viewed here:
+
+* https://beltoforion.de/en/spiral_galaxy_renderer/spiral-galaxy-renderer.html
+
+The output of the C++ version is virtually the same.
+
 ![titleimage](https://beltoforion.de/en/spiral_galaxy_renderer/images/github_title_galaxy_simulator.jpg)
 
 Hers is a list of galaxies created by the algorithm:
