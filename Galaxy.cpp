@@ -73,17 +73,6 @@ void Galaxy::InitStarsAndDust()
 	_stars = std::vector<Star>();
 	_stars.reserve(_numStars);
 
-	// First star ist the black hole at the centre
-	auto star = Star();
-	star.a = 0;
-	star.b = 0;
-	star.tiltAngle = 0;
-	star.theta0 = 0;
-	star.velTheta = 0;
-	star.type = 0;
-	star.temp = 6000;
-	_stars.push_back(star);
-
 	//
 	// 1.) Initialize the stars
 	//
@@ -98,7 +87,7 @@ void Galaxy::InitStarsAndDust()
 		_radFarField,		// end of the intensity curve
 		1000);				// number of supporting points
 
-	for (int i = 1; i < _numStars; ++i)
+	for (int i = 0; i < _numStars; ++i)
 	{
 		float rad = (float)cdf.ValFromProb(Helper::rnum());
 		auto star = Star();
