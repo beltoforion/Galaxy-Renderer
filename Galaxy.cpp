@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include <cmath>
 #include <iostream>
-#include <execution>
 #include <algorithm>
 
 #include "Helper.hpp"
