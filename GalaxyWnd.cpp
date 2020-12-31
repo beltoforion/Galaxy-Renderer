@@ -359,7 +359,10 @@ void GalaxyWnd::Render()
 	if (_flags & (int)DisplayItem::AXIS)
 	{
 		_vertAxis.Draw(_matView, _matProjection);
+		CHECK_GL_ERROR
+
 		_textAxisLabel.Draw(_width, _height, _matView, _matProjection);
+		CHECK_GL_ERROR
 	}
 
 	int features = 0;

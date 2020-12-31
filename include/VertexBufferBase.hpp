@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Helper.hpp"
 
 template<typename TVertex>
 class VertexBufferBase
@@ -101,7 +102,7 @@ public:
 
 	void CreateBuffer(const std::vector<TVertex>& vert, const std::vector<int>& idx, GLuint type)  noexcept(false)
 	{
-		Helper::CheckGlError("VertexBufferBase: VertexBufferBase::CreateBuffer aborted due to an existing error condition!");
+		CHECK_GL_ERROR
 
 		_vert = vert;
 		_idx = idx;
@@ -109,7 +110,7 @@ public:
 
 		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 		glBufferData(GL_ARRAY_BUFFER, _vert.size() * sizeof(TVertex), _vert.data(), _bufferMode);
-		Helper::CheckGlError("VertexBufferBase::CreateBuffer: Vertex buffer creation failed!");
+		CHECK_GL_ERROR
 
 		glBindVertexArray(_vao);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
@@ -130,15 +131,15 @@ public:
 				glVertexAttribPointer(attrib.attribIdx, attrib.size, attrib.type, GL_FALSE, sizeof(TVertex), (GLvoid*)attrib.offset);
 			}
 		}
-		Helper::CheckGlError("VertexBufferBase::CreateBuffer: Setting attributes failed!");
+		CHECK_GL_ERROR
 
 		// Set up index buffer array
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _idx.size() * sizeof(int), _idx.data(), GL_STATIC_DRAW);
-		Helper::CheckGlError("VertexBufferBase::CreateBuffer: Index buffer creation failed!");
+		CHECK_GL_ERROR
 
 		glBindVertexArray(0);
-		Helper::CheckGlError("VertexBufferBase::CreateBuffer: unbinding vertex array failed!");
+		CHECK_GL_ERROR
 	}
 
 	void UpdateBuffer(const std::vector<TVertex>& vert) noexcept(false)
@@ -156,6 +157,7 @@ public:
 
 	virtual void Draw(glm::mat4& matView, glm::mat4& matProjection)
 	{
+		CHECK_GL_ERROR
 		glUseProgram(_shaderProgram);
 
 		GLuint viewMatIdx = glGetUniformLocation(_shaderProgram, "viewMat");
@@ -169,22 +171,25 @@ public:
 		glEnable(GL_PRIMITIVE_RESTART);
 		glEnable(GL_BLEND);
 		glPrimitiveRestartIndex(0xFFFF);
+		CHECK_GL_ERROR
 
 		glEnable(GL_PROGRAM_POINT_SIZE);
-		glEnable(GL_POINT_SPRITE);
+		CHECK_GL_ERROR
 
 		OnBeforeDraw();
 
 		glBindVertexArray(_vao);
 		glDrawElements(_primitiveType, (int)_idx.size(), GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
+		CHECK_GL_ERROR
 
-		glDisable(GL_POINT_SPRITE);
 		glDisable(GL_PROGRAM_POINT_SIZE);
-
 		glDisable(GL_BLEND);
 		glDisable(GL_PRIMITIVE_RESTART);
+		CHECK_GL_ERROR
+
 		glUseProgram(0);
+		CHECK_GL_ERROR
 	}
 
 	void ReleaseAttribArray() const 
