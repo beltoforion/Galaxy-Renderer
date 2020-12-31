@@ -148,10 +148,13 @@ TTF_Font* TextBuffer::GetFont(int idxFont) const
 
 void TextBuffer::Clear()
 {
+	CHECK_GL_ERROR
+
 	for (auto td : _textureData)
 	{
 		SDL_FreeSurface(td.surface);
 		glDeleteTextures(1, &td.id);
+		CHECK_GL_ERROR
 	}
 
 	_textureData.clear();
@@ -162,6 +165,8 @@ void TextBuffer::Clear()
 
 void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matProjection)
 {
+	CHECK_GL_ERROR
+		
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
@@ -238,15 +243,21 @@ void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matP
 
 void TextBuffer::BeginUpdate()
 {
+	CHECK_GL_ERROR
+
 	if (_updating)
 		throw std::runtime_error("TextBuffer::BeginUpdate: An update is already in Progress!");
 
 	_updating = true;
 	Clear();
+
+	CHECK_GL_ERROR
 }
 
 void TextBuffer::EndUpdate()
 {
+	CHECK_GL_ERROR
+
 	if (!_updating)
 		throw std::runtime_error("TextBuffer::EndUpdate: No update in progress!");
 
@@ -259,15 +270,20 @@ void TextBuffer::EndUpdate()
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)td.size.x, (GLsizei)td.size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, td.surface->pixels);
+		CHECK_GL_ERROR
 	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	_updating = false; 
+
+	CHECK_GL_ERROR
 }
 
 void TextBuffer::AddText(int idxFont, Vec2 pos, const char* fmt, ...)
 {
+	CHECK_GL_ERROR
+
 	if (fmt == nullptr)
 		throw std::runtime_error("TextBuffer::AddText failed: bad format string!");
 
@@ -300,4 +316,6 @@ void TextBuffer::AddText(int idxFont, Vec2 pos, const char* fmt, ...)
 
 	if (pSurface != nullptr)
 		SDL_FreeSurface(pSurface);
+
+	CHECK_GL_ERROR
 }

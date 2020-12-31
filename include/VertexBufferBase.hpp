@@ -101,12 +101,15 @@ public:
 
 	void CreateBuffer(const std::vector<TVertex>& vert, const std::vector<int>& idx, GLuint type)  noexcept(false)
 	{
+		Helper::CheckGlError("VertexBufferBase: VertexBufferBase::CreateBuffer aborted due to an existing error condition!");
+
 		_vert = vert;
 		_idx = idx;
 		_primitiveType = type;
 
 		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 		glBufferData(GL_ARRAY_BUFFER, _vert.size() * sizeof(TVertex), _vert.data(), _bufferMode);
+		Helper::CheckGlError("VertexBufferBase::CreateBuffer: Vertex buffer creation failed!");
 
 		glBindVertexArray(_vao);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
@@ -127,20 +130,15 @@ public:
 				glVertexAttribPointer(attrib.attribIdx, attrib.size, attrib.type, GL_FALSE, sizeof(TVertex), (GLvoid*)attrib.offset);
 			}
 		}
+		Helper::CheckGlError("VertexBufferBase::CreateBuffer: Setting attributes failed!");
 
 		// Set up index buffer array
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _idx.size() * sizeof(int), _idx.data(), GL_STATIC_DRAW);
-
-		auto errc = glGetError();
-		if (errc != GL_NO_ERROR)
-		{
-			std::stringstream ss;
-			ss << "VertexBufferBase: Cannot create vbo! (Error 0x" << std::hex << errc << ")" << std::endl;
-			throw std::runtime_error(ss.str());
-		}
+		Helper::CheckGlError("VertexBufferBase::CreateBuffer: Index buffer creation failed!");
 
 		glBindVertexArray(0);
+		Helper::CheckGlError("VertexBufferBase::CreateBuffer: unbinding vertex array failed!");
 	}
 
 	void UpdateBuffer(const std::vector<TVertex>& vert) noexcept(false)

@@ -2,8 +2,26 @@
 
 #include <cmath>
 #include <algorithm>
+#include <string>
+#include <sstream>
+#include <GL/glew.h>
+
 
 #include "Types.hpp"
+
+#ifndef __FUNCTION_NAME__
+	#ifdef WIN32
+		#define __FUNCTION_NAME__   __FUNCTION__  
+	#else          //*NIX
+		#define __FUNCTION_NAME__   __func__ 
+	#endif
+#endif
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define AT __FILE__ ":" TOSTRING(__LINE__)
+#define CHECK_GL_ERROR Helper::CheckGlError( " OpenGL error detected at " AT "!");
+
 
 /** \brief A class to store relevant constants. */
 class Helper
@@ -42,6 +60,17 @@ public:
 	static inline float rnum()
 	{
 		return (float)std::rand() / RAND_MAX;
+	}
+
+	static void CheckGlError(const char* szMsg)
+	{
+		auto errc = glGetError();
+		if (errc != GL_NO_ERROR)
+		{
+			std::stringstream ss;
+			ss << szMsg << " (Error 0x" << std::hex << errc << ")" << std::endl;
+			throw std::runtime_error(ss.str());
+		}
 	}
 
 	static inline Color ColorFromTemperature(float temp)

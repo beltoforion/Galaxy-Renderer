@@ -158,6 +158,8 @@ void GalaxyWnd::UpdateAxis()
 	//
 
 	_textAxisLabel.BeginUpdate();
+	CHECK_GL_ERROR
+
 	s = (GLfloat)std::pow(10, (int)(std::log10(_fov / 2)));
 	l = _fov / 100, p = 0;
 
@@ -167,14 +169,18 @@ void GalaxyWnd::UpdateAxis()
 		if (i % 2 == 0)
 		{
 			_textAxisLabel.AddText(1, GetWindowPos(p - l, -4.f * l, 0), "%2.0f", p);
+			CHECK_GL_ERROR
 		}
 		else
 		{
-			glRasterPos2f(p - l, 2 * l);
 			_textAxisLabel.AddText(1, GetWindowPos(p - l, 2 * l, 0), "%2.0f", p);
+			CHECK_GL_ERROR
+
 		}
 	}
 	_textAxisLabel.EndUpdate();
+	CHECK_GL_ERROR
+
 	_renderUpdateHint &= ~ruhAXIS;
 }
 
