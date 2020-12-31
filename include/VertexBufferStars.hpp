@@ -44,6 +44,7 @@ public:
 
 	virtual void Draw(glm::mat4& matView, glm::mat4& matProjection)
 	{
+		CHECK_GL_ERROR
 		glUseProgram(GetShaderProgramm());
 
 		GLuint viewMatIdx = glGetUniformLocation(GetShaderProgramm(), "viewMat");
@@ -58,19 +59,18 @@ public:
 		glBlendFunc(GL_SRC_ALPHA, _blendFunc);
 		glBlendEquation(_blendEquation);
 		glEnable(GL_PROGRAM_POINT_SIZE);
-		glEnable(GL_POINT_SPRITE);
 		OnBeforeDraw();
 
 		glBindVertexArray(GetVertexArrayObject());
 		glDrawElements(GetPrimitiveType(), GetArrayElementCount(), GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
 
-		glDisable(GL_POINT_SPRITE);
 		glDisable(GL_PROGRAM_POINT_SIZE);
 		glDisable(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 
 		glUseProgram(0);
+		CHECK_GL_ERROR
 	}
 
 protected:

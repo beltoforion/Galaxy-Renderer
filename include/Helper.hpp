@@ -9,18 +9,11 @@
 
 #include "Types.hpp"
 
-#ifndef __FUNCTION_NAME__
-	#ifdef WIN32
-		#define __FUNCTION_NAME__   __FUNCTION__  
-	#else          //*NIX
-		#define __FUNCTION_NAME__   __func__ 
-	#endif
-#endif
-
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 #define AT __FILE__ ":" TOSTRING(__LINE__)
 #define CHECK_GL_ERROR Helper::CheckGlError( " OpenGL error detected at " AT "!");
+
 
 
 /** \brief A class to store relevant constants. */
