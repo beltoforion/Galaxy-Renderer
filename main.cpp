@@ -1,10 +1,4 @@
-#include <cstdlib>
-#include <cstdio>
-#include <cassert>
 #include <iostream>
-
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "GalaxyWnd.hpp"
 
@@ -25,5 +19,5 @@ int main(int argc, char** argv)
 		std::cout << "Fatal error: unexpected exception" << std::endl;
 	}
 
-	return (EXIT_SUCCESS);
+	return 0;
 }

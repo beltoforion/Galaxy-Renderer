@@ -2,11 +2,6 @@
 
 #include <cstdint>
 
-struct Vec2 final
-{
-	float x, y;
-};
-
 struct Vec3 final
 {
 	float x, y, z;

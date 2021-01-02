@@ -280,7 +280,7 @@ void TextBuffer::EndUpdate()
 	CHECK_GL_ERROR
 }
 
-void TextBuffer::AddText(int idxFont, Vec2 pos, const char* fmt, ...)
+void TextBuffer::AddText(int idxFont, glm::vec2 pos, const char* fmt, ...)
 {
 	CHECK_GL_ERROR
 

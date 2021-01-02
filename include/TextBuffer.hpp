@@ -18,7 +18,7 @@ public:
 	~TextBuffer();
 
 	void Initialize();
-	void AddText(int idxFont, Vec2 pos, const char* fmt, ...);
+	void AddText(int idxFont, glm::vec2 pos, const char* fmt, ...);
 	void Draw(int width, int height, glm::mat4& matView, glm::mat4& matProjection);
 	float GetFontSize(int idxFont) const;
 
@@ -30,8 +30,8 @@ private:
 	struct TextureData
 	{
 		SDL_Surface* surface;
-		Vec2 pos;
-		Vec2 size;
+		glm::vec2 pos;
+		glm::vec2 size;
 		GLuint id;
 	};
 
