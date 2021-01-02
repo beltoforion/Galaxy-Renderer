@@ -22,7 +22,7 @@ An online demo of the typescript version can be viewed here:
 
 The output of the C++ version is virtually the same.
 
-![titleimage](https://beltoforion.de/en/spiral_galaxy_renderer/images/github_title_galaxy_simulator.jpg)
+![titleimage](https://beltoforion.de/github_images/galaxy-renderer-cpp.jpg)
 
 Hers is a list of galaxies created by the algorithm:
-![image](https://beltoforion.de/en/spiral_galaxy_renderer/images/galaxy_overview.jpg)
+![image](https://beltoforion.de/github_images/galaxy-renderer-overview.jpg)
