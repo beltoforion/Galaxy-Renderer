@@ -375,7 +375,7 @@ void GalaxyWnd::Render()
 
 	if (features != 0)
 	{
-		_vertStars.UpdateShaderVariables(_time, _galaxy.GetPertN(), _galaxy.GetPertAmp(), _galaxy.GetDustRenderSize(), features);
+		_vertStars.UpdateShaderVariables(_time, _galaxy.GetPertN(), _galaxy.GetPertAmp(), (int)_galaxy.GetDustRenderSize(), features);
 		_vertStars.Draw(_matView, _matProjection);
 	}
 

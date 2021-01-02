@@ -21,10 +21,10 @@ public:
 	~GalaxyWnd();
 
 protected:
-	virtual void Render();
-	virtual void Update();
+	virtual void Render() override;
+	virtual void Update() override;
 
-	virtual void OnProcessEvents(Uint32 type);
+	virtual void OnProcessEvents(Uint32 type) override;
 
 	void InitGL() noexcept (false) override;
 	void InitSimulation() override;

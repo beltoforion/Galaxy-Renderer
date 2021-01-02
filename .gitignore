@@ -16,3 +16,6 @@ vsproject/.nuget/*
 *.log
 *.ipch
 *.opendb
+.vs/*
+packages/*
+x64/*
