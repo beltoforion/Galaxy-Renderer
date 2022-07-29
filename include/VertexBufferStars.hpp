@@ -149,6 +149,7 @@ protected:
 			"	    vertexColor = vec4(1,1,1,1);\n"
 			"   }\n"
 			"	gl_Position =  projMat * vec4(ps, 0, 1);\n"
+			"   gl_PointSize = max(gl_PointSize, 0.0);\n"
 			"	vertexType = type;\n"
 			"	features = displayFeatures;\n"
 			"}\n";
