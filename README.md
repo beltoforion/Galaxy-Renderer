@@ -22,7 +22,7 @@ An online demo of the typescript version can be viewed here:
 
 The output of the C++ version is virtually the same.
 
-![titleimage](https://beltoforion.de/github_images/galaxy-renderer-cpp.jpg)
+![galaxy-renderer-cpp](https://user-images.githubusercontent.com/2202567/183997359-e4480044-986e-445d-935c-a50d55db21f3.jpg)
 
 Hers is a list of galaxies created by the algorithm:
-![image](https://beltoforion.de/github_images/galaxy-renderer-overview.jpg)
+![galaxy-renderer-overview](https://user-images.githubusercontent.com/2202567/183997403-eff97429-b0d2-4933-a49e-ac16e0cab27c.jpg)
