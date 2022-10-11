@@ -134,8 +134,9 @@ xcopy /y /d $(SolutionDir)\..\star.bmp $(OutDir)</Command>
       <IgnoreSpecificDefaultLibraries>libcmt</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y $(SolutionDir)assets\arial.ttf $(OutDir)
-xcopy /Y $(SolutionDir)assets\consola.ttf $(OutDir)</Command>
+      <Command>if not exist  $(OutDir)assets mkdir $(OutDir)assets
+xcopy /Y $(SolutionDir)assets\arial.ttf $(OutDir)assets
+xcopy /Y $(SolutionDir)assets\consola.ttf $(OutDir)assets</Command>
       <Message>Copying assets to output folder</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -196,8 +197,9 @@ xcopy /y /d $(SolutionDir)\..\star.bmp $(OutDir)</Command>
       <IgnoreSpecificDefaultLibraries>libcmt</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y $(SolutionDir)assets\arial.ttf $(OutDir)
-xcopy /Y $(SolutionDir)assets\consola.ttf $(OutDir)</Command>
+      <Command>if not exist  $(OutDir)assets mkdir $(OutDir)assets
+xcopy /Y $(SolutionDir)assets\arial.ttf $(OutDir)assets
+xcopy /Y $(SolutionDir)assets\consola.ttf $(OutDir)assets</Command>
       <Message>Copying assets to output folder</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
