@@ -207,12 +207,13 @@ void GalaxyWnd::UpdateText()
 
 	y += dy1; _textHelp.AddText(1, { x0, y }, "Display Features:");
 	y += dy1; _textHelp.AddText(2, { x0, y }, "[b],[n]  Dust render size:  %2.2lf", _galaxy.GetDustRenderSize());
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F1] Help Screen");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F2] Toggle Axis");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F3] Toggle Dust");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F4] Toggle H2 Regions");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F5] Toggle Filaments");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F6] Toggle Density Waves");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F1]  Help Screen");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F2]  Toggle Axis");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F3]  Toggle Dust");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F4]  Toggle H2 Regions");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F5]  Toggle Filaments");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F6]  Toggle Density Waves");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F10] Exit");
 
 	y += dy1; _textHelp.AddText(1, { x0, y }, "Physics:");
 	y += dy1; _textHelp.AddText(2, { x0, y }, "[z],[h] Base Temp.:  %2.2lf K", _galaxy.GetBaseTemp());
@@ -221,7 +222,7 @@ void GalaxyWnd::UpdateText()
 
 	y += dy1; _textHelp.AddText(1, { x0, y }, "Predefined Galaxies:");
 	y += dy1; _textHelp.AddText(2, { x0, y }, "[KP1] - [KP8] Predefined Galaxies");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[Pause]       Halt simulation");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[Pause],[Space]       Halt simulation");
 
 	_textHelp.AddText(1, { (float)_width - 180, (float)_height - 30 }, " (C) 2020 Ingo Berg");
 	_textHelp.EndUpdate();
@@ -568,11 +569,16 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			_flags ^= (int)DisplayItem::DENSITY_WAVES;
 			break;
 
+		case SDLK_F10:
+				_bRunning = false;
+			break;
+
 		case  SDLK_v:
 			_flags ^= (int)DisplayItem::VELOCITY;
 			break;
 
 		case  SDLK_PAUSE:
+		case  SDLK_SPACE:
 			_flags ^= (int)DisplayItem::PAUSE;
 			break;
 
