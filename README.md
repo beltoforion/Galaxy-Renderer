@@ -26,3 +26,12 @@ The output of the C++ version is virtually the same.
 
 Hers is a list of galaxies created by the algorithm:
 ![galaxy-renderer-overview](https://user-images.githubusercontent.com/2202567/183997403-eff97429-b0d2-4933-a49e-ac16e0cab27c.jpg)
+
+-----------
+
+For old system or GPU unsupported OpenGL 3.3 use overload MESA version for running application.
+In Linux.
+```
+MESA_GL_VERSION_OVERRIDE=3.3 MESA_GLSL_VERSION_OVERRIDE=330 ./galaxy_rendere
+```
+
