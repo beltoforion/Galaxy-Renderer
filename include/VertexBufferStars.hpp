@@ -78,7 +78,7 @@ protected:
 	virtual const char* GetVertexShaderSource() const override
 	{
 		return
-			"#version 440 core\n"
+			"#version 330 core\n"
 			"#define DEG_TO_RAD 0.01745329251\n"
 			"\n"
 			"uniform mat4 projMat;\n"
@@ -158,7 +158,7 @@ protected:
 	virtual const char* GetFragmentShaderSource() const override
 	{
 		return
-			"#version 440 core\n"
+			"#version 330 core\n"
 			"in vec4 vertexColor;\n"
 			"flat in int vertexType;\n"
 			"flat in int features;\n"
