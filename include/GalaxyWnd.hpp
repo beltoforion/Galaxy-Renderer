@@ -40,7 +40,6 @@ private:
 		AXIS          = 1 << 1,
 		STARS         = 1 << 2,
 		PAUSE         = 1 << 3,
-		HELP          = 1 << 4,
 		DENSITY_WAVES = 1 << 5,
 		VELOCITY      = 1 << 6,
 		DUST          = 1 << 7,
@@ -56,7 +55,6 @@ private:
 		ruhSTARS = 1 << 3,
 		ruhDUST = 1 << 4,
 		ruhCREATE_VELOCITY_CURVE = 1 << 5,
-		ruhCREATE_TEXT = 1 << 7
 	};
 
 	float _time;
@@ -70,7 +68,6 @@ private:
 	VertexBufferLines _vertVelocityCurve;
 	VertexBufferStars _vertStars;
 
-	TextBuffer _textHelp;
 	TextBuffer _textAxisLabel;
 	TextBuffer _textGalaxyLabels;
 
@@ -99,12 +96,27 @@ private:
 	void UpdateAxis();
 	void UpdateStars();
 	void UpdateVelocityCurve();
-	void UpdateText();
 
 	void RenderScene(glm::mat4& matView, glm::mat4& matProjection, bool overlays);
 	void RenderUI();
 	void ToggleVideoRecording();
 
-	bool _showUi = true;   ///< Visibility of the Dear ImGui control panel (F1)
+	// --- Dear ImGui control panel state -----------------------------------
+	bool _showUi = true;   ///< Visibility of the control panel (toggled with F1)
+
+	// Cache for parameters whose edit triggers an expensive star/dust rebuild.
+	// Widgets bind to these; the model is only updated when a widget is
+	// released (see RenderUI). Kept in sync with the model while no widget is
+	// being dragged, so keyboard shortcuts stay reflected in the panel.
+	struct UiCache
+	{
+		int   radCore = 0;
+		int   radGalaxy = 0;
+		float exInner = 0.0f;
+		float exOuter = 0.0f;
+		float angOff = 0.0f;
+		float baseTemp = 0.0f;
+		float fov = 0.0f;
+	} _ui;
 };
 

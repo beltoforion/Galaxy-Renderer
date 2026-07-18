@@ -3,6 +3,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <cstddef>
+#include <cstdio>
 #include <ctime>
 #include <iostream>
 
@@ -19,14 +20,13 @@ const float GalaxyWnd::TimeStepSize = 100000.0f;
 
 GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
-	, _flags((int)DisplayItem::STARS | (int)DisplayItem::AXIS | (int)DisplayItem::HELP | (int)DisplayItem::DUST | (int)DisplayItem::H2 | (int)DisplayItem::FILAMENTS)
+	, _flags((int)DisplayItem::STARS | (int)DisplayItem::AXIS | (int)DisplayItem::DUST | (int)DisplayItem::H2 | (int)DisplayItem::FILAMENTS)
 	, _galaxy()
-	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE | ruhCREATE_TEXT)
+	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE)
 	, _vertDensityWaves(2)
 	, _vertAxis()
 	, _vertVelocityCurve(1, GL_DYNAMIC_DRAW)
 	, _vertStars(GL_FUNC_ADD, GL_ONE)
-	, _textHelp()
 	, _textAxisLabel()
 	, _textGalaxyLabels()
 	, _videoRecorder()
@@ -79,7 +79,6 @@ void GalaxyWnd::InitGL() noexcept(false)
 	_vertStars.Initialize();
 
 	// Font initialization
-	_textHelp.Initialize();
 	_textAxisLabel.Initialize();
 	_textGalaxyLabels.Initialize();
 
@@ -211,58 +210,6 @@ void GalaxyWnd::UpdateAxis()
 	_renderUpdateHint &= ~ruhAXIS;
 }
 
-void GalaxyWnd::UpdateText()
-{
-	float x0 = 10, y0 = 60, dy = 20;
-	int line = 0;
-	float y = y0 - 60;
-
-	y0 = 60;
-	float dy1 = _textHelp.GetFontSize(1) + 8;
-	float dy2 = _textHelp.GetFontSize(2) + 6;
-
-	_textHelp.BeginUpdate();
-	_textHelp.AddText(0, { x0, y0 - 60 }, "Spiral Galaxy Renderer");
-
-	y = y0; _textHelp.AddText(1, { x0, y }, "Geometry:");
-	y += dy1; _textHelp.AddText(2, { x0, y }, "[r],[f] RadCore:     %d pc", (int)_galaxy.GetCoreRad());
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[t],[g] RadGalaxy:   %d pc", (int)_galaxy.GetRad());
-	y += dy2; _textHelp.AddText(2, { x0, y }, "        RadFarField: %d pc", (int)_galaxy.GetFarFieldRad());
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[q],[a] ExInner:     %2.2f", _galaxy.GetExInner());
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[w],[s] ExOuter:     %2.2f", _galaxy.GetExOuter());
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[e],[d] AngOff:      %1.4g deg/pc", _galaxy.GetAngularOffset());
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[+],[-] FoV:         %1.2f pc", _fov);
-
-	y += dy1; _textHelp.AddText(1, { x0, y }, "Spiral Arms:");
-	y += dy1; _textHelp.AddText(2, { x0, y }, "[Home],[End]    Num pert:  %d", _galaxy.GetPertN());
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[PG_UP],[PG_DN] pertDamp:  %1.2f", _galaxy.GetPertAmp());
-
-	y += dy1; _textHelp.AddText(1, { x0, y }, "Display Features:");
-	y += dy1; _textHelp.AddText(2, { x0, y }, "[b],[n]  Dust render size:  %2.2lf", _galaxy.GetDustRenderSize());
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F1]  Help Screen");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F2]  Toggle Axis");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F3]  Toggle Dust");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F4]  Toggle H2 Regions");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F5]  Toggle Filaments");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F6]  Toggle Density Waves");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F7]  Record %dx%d Video: %s", _videoWidth, _videoHeight, _videoRecorder.IsRecording() ? "ON" : "OFF");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[F10] Exit");
-
-	y += dy1; _textHelp.AddText(1, { x0, y }, "Physics:");
-	y += dy1; _textHelp.AddText(2, { x0, y }, "[z],[h] Base Temp.:  %2.2lf K", _galaxy.GetBaseTemp());
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[m] Toggle Dark Matter: %s", _galaxy.HasDarkMatter() ? "ON" : "OFF");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[v] Display Velocity Curve: %s", ((_flags & (int)DisplayItem::VELOCITY) != 0) ? "ON" : "OFF");
-
-	y += dy1; _textHelp.AddText(1, { x0, y }, "Predefined Galaxies:");
-	y += dy1; _textHelp.AddText(2, { x0, y }, "[KP1] - [KP8] Predefined Galaxies");
-	y += dy2; _textHelp.AddText(2, { x0, y }, "[Pause],[Space]       Halt simulation");
-
-	_textHelp.AddText(1, { (float)_width - 180, (float)_height - 30 }, " (C) 2026 Ingo Berg");
-	_textHelp.EndUpdate();
-
-	_renderUpdateHint &= ~ruhCREATE_TEXT;
-}
-
 void GalaxyWnd::UpdateVelocityCurve()
 {
 	// I don't need every star for the curve.
@@ -365,9 +312,6 @@ void GalaxyWnd::Update()
 	if ((_renderUpdateHint & ruhCREATE_VELOCITY_CURVE) != 0)
 		UpdateVelocityCurve();
 
-	if ((_renderUpdateHint & ruhCREATE_TEXT) != 0)
-		UpdateText();
-
 	_camOrient = { 0, 1, 0 };
 	_camPos = { 0, 0, 5000 };
 	_camLookAt = { 0, 0, 0 };
@@ -425,12 +369,216 @@ void GalaxyWnd::Render()
 
 void GalaxyWnd::RenderUI()
 {
-	// Minimal placeholder panel; the full control panel is built in a later step.
+	// Copyright is drawn independently of the panel so it stays visible even
+	// when the control panel is hidden (F1).
+	ImGui::GetForegroundDrawList()->AddText(
+		ImVec2((float)_width - 155.0f, (float)_height - 22.0f),
+		IM_COL32(200, 200, 200, 200), "(C) 2026 Ingo Berg");
+
 	if (!_showUi)
 		return;
 
-	ImGui::Begin("Galaxy Controls", &_showUi);
-	ImGui::Text("Dear ImGui online. FPS: %d", GetFPS());
+	// Mirror the model into the edit cache whenever the user is not actively
+	// dragging a widget. This keeps the sliders in sync with keyboard-driven
+	// changes while never fighting an in-progress drag of a deferred control.
+	if (!ImGui::IsAnyItemActive())
+	{
+		_ui.radCore   = (int)_galaxy.GetCoreRad();
+		_ui.radGalaxy = (int)_galaxy.GetRad();
+		_ui.exInner   = _galaxy.GetExInner();
+		_ui.exOuter   = _galaxy.GetExOuter();
+		_ui.angOff    = _galaxy.GetAngularOffset();
+		_ui.baseTemp  = _galaxy.GetBaseTemp();
+		_ui.fov       = _fov;
+	}
+
+	ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(400, 640), ImGuiCond_FirstUseEver);
+	if (!ImGui::Begin("Galaxy Controls", &_showUi))
+	{
+		ImGui::End();
+		return;
+	}
+
+	// Reserve room on the right for widget labels so they are not clipped.
+	ImGui::PushItemWidth(-180.0f);
+
+	ImGui::Text("%d FPS", GetFPS());
+	ImGui::SameLine();
+	ImGui::TextDisabled("(F1 toggles this panel)");
+
+	// --- Geometry (heavy edits: applied on release) -----------------------
+	if (ImGui::CollapsingHeader("Geometry", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::SliderInt("Core radius (pc)", &_ui.radCore, 0, _ui.radGalaxy);
+		if (ImGui::IsItemDeactivatedAfterEdit())
+		{
+			_galaxy.SetCoreRad((float)_ui.radCore);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
+		}
+
+		ImGui::SliderInt("Galaxy radius (pc)", &_ui.radGalaxy, 1000, 40000);
+		if (ImGui::IsItemDeactivatedAfterEdit())
+		{
+			_galaxy.SetRad((float)_ui.radGalaxy);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
+		}
+
+		ImGui::SliderFloat("Excentricity inner", &_ui.exInner, 0.0f, 2.0f, "%.2f");
+		if (ImGui::IsItemDeactivatedAfterEdit())
+		{
+			_galaxy.SetExInner(_ui.exInner);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
+		}
+
+		ImGui::SliderFloat("Excentricity outer", &_ui.exOuter, 0.0f, 2.0f, "%.2f");
+		if (ImGui::IsItemDeactivatedAfterEdit())
+		{
+			_galaxy.SetExOuter(_ui.exOuter);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
+		}
+
+		ImGui::SliderFloat("Angular offset (deg/pc)", &_ui.angOff, 0.0f, 0.001f, "%.5f");
+		if (ImGui::IsItemDeactivatedAfterEdit())
+		{
+			_galaxy.SetAngularOffset(_ui.angOff);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
+		}
+
+		// Field of view is cheap (no star rebuild) -> apply immediately.
+		if (ImGui::SliderFloat("Field of view (pc)", &_ui.fov, 1000.0f, 60000.0f, "%.0f", ImGuiSliderFlags_Logarithmic))
+		{
+			_fov = _ui.fov;
+			AdjustCamera();
+			SetCameraOrientation({ 0, 1, 0 });
+			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES;
+		}
+
+		ImGui::Text("Far field radius: %d pc", (int)_galaxy.GetFarFieldRad());
+	}
+
+	// --- Spiral arms (cheap edits) ----------------------------------------
+	if (ImGui::CollapsingHeader("Spiral Arms", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		int pertN = _galaxy.GetPertN();
+		if (ImGui::SliderInt("Perturbations", &pertN, 0, 5))
+		{
+			_galaxy.SetPertN(pertN);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
+		}
+
+		float pertAmp = _galaxy.GetPertAmp();
+		if (ImGui::SliderFloat("Perturbation damping", &pertAmp, 0.0f, 100.0f, "%.1f"))
+		{
+			_galaxy.SetPertAmp(pertAmp);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
+		}
+	}
+
+	// --- Display features (flag toggles + dust size) ----------------------
+	if (ImGui::CollapsingHeader("Display Features", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		auto flagCheckbox = [&](const char* label, DisplayItem item)
+		{
+			bool on = (_flags & (int)item) != 0;
+			if (ImGui::Checkbox(label, &on))
+			{
+				if (on) _flags |= (int)item;
+				else    _flags &= ~(int)item;
+			}
+		};
+
+		flagCheckbox("Stars", DisplayItem::STARS);
+		flagCheckbox("Axis", DisplayItem::AXIS);
+		flagCheckbox("Dust", DisplayItem::DUST);
+		flagCheckbox("H2 regions", DisplayItem::H2);
+		flagCheckbox("Filaments", DisplayItem::FILAMENTS);
+		flagCheckbox("Density waves", DisplayItem::DENSITY_WAVES);
+		flagCheckbox("Velocity curve", DisplayItem::VELOCITY);
+
+		float dustSize = _galaxy.GetDustRenderSize();
+		if (ImGui::SliderFloat("Dust render size (px)", &dustSize, 1.0f, 200.0f, "%.0f"))
+			_galaxy.SetDustRenderSize(dustSize);   // cheap: no rebuild
+	}
+
+	// --- Physics ----------------------------------------------------------
+	if (ImGui::CollapsingHeader("Physics", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::SliderFloat("Base temperature (K)", &_ui.baseTemp, 1000.0f, 10000.0f, "%.0f");
+		if (ImGui::IsItemDeactivatedAfterEdit())
+		{
+			_galaxy.SetBaseTemp(_ui.baseTemp);
+			_renderUpdateHint |= ruhSTARS | ruhDUST;
+		}
+
+		bool darkMatter = _galaxy.HasDarkMatter();
+		if (ImGui::Checkbox("Dark matter", &darkMatter))
+		{
+			_galaxy.ToggleDarkMatter();
+			_renderUpdateHint |= ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
+		}
+	}
+
+	// --- Simulation -------------------------------------------------------
+	if (ImGui::CollapsingHeader("Simulation", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		bool paused = (_flags & (int)DisplayItem::PAUSE) != 0;
+		if (ImGui::Checkbox("Pause", &paused))
+		{
+			if (paused) _flags |= (int)DisplayItem::PAUSE;
+			else        _flags &= ~(int)DisplayItem::PAUSE;
+		}
+	}
+
+	// --- Predefined galaxies ---------------------------------------------
+	if (ImGui::CollapsingHeader("Predefined Galaxies", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		// FoV each preset selects (0 = keep the current field of view).
+		static const float presetFov[9] = { 33960, 46585, 0, 0, 35000, 0, 36982, 41091, 41091 };
+		for (int i = 0; i < (int)_predefinedGalaxies.size() && i < 9; ++i)
+		{
+			char label[16];
+			std::snprintf(label, sizeof(label), "Galaxy %d", i + 1);
+			if (i % 3 != 0)
+				ImGui::SameLine();
+			if (ImGui::Button(label, ImVec2(95, 0)))
+			{
+				_galaxy.Reset(_predefinedGalaxies[i]);
+				if (presetFov[i] > 0.0f)
+				{
+					_fov = presetFov[i];
+					AdjustCamera();
+					SetCameraOrientation({ 0, 1, 0 });
+				}
+				_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE | ruhAXIS;
+			}
+		}
+	}
+
+	// --- Video export -----------------------------------------------------
+	if (ImGui::CollapsingHeader("Video Export", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		const bool recording = _videoRecorder.IsRecording();
+
+		ImGui::BeginDisabled(recording);
+		ImGui::InputInt("Width", &_videoWidth);
+		ImGui::InputInt("Height", &_videoHeight);
+		ImGui::SliderInt("FPS", &_videoFps, 24, 120);
+		ImGui::EndDisabled();
+		if (_videoWidth < 16)  _videoWidth = 16;
+		if (_videoHeight < 16) _videoHeight = 16;
+
+		if (ImGui::Button(recording ? "Stop Recording" : "Start Recording", ImVec2(-1, 0)))
+			ToggleVideoRecording();
+
+		if (recording)
+			ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "REC  %s  (%d frames)",
+				_videoRecorder.GetFilename().c_str(), _videoRecorder.GetFrameCount());
+		else
+			ImGui::TextDisabled("Requires ffmpeg (libx264) in PATH");
+	}
+
+	ImGui::PopItemWidth();
 	ImGui::End();
 }
 
@@ -477,9 +625,6 @@ void GalaxyWnd::RenderScene(glm::mat4& matView, glm::mat4& matProjection, bool o
 
 	if (_flags & (int)DisplayItem::VELOCITY)
 		_vertVelocityCurve.Draw(matView, matProjection);
-
-	if (overlays && (_flags & (int)DisplayItem::HELP))
-		_textHelp.Draw(_width, _height, matView, matProjection);
 }
 
 void GalaxyWnd::ToggleVideoRecording()
@@ -648,7 +793,7 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case  SDLK_F1:
-			_flags ^= (int)DisplayItem::HELP;
+			_showUi = !_showUi;
 			break;
 
 		case SDLK_F2:
@@ -771,9 +916,6 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			}
 			break;
 		} // switch (m_event.key.keysym.sym)
-
-		// Whatever key was pressed, always update the help text
-		_renderUpdateHint |= ruhCREATE_TEXT;
 		break;
 	} // switch (type) -> Mouse or Keys
 }
