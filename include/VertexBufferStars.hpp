@@ -59,12 +59,18 @@ public:
 		glBlendFunc(GL_SRC_ALPHA, _blendFunc);
 		glBlendEquation(_blendEquation);
 		glEnable(GL_PROGRAM_POINT_SIZE);
+		// Enable point sprite coordinate replacement so gl_PointCoord is provided
+		// in the fragment shader. Required on some (e.g. NVIDIA compatibility) GL
+		// contexts, where gl_PointCoord otherwise stays (0,0) and the stars become
+		// invisible (their alpha turns negative under additive blending).
+		glEnable(GL_POINT_SPRITE);
 		OnBeforeDraw();
 
 		glBindVertexArray(GetVertexArrayObject());
 		glDrawElements(GetPrimitiveType(), GetArrayElementCount(), GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
 
+		glDisable(GL_POINT_SPRITE);
 		glDisable(GL_PROGRAM_POINT_SIZE);
 		glDisable(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
