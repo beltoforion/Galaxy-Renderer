@@ -1,5 +1,5 @@
 
-CPPFILES=CumulativeDistributionFunction.cpp Galaxy.cpp GalaxyWnd.cpp Helper.cpp main.cpp SDLWnd.cpp TextBuffer.cpp
+CPPFILES=CumulativeDistributionFunction.cpp Galaxy.cpp GalaxyWnd.cpp Helper.cpp main.cpp SDLWnd.cpp TextBuffer.cpp VideoRecorder.cpp
 OBJFILES=$(CPPFILES:.cpp=.o)
 OUT=galaxy_renderer
 PKG_CONFIG?=pkg-config

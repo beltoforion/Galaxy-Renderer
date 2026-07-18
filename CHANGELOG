@@ -8,6 +8,13 @@ Copyright (C) 2009 - 2020 Ingo Berg
 History:
 --------
 
+Rev 2.0.0 2026-07-18
+--------------------
+Changes:
+   * added video export (MP4/H.264 via ffmpeg): press [F7] to start/stop recording
+   * the video is rendered offscreen at an arbitrary resolution (default 3840x2160 at 60 fps),
+     independent of the window size; use --video-size and --video-fps to change it
+
 Rev 1.9.9 2020-12-15
 --------------------
 Changes:
