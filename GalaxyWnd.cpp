@@ -8,6 +8,10 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_opengl3.h"
+
 #include "Helper.hpp"
 #include "Types.hpp"
 
@@ -51,6 +55,12 @@ void GalaxyWnd::SetVideoOptions(int width, int height, int fps)
 
 GalaxyWnd::~GalaxyWnd()
 {
+	// Shut down Dear ImGui while the GL context is still valid (before the
+	// base SDLWindow destructor calls SDL_Quit).
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
+
 	_videoRecorder.Stop();
 	_vertDensityWaves.Release();
 	_vertAxis.Release();
@@ -76,6 +86,13 @@ void GalaxyWnd::InitGL() noexcept(false)
 	glDisable(GL_DEPTH_TEST);
 	glClearColor(0.0f, .0f, 0.08f, 0.0f);
 	SetCameraOrientation({ 0, 1, 0 });
+
+	// Dear ImGui initialization (context is created by SDLWindow::Init()).
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	ImGui_ImplSDL2_InitForOpenGL(_pSdlWnd, _sdcGlContext);
+	ImGui_ImplOpenGL3_Init("#version 330");
 }
 
 void GalaxyWnd::InitSimulation()
@@ -394,8 +411,27 @@ void GalaxyWnd::Render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	RenderScene(_matView, _matProjection, true);
 
+	// Dear ImGui overlay (window pass only, never in the video framebuffer).
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+	ImGui::NewFrame();
+	RenderUI();
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 	SDL_GL_SwapWindow(_pSdlWnd);
 	SDL_Delay(1);
+}
+
+void GalaxyWnd::RenderUI()
+{
+	// Minimal placeholder panel; the full control panel is built in a later step.
+	if (!_showUi)
+		return;
+
+	ImGui::Begin("Galaxy Controls", &_showUi);
+	ImGui::Text("Dear ImGui online. FPS: %d", GetFPS());
+	ImGui::End();
 }
 
 void GalaxyWnd::RenderScene(glm::mat4& matView, glm::mat4& matProjection, bool overlays)

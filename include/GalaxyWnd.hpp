@@ -102,6 +102,9 @@ private:
 	void UpdateText();
 
 	void RenderScene(glm::mat4& matView, glm::mat4& matProjection, bool overlays);
+	void RenderUI();
 	void ToggleVideoRecording();
+
+	bool _showUi = true;   ///< Visibility of the Dear ImGui control panel (F1)
 };
 

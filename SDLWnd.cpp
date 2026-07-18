@@ -14,6 +14,9 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+
 #include "Helper.hpp"
 
 
@@ -222,12 +225,34 @@ void SDLWindow::OnProcessEvents(Uint32 type)
 
 void SDLWindow::PollEvents()
 {
+	const ImGuiIO& io = ImGui::GetIO();
+
 	while (SDL_PollEvent(&_event))
 	{
+		// Let Dear ImGui see every event first so its widgets can react.
+		ImGui_ImplSDL2_ProcessEvent(&_event);
+
 		switch (_event.type)
 		{
 		case SDL_QUIT:
 			ExitMainLoop();
+			break;
+
+		case SDL_KEYDOWN:
+		case SDL_KEYUP:
+		case SDL_TEXTINPUT:
+			// Suppress galaxy hotkeys while a widget has keyboard focus.
+			if (!io.WantCaptureKeyboard)
+				OnProcessEvents(_event.type);
+			break;
+
+		case SDL_MOUSEBUTTONDOWN:
+		case SDL_MOUSEBUTTONUP:
+		case SDL_MOUSEWHEEL:
+		case SDL_MOUSEMOTION:
+			// Suppress galaxy mouse handling while the pointer is over the UI.
+			if (!io.WantCaptureMouse)
+				OnProcessEvents(_event.type);
 			break;
 
 		default:
