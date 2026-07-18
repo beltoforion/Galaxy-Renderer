@@ -39,6 +39,9 @@
     <ClCompile Include=".\TextBuffer.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include=".\VideoRecorder.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include=".\include\CumulativeDistributionFunction.hpp">
@@ -69,6 +72,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include=".\include\VertexBufferStars.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include=".\include\VideoRecorder.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

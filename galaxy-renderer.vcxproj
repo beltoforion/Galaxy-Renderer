@@ -214,6 +214,7 @@ xcopy /Y $(SolutionDir)assets\consola.ttf $(OutDir)assets</Command>
     <ClCompile Include=".\Helper.cpp" />
     <ClCompile Include=".\SDLWnd.cpp" />
     <ClCompile Include=".\TextBuffer.cpp" />
+    <ClCompile Include=".\VideoRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include=".\include\CumulativeDistributionFunction.hpp" />
@@ -226,6 +227,7 @@ xcopy /Y $(SolutionDir)assets\consola.ttf $(OutDir)assets</Command>
     <ClInclude Include=".\include\VertexBufferBase.hpp" />
     <ClInclude Include=".\include\VertexBufferLines.hpp" />
     <ClInclude Include=".\include\VertexBufferStars.hpp" />
+    <ClInclude Include=".\include\VideoRecorder.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

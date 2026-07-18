@@ -3,7 +3,10 @@
 #include <cmath>
 #include <stdexcept>
 #include <cstddef>
+#include <ctime>
 #include <iostream>
+
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Helper.hpp"
 #include "Types.hpp"
@@ -22,6 +25,10 @@ GalaxyWnd::GalaxyWnd()
 	, _textHelp()
 	, _textAxisLabel()
 	, _textGalaxyLabels()
+	, _videoRecorder()
+	, _videoWidth(3840)
+	, _videoHeight(2160)
+	, _videoFps(60)
 {
 	_predefinedGalaxies.push_back({ 13000, 4000, .0004f, .85f, .95f, 40000, true, 2, 40, 90, 3600 });
 	_predefinedGalaxies.push_back({ 16000, 4000, .0003f, .8f, .85f, 40000, true, 0, 40, 100, 4500 });
@@ -35,8 +42,16 @@ GalaxyWnd::GalaxyWnd()
 }
 
 
+void GalaxyWnd::SetVideoOptions(int width, int height, int fps)
+{
+	_videoWidth = width;
+	_videoHeight = height;
+	_videoFps = fps;
+}
+
 GalaxyWnd::~GalaxyWnd()
 {
+	_videoRecorder.Stop();
 	_vertDensityWaves.Release();
 	_vertAxis.Release();
 	_vertVelocityCurve.Release();
@@ -213,6 +228,7 @@ void GalaxyWnd::UpdateText()
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[F4]  Toggle H2 Regions");
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[F5]  Toggle Filaments");
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[F6]  Toggle Density Waves");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[F7]  Record %dx%d Video: %s", _videoWidth, _videoHeight, _videoRecorder.IsRecording() ? "ON" : "OFF");
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[F10] Exit");
 
 	y += dy1; _textHelp.AddText(1, { x0, y }, "Physics:");
@@ -348,17 +364,52 @@ void GalaxyWnd::Render()
 		++ct;
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	AdjustCamera();
 
+	if (_videoRecorder.IsRecording())
+	{
+		// Render the scene a second time into the offscreen video framebuffer.
+		// Text overlays are omitted; their pixel positions are computed for the
+		// window and the video is meant to show the galaxy only.
+		_videoRecorder.BindFramebuffer();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		double l = _fov / 2.0;
+		double aspect = (double)_videoRecorder.GetWidth() / _videoRecorder.GetHeight();
+		glm::mat4 matProjVideo = glm::ortho(
+			-l * aspect, l * aspect,
+			-l, l,
+			-l, l);
+
+		_vertStars.SetSizeFactor((float)_videoRecorder.GetHeight() / (float)_height);
+		RenderScene(_matView, matProjVideo, false);
+		_vertStars.SetSizeFactor(1.0f);
+
+		_videoRecorder.CaptureFrame();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, _width, _height);
+	}
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	RenderScene(_matView, _matProjection, true);
+
+	SDL_GL_SwapWindow(_pSdlWnd);
+	SDL_Delay(1);
+}
+
+void GalaxyWnd::RenderScene(glm::mat4& matView, glm::mat4& matProjection, bool overlays)
+{
 	if (_flags & (int)DisplayItem::AXIS)
 	{
-		_vertAxis.Draw(_matView, _matProjection);
+		_vertAxis.Draw(matView, matProjection);
 		CHECK_GL_ERROR
 
-		_textAxisLabel.Draw(_width, _height, _matView, _matProjection);
-		CHECK_GL_ERROR
+		if (overlays)
+		{
+			_textAxisLabel.Draw(_width, _height, matView, matProjection);
+			CHECK_GL_ERROR
+		}
 	}
 
 	int features = 0;
@@ -377,23 +428,38 @@ void GalaxyWnd::Render()
 	if (features != 0)
 	{
 		_vertStars.UpdateShaderVariables(_time, _galaxy.GetPertN(), _galaxy.GetPertAmp(), (int)_galaxy.GetDustRenderSize(), features);
-		_vertStars.Draw(_matView, _matProjection);
+		_vertStars.Draw(matView, matProjection);
 	}
 
 	if (_flags & (int)DisplayItem::DENSITY_WAVES)
 	{
-		_vertDensityWaves.Draw(_matView, _matProjection);
-		_textGalaxyLabels.Draw(_width, _height, _matView, _matProjection);
+		_vertDensityWaves.Draw(matView, matProjection);
+
+		if (overlays)
+			_textGalaxyLabels.Draw(_width, _height, matView, matProjection);
 	}
 
 	if (_flags & (int)DisplayItem::VELOCITY)
-		_vertVelocityCurve.Draw(_matView, _matProjection);
+		_vertVelocityCurve.Draw(matView, matProjection);
 
-	if (_flags & (int)DisplayItem::HELP)
-		_textHelp.Draw(_width, _height, _matView, _matProjection);
+	if (overlays && (_flags & (int)DisplayItem::HELP))
+		_textHelp.Draw(_width, _height, matView, matProjection);
+}
 
-	SDL_GL_SwapWindow(_pSdlWnd);
-	SDL_Delay(1);
+void GalaxyWnd::ToggleVideoRecording()
+{
+	if (_videoRecorder.IsRecording())
+	{
+		_videoRecorder.Stop();
+		return;
+	}
+
+	std::time_t now = std::time(nullptr);
+	char timestamp[32];
+	std::strftime(timestamp, sizeof(timestamp), "%Y%m%d-%H%M%S", std::localtime(&now));
+
+	std::string filename = std::string("galaxy-") + timestamp + ".mp4";
+	_videoRecorder.Start(_videoWidth, _videoHeight, _videoFps, filename);
 }
 
 void GalaxyWnd::AddEllipsisVertices(
@@ -567,6 +633,10 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 
 		case SDLK_F6:
 			_flags ^= (int)DisplayItem::DENSITY_WAVES;
+			break;
+
+		case SDLK_F7:
+			ToggleVideoRecording();
 			break;
 
 		case SDLK_F10:

@@ -10,6 +10,7 @@
 #include "VertexBufferLines.hpp"
 #include "VertexBufferStars.hpp"
 #include "TextBuffer.hpp"
+#include "VideoRecorder.hpp"
 
 
 /** \brief Main window of th n-body simulation. */
@@ -19,6 +20,8 @@ public:
 
 	GalaxyWnd();
 	~GalaxyWnd();
+
+	void SetVideoOptions(int width, int height, int fps);
 
 protected:
 	virtual void Render() override;
@@ -71,6 +74,11 @@ private:
 	TextBuffer _textAxisLabel;
 	TextBuffer _textGalaxyLabels;
 
+	VideoRecorder _videoRecorder;
+	int _videoWidth;
+	int _videoHeight;
+	int _videoFps;
+
 	std::vector<Galaxy::GalaxyParam> _predefinedGalaxies;
 
 	static const float TimeStepSize;
@@ -92,5 +100,8 @@ private:
 	void UpdateStars();
 	void UpdateVelocityCurve();
 	void UpdateText();
+
+	void RenderScene(glm::mat4& matView, glm::mat4& matProjection, bool overlays);
+	void ToggleVideoRecording();
 };
 

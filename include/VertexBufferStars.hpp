@@ -19,6 +19,7 @@ public:
 		, _time(0)
 		, _blendFunc(blendFunc)
 		, _blendEquation(blendEquation)
+		, _sizeFactor(1)
 	{
 		DefineAttributes({
 			{ attTheta0,        1, GL_FLOAT, offsetof(Star, theta0) },
@@ -40,6 +41,14 @@ public:
 		_time = time;
 		_dustSize = dustSize;
 		_displayFeatures = displayFeatures;
+	}
+
+	/// Scales all point sizes. Needed to keep the relative sizes of stars and
+	/// dust intact when rendering into an offscreen buffer with a resolution
+	/// different from the window (i.e. when recording video).
+	void SetSizeFactor(float sizeFactor)
+	{
+		_sizeFactor = sizeFactor;
 	}
 
 	virtual void Draw(glm::mat4& matView, glm::mat4& matProjection)
@@ -94,6 +103,7 @@ protected:
 			"uniform int displayFeatures;\n"
 			"uniform float pertAmp;\n"
 			"uniform float time;\n"
+			"uniform float sizeFactor;\n"
 //			"uniform float DEG_TO_RAD = 0.01745329251;\n"
 			"\n"
 			"layout(location = 0) in float theta0;\n"
@@ -155,7 +165,7 @@ protected:
 			"	    vertexColor = vec4(1,1,1,1);\n"
 			"   }\n"
 			"	gl_Position =  projMat * vec4(ps, 0, 1);\n"
-			"   gl_PointSize = max(gl_PointSize, 0.0);\n"
+			"   gl_PointSize = max(gl_PointSize * sizeFactor, 0.0);\n"
 			"	vertexType = type;\n"
 			"	features = displayFeatures;\n"
 			"}\n";
@@ -221,6 +231,9 @@ protected:
 
 		GLuint varDisplayFeatures = glGetUniformLocation(GetShaderProgramm(), "displayFeatures");
 		glUniform1i(varDisplayFeatures, _displayFeatures);
+
+		GLuint varSizeFactor = glGetUniformLocation(GetShaderProgramm(), "sizeFactor");
+		glUniform1f(varSizeFactor, _sizeFactor);
 	}
 
 
@@ -247,4 +260,5 @@ private:
 	GLuint _blendFunc;
 	GLuint _blendEquation;
 	int _displayFeatures;
+	float _sizeFactor;
 };

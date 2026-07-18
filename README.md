@@ -29,6 +29,32 @@ Hers is a list of galaxies created by the algorithm:
 
 -----------
 
+## Video Export
+
+The renderer can export its animation as an H.264 encoded MP4 video. The video is rendered into an 
+offscreen framebuffer whose resolution is independent of the window size, so you can record 4K 
+(or higher) footage on a normal desktop. The raw frames are piped to [ffmpeg](https://ffmpeg.org) 
+for encoding, so ffmpeg must be installed and available in the search path.
+
+* Press **[F7]** to start and stop the recording. The video is written to a file named 
+  `galaxy-YYYYMMDD-HHMMSS.mp4` in the current working directory.
+* The default video resolution is 3840x2160 (4K UHD) at 60 fps. It can be changed on the command line:
+
+```
+./galaxy_renderer --video-size 1920x1080 --video-fps 30
+```
+
+Notes:
+
+* One simulation step is recorded per video frame, so the exported video plays back the evolution 
+  of the galaxy at a fixed rate independent of how fast your machine renders.
+* Text overlays (help screen, axis labels) are not part of the video; use [F2]/[F6] etc. to choose 
+  which visual elements (axis, density waves, dust, ...) are included.
+* Recording 4K footage is demanding. If recording is slow, this only affects the time it takes to 
+  record - the resulting video always plays back smoothly at the selected frame rate.
+
+-----------
+
 For old system or GPU unsupported OpenGL 3.3 use overload MESA version for running application.
 In Linux.
 ```
