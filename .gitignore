@@ -19,3 +19,15 @@ vsproject/.nuget/*
 .vs/*
 packages/*
 x64/*
+*.o
+
+# CMake
+/build/
+/CMakeCache.txt
+/CMakeFiles/
+cmake_install.cmake
+cmake-install*
+
+# Runtime artifacts
+/galaxy_renderer
+galaxy-*.mp4
