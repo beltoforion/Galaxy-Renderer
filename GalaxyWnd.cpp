@@ -240,7 +240,7 @@ void GalaxyWnd::UpdateText()
 	y += dy1; _textHelp.AddText(2, { x0, y }, "[KP1] - [KP8] Predefined Galaxies");
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[Pause],[Space]       Halt simulation");
 
-	_textHelp.AddText(1, { (float)_width - 180, (float)_height - 30 }, " (C) 2020 Ingo Berg");
+	_textHelp.AddText(1, { (float)_width - 180, (float)_height - 30 }, " (C) 2026 Ingo Berg");
 	_textHelp.EndUpdate();
 
 	_renderUpdateHint &= ~ruhCREATE_TEXT;
