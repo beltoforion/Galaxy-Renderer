@@ -88,18 +88,20 @@ public:
 		glBlendEquation(_blendEquation);
 		glEnable(GL_PROGRAM_POINT_SIZE);
 		// Enable point sprite coordinate replacement so gl_PointCoord is provided
-		// in the fragment shader. Required on some (e.g. NVIDIA compatibility) GL
-		// contexts, where gl_PointCoord otherwise stays (0,0) and the stars become
-		// invisible (their alpha turns negative under additive blending).
-		// GL_POINT_SPRITE only exists in compatibility profiles; core profiles
-		// always provide gl_PointCoord and reject the enum with GL_INVALID_ENUM
-		// (strict drivers, e.g. via Wine/Windows, then kill the renderer).
-		static const bool isCompatProfile = []() {
-			GLint mask = 0;
-			glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
-			return (mask & GL_CONTEXT_COMPATIBILITY_PROFILE_BIT) != 0;
+		// in the fragment shader. Officially GL_POINT_SPRITE does not exist in
+		// core profiles (coord replacement is always on there), but some drivers
+		// (e.g. NVIDIA on Linux) still require the enable even on core contexts -
+		// without it gl_PointCoord stays (0,0) and the stars become invisible
+		// (their alpha turns negative under additive blending). Strict drivers
+		// (e.g. WGL under Wine/Windows) instead reject the enum with
+		// GL_INVALID_ENUM, which CHECK_GL_ERROR would escalate to a fatal error.
+		// So probe once: try the enable and remember whether the driver takes it.
+		static const bool usePointSprite = []() {
+			while (glGetError() != GL_NO_ERROR) {}  // drain pending errors
+			glEnable(GL_POINT_SPRITE);
+			return glGetError() == GL_NO_ERROR;
 		}();
-		if (isCompatProfile)
+		if (usePointSprite)
 			glEnable(GL_POINT_SPRITE);
 		OnBeforeDraw();
 
@@ -107,7 +109,7 @@ public:
 		glDrawElements(GetPrimitiveType(), GetArrayElementCount(), GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
 
-		if (isCompatProfile)
+		if (usePointSprite)
 			glDisable(GL_POINT_SPRITE);
 		glDisable(GL_PROGRAM_POINT_SIZE);
 		glDisable(GL_BLEND);

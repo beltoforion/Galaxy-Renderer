@@ -153,7 +153,7 @@ void GalaxyWnd::ApplyPreset(int idx)
 		SetCameraOrientation({ 0, 1, 0 });
 	}
 	if (preset.h2SizeMax > 0)
-		_h2SizeMax = preset.h2SizeMax;
+		_h2SizeMax = std::min(preset.h2SizeMax, 200.0f);
 	if (preset.h2Threshold > 0)
 		_h2Threshold = preset.h2Threshold;
 	_flags = (_flags & ~preset.displayMask) | (preset.displayFlags & preset.displayMask);
@@ -592,6 +592,12 @@ void GalaxyWnd::RenderUI()
 		return;
 	}
 
+#ifndef GALAXY_VERSION
+#define GALAXY_VERSION "unknown"
+#endif
+	ImGui::TextDisabled("Version " GALAXY_VERSION);
+	ImGui::Spacing();
+
 	// Fixed widget width so the auto-resized window has a deterministic size
 	// and the labels to the right are never clipped.
 	ImGui::PushItemWidth(150.0f);
@@ -729,8 +735,10 @@ void GalaxyWnd::RenderUI()
 			_galaxy.SetDustRenderSize(dustSize);   // cheap: no rebuild
 
 		// Pure shader parameters of the H2 orbit-crowding model: no rebuild.
-		ImGui::SliderFloat("H2 max size (px)", &_h2SizeMax, 10.0f, 300.0f, "%.0f");
-		ImGui::SliderFloat("H2 ignition threshold", &_h2Threshold, 1.0f, 3.0f, "%.2f");
+		ImGui::SliderFloat("H2 max size (px)", &_h2SizeMax, 10.0f, 200.0f, "%.0f");
+		// Values below 1 ignite regions away from the wave crest (rho ~ 1 is the
+		// undisturbed wave spacing), widening the H2 band beyond the density maximum.
+		ImGui::SliderFloat("H2 ignition threshold", &_h2Threshold, 0.5f, 3.0f, "%.2f");
 		endSection();
 	}
 

@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
+# The version is shown in the UI below the control panel title; it is bumped
+# with every source change (patch level for fixes/tweaks, minor for features).
 project(galaxy_renderer
-    VERSION 1.2.0
+    VERSION 2.0.2
     DESCRIPTION "Spiral galaxy renderer based on the density wave theory (Dear ImGui UI)"
     LANGUAGES CXX)
 
@@ -90,6 +92,9 @@ add_executable(galaxy_renderer
 
 target_include_directories(galaxy_renderer PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+target_compile_definitions(galaxy_renderer PRIVATE
+    GALAXY_VERSION="${PROJECT_VERSION}")
 
 # SDL2main on platforms that need it (Windows): SDL.h renames main() to
 # SDL_main, and SDL2main supplies the real entry point that calls it. It is a
