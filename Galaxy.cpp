@@ -67,10 +67,31 @@ void Galaxy::ToggleDarkMatter()
 	InitStarsAndDust();
 }
 
+/** \brief Draws a random vertical oscillation amplitude from a sech^2 profile.
+
+	The time averaged vertical density of a population of stars oscillating
+	harmonically with amplitudes drawn this way approximates the sech^2(z/h)
+	profile observed in galactic discs (Spitzer 1942; van der Kruit & Searle 1981).
+	\param scaleHeight Scale height h of the population in parsec
+*/
+static float SampleVerticalAmplitude(float scaleHeight)
+{
+	// Inverse of the half-sech^2 CDF: z = h * atanh(u); clamp u to avoid the
+	// divergence of atanh for u -> 1 (limits amplitudes to about 3 h).
+	float u = std::min(0.995f, Helper::rnum());
+	return scaleHeight * std::atanh(u);
+}
+
 void Galaxy::InitStarsAndDust()
 {
 	_stars = std::vector<Star>();
 	_stars.reserve(_numStars);
+
+	// Scale heights of the different particle populations. Stars form a
+	// comparatively thick disc, dust and H2 regions concentrate in a thin disc.
+	// (Milky Way: thin disc ~300 pc, thick disc ~1000 pc, dust ~100 pc)
+	const float heightStarDisc = _radGalaxy / 25.0f;
+	const float heightDust = _radGalaxy / 80.0f;
 
 	//
 	// 1.) Initialize the stars
@@ -98,6 +119,15 @@ void Galaxy::InitStarsAndDust()
 		star.temp = 6000 + (4000 * Helper::rnum() - 2000);
 		star.mag = 0.1f + 0.4f * Helper::rnum();
 		star.type = 0;
+
+		// Stars close to the core belong to the bulge and get a larger
+		// vertical extent than the disc population further out.
+		float scaleHeight = heightStarDisc;
+		if (_radCore > 0)
+			scaleHeight *= 1.0f + 3.0f * std::exp(-2.0f * rad / _radCore);
+
+		star.zAmp = SampleVerticalAmplitude(scaleHeight);
+		star.zPhase = 360.0f * Helper::rnum();
 
 		// Make a small portion of the stars brighter
 		if (i < _numStars / 60)
@@ -139,6 +169,8 @@ void Galaxy::InitStarsAndDust()
 		// the following temperature distribution (no science here it just looks right)
 		dustParticle.temp = _baseTemp + rad / 4.5f;
 		dustParticle.mag = 0.02f + 0.15f * Helper::rnum();
+		dustParticle.zAmp = SampleVerticalAmplitude(heightDust);
+		dustParticle.zPhase = 360.0f * Helper::rnum();
 		_stars.push_back(dustParticle);
 	}
 
@@ -160,6 +192,11 @@ void Galaxy::InitStarsAndDust()
 		auto b = rad * GetExcentricity(rad);
 		auto num = (int)(100 * Helper::rnum());
 		auto temp = _baseTemp + rad / 4.5f - 2000;
+
+		// All particles of a filament share similar vertical parameters so
+		// the filament stays coherent instead of being scattered in z.
+		auto zAmpFilament = SampleVerticalAmplitude(heightDust);
+		auto zPhaseFilament = 360.0f * Helper::rnum();
 		for (int i = 0; i < num; ++i)
 		{
 			rad = rad + 200 - 400 * Helper::rnum();
@@ -169,6 +206,8 @@ void Galaxy::InitStarsAndDust()
 			dustParticle.tiltAngle = GetAngularOffset(rad);
 			dustParticle.theta0 = theta + 10 - 20 * Helper::rnum();
 			dustParticle.velTheta = GetOrbitalVelocity((dustParticle.a + dustParticle.b) / 2.0f);
+			dustParticle.zAmp = zAmpFilament + heightDust * 0.1f * Helper::rnum();
+			dustParticle.zPhase = zPhaseFilament + 10 - 20 * Helper::rnum();
 
 			// I want the outer parts to appear blue, the inner parts yellow. I'm imposing
 			// the following temperature distribution (no science here it just looks right)
@@ -198,6 +237,8 @@ void Galaxy::InitStarsAndDust()
 		particleH2.temp = 6000 + (6000 * Helper::rnum()) - 3000;
 		particleH2.mag = 0.1f + 0.05f * Helper::rnum();
 		particleH2.type = 3;
+		particleH2.zAmp = SampleVerticalAmplitude(heightDust);
+		particleH2.zPhase = 360.0f * Helper::rnum();
 
 		_stars.push_back(particleH2);
 

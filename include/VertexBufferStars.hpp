@@ -29,7 +29,9 @@ public:
 			{ attTemperature,   1, GL_FLOAT, offsetof(Star, temp) },
 			{ attMagnitude,     1, GL_FLOAT, offsetof(Star, mag) },
 			{ attType,          1, GL_INT, offsetof(Star, type) },
-			{ attColor,         4, GL_FLOAT, offsetof(VertexStar, col) }
+			{ attColor,         4, GL_FLOAT, offsetof(VertexStar, col) },
+			{ attZAmp,          1, GL_FLOAT, offsetof(Star, zAmp) },
+			{ attZPhase,        1, GL_FLOAT, offsetof(Star, zPhase) }
 		});
 	}
 
@@ -105,12 +107,14 @@ protected:
 			"layout(location = 6) in float mag;\n"
 			"layout(location = 7) in int type;\n"
 			"layout(location = 8) in vec4 color;\n"
+			"layout(location = 9) in float zAmp;\n"
+			"layout(location = 10) in float zPhase;\n"
 			"\n"
 			"out vec4 vertexColor;\n"
 			"flat out int vertexType;\n"
 			"flat out int features;\n"
 			"\n"
-			"vec2 calcPos(float a, float b, float theta, float velTheta, float time, float tiltAngle) {\n"
+			"vec3 calcPos(float a, float b, float theta, float velTheta, float time, float tiltAngle) {\n"
 			"	float thetaActual = theta + velTheta * time;\n"
 			"	float beta = -tiltAngle;\n"
 			"	float alpha = thetaActual * DEG_TO_RAD;\n"
@@ -118,19 +122,22 @@ protected:
 			"	float sinalpha = sin(alpha);\n"
 			"	float cosbeta = cos(beta);\n"
 			"	float sinbeta = sin(beta);\n"
-			"	vec2 center = vec2(0,0);\n"	
+			"	vec2 center = vec2(0,0);\n"
 			"	vec2 ps = vec2(center.x + (a * cosalpha * cosbeta - b * sinalpha * sinbeta),\n"
 			"			       center.y + (a * cosalpha * sinbeta + b * sinalpha * cosbeta));\n"
 			"	if (pertAmp > 0.0 && pertN > 0) {\n"
 			"		ps.x += (a / pertAmp) * sin(alpha * 2.0 * pertN);\n"
 			"		ps.y += (a / pertAmp) * cos(alpha * 2.0 * pertN);\n"
 			"	}\n"
-			"	return ps;\n"
+			"	// Vertical epicyclic oscillation. The vertical frequency of disc\n"
+			"	// stars is roughly twice the orbital frequency, hence 2 * alpha.\n"
+			"	float z = zAmp * sin(2.0 * alpha + zPhase * DEG_TO_RAD);\n"
+			"	return vec3(ps, z);\n"
 			"}\n"
 			"\n"
 			"void main()\n"
 			"{\n"
-			"	vec2 ps = calcPos(a, b, theta0, velTheta, time, tiltAngle);"	
+			"	vec3 ps = calcPos(a, b, theta0, velTheta, time, tiltAngle);"
 			"\n"
 			"	if (type==0) {\n"
 			"		gl_PointSize = mag * 4.0;\n"
@@ -142,19 +149,19 @@ protected:
 			"		gl_PointSize = mag * 2.0 * float(dustSize);\n"
 			"	    vertexColor = color * mag;\n"
 			"	} else if (type==3) {\n"
-			"		vec2 ps2 = calcPos(a + 1000.0, b, theta0, velTheta, time, tiltAngle);\n"
-			"		float dst = distance(ps, ps2);\n"
+			"		vec3 ps2 = calcPos(a + 1000.0, b, theta0, velTheta, time, tiltAngle);\n"
+			"		float dst = distance(ps.xy, ps2.xy);\n"
 			"		float size = ((1000.0 - dst) / 10) - 50;\n"
 			"		gl_PointSize = size;\n"
 			"	    vertexColor = color * mag * vec4(2, 0.5, 0.5, 1);\n"
 			"	} else if (type==4) {\n"
-			"		vec2 ps2 = calcPos(a + 1000.0, b, theta0, velTheta, time, tiltAngle);\n"
-			"		float dst = distance(ps, ps2);\n"
+			"		vec3 ps2 = calcPos(a + 1000.0, b, theta0, velTheta, time, tiltAngle);\n"
+			"		float dst = distance(ps.xy, ps2.xy);\n"
 			"		float size = ((1000.0 - dst) / 10.0) - 50.0;\n"
 			"		gl_PointSize = size/10.0;\n"
 			"	    vertexColor = vec4(1,1,1,1);\n"
 			"   }\n"
-			"	gl_Position =  projMat * vec4(ps, 0, 1);\n"
+			"	gl_Position =  projMat * viewMat * vec4(ps, 1);\n"
 			"   gl_PointSize = max(gl_PointSize, 0.0);\n"
 			"	vertexType = type;\n"
 			"	features = displayFeatures;\n"
@@ -236,7 +243,9 @@ private:
 		attTemperature,
 		attMagnitude,
 		attType,
-		attColor
+		attColor,
+		attZAmp,
+		attZPhase
 	};
 
 	// parameters for density wave computation

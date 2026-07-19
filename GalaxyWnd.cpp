@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <iostream>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "Helper.hpp"
 #include "Types.hpp"
 
@@ -12,6 +14,9 @@ const float GalaxyWnd::TimeStepSize = 100000.0f;
 
 GalaxyWnd::GalaxyWnd()
 	: SDLWindow()
+	, _time(0)
+	, _camAzimuth(0)
+	, _camInclination(0)
 	, _flags((int)DisplayItem::STARS | (int)DisplayItem::AXIS | (int)DisplayItem::HELP | (int)DisplayItem::DUST | (int)DisplayItem::H2 | (int)DisplayItem::FILAMENTS)
 	, _galaxy()
 	, _renderUpdateHint(ruhDENSITY_WAVES | ruhAXIS | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE | ruhCREATE_TEXT)
@@ -205,6 +210,11 @@ void GalaxyWnd::UpdateText()
 	y += dy1; _textHelp.AddText(2, { x0, y }, "[Home],[End]    Num pert:  %d", _galaxy.GetPertN());
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[PG_UP],[PG_DN] pertDamp:  %1.2f", _galaxy.GetPertAmp());
 
+	y += dy1; _textHelp.AddText(1, { x0, y }, "Camera:");
+	y += dy1; _textHelp.AddText(2, { x0, y }, "[Arrows], Mouse Drag  Rotate view (az %2.0f, incl %2.0f)", _camAzimuth, _camInclination);
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[Mouse Wheel]         Zoom");
+	y += dy2; _textHelp.AddText(2, { x0, y }, "[c]                   Reset to top down view");
+
 	y += dy1; _textHelp.AddText(1, { x0, y }, "Display Features:");
 	y += dy1; _textHelp.AddText(2, { x0, y }, "[b],[n]  Dust render size:  %2.2lf", _galaxy.GetDustRenderSize());
 	y += dy2; _textHelp.AddText(2, { x0, y }, "[F1]  Help Screen");
@@ -320,6 +330,20 @@ void GalaxyWnd::Update()
 	if (!(_flags & (int)DisplayItem::PAUSE))
 		_time += GalaxyWnd::TimeStepSize;
 
+	// Orbit the camera around the galaxy center. Position and up vector are
+	// the top down defaults rotated by inclination (around x) and azimuth
+	// (around the galactic axis z).
+	glm::mat4 camRot =
+		glm::rotate(glm::mat4(1.0f), _camAzimuth * Helper::DEG_TO_RAD, glm::vec3(0, 0, 1)) *
+		glm::rotate(glm::mat4(1.0f), _camInclination * Helper::DEG_TO_RAD, glm::vec3(1, 0, 0));
+	_camPos = glm::vec3(camRot * glm::vec4(0, 0, 5000, 1));
+	_camOrient = glm::vec3(camRot * glm::vec4(0, 1, 0, 0));
+	_camLookAt = { 0, 0, 0 };
+
+	// The view matrix must be up to date before labels are positioned
+	// via GetWindowPos in the Update* functions below.
+	AdjustCamera();
+
 	if ((_renderUpdateHint & ruhDENSITY_WAVES) != 0)
 		UpdateDensityWaves();
 
@@ -334,10 +358,6 @@ void GalaxyWnd::Update()
 
 	if ((_renderUpdateHint & ruhCREATE_TEXT) != 0)
 		UpdateText();
-
-	_camOrient = { 0, 1, 0 };
-	_camPos = { 0, 0, 5000 };
-	_camLookAt = { 0, 0, 0 };
 }
 
 void GalaxyWnd::Render()
@@ -387,7 +407,12 @@ void GalaxyWnd::Render()
 	}
 
 	if (_flags & (int)DisplayItem::VELOCITY)
-		_vertVelocityCurve.Draw(_matView, _matProjection);
+	{
+		// The velocity curve is a diagnostic overlay, it is not rotated
+		// with the galaxy but always drawn parallel to the screen.
+		glm::mat4 matViewIdentity(1);
+		_vertVelocityCurve.Draw(matViewIdentity, _matProjection);
+	}
 
 	if (_flags & (int)DisplayItem::HELP)
 		_textHelp.Draw(_width, _height, _matView, _matProjection);
@@ -449,9 +474,54 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 	case SDL_MOUSEBUTTONDOWN:
 		break;
 
+	case SDL_MOUSEMOTION:
+		// Dragging with the left mouse button orbits the camera around the galaxy.
+		if (_event.motion.state & SDL_BUTTON_LMASK)
+		{
+			_camAzimuth += _event.motion.xrel * 0.4f;
+			_camInclination = std::min(90.0f, std::max(-90.0f, _camInclination + _event.motion.yrel * 0.4f));
+			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES | ruhCREATE_TEXT;  // reposition the labels
+		}
+		break;
+
+	case SDL_MOUSEWHEEL:
+		if (_event.wheel.y != 0)
+		{
+			ScaleAxis(_event.wheel.y > 0 ? 0.9f : 1.1f);
+			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES | ruhCREATE_TEXT;
+		}
+		break;
+
 	case SDL_KEYDOWN:
 		switch (_event.key.keysym.sym)
 		{
+		case SDLK_UP:
+			_camInclination = std::min(90.0f, _camInclination + 5);
+			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES;
+			break;
+
+		case SDLK_DOWN:
+			_camInclination = std::max(-90.0f, _camInclination - 5);
+			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES;
+			break;
+
+		case SDLK_LEFT:
+			_camAzimuth -= 5;
+			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES;
+			break;
+
+		case SDLK_RIGHT:
+			_camAzimuth += 5;
+			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES;
+			break;
+
+		case SDLK_c:
+			// Reset the camera to the classic top down view
+			_camAzimuth = 0;
+			_camInclination = 0;
+			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES;
+			break;
+
 		case SDLK_END:
 			_galaxy.SetPertN(std::max(_galaxy.GetPertN() - 1, 0));
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;

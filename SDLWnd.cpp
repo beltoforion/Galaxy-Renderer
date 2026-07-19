@@ -20,9 +20,8 @@
 glm::vec2 SDLWindow::GetWindowPos(GLfloat x, GLfloat y, GLfloat z)
 {
 	glm::vec3 pos = glm::vec3(x, y, z);
-	glm::mat4 matModel = glm::mat4(1.0);
 	glm::vec4 viewPort = glm::vec4(0.0f, 0.0f, (float)_width, (float)_height);
-	glm::vec3 projected = glm::project(pos, matModel, _matProjection, viewPort);
+	glm::vec3 projected = glm::project(pos, _matView, _matProjection, viewPort);
 	return glm::vec2(projected.x, projected.y);
 }
 
@@ -147,10 +146,12 @@ void SDLWindow::AdjustCamera()
 	double aspect = (double)_width / _height;
 
 	// new mvp matrices for glsl shaders via glm:
+	// Near/far planes are kept wide so the galaxy is not clipped when the
+	// camera is rotated out of the galactic plane while zoomed in.
 	_matProjection = glm::ortho(
-		-l * aspect, l * aspect, 
-		-l, l, 
-		-l, l);
+		-l * aspect, l * aspect,
+		-l, l,
+		-400000.0, 400000.0);
 	
 	glm::dvec3 camPos(_camPos.x, _camPos.y, _camPos.z);
 	glm::dvec3 camLookAt(_camLookAt.x, _camLookAt.y, _camLookAt.z);

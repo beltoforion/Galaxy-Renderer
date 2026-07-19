@@ -57,6 +57,8 @@ private:
 	};
 
 	float _time;
+	float _camAzimuth;		///< Rotation of the camera around the galactic axis in degree
+	float _camInclination;	///< Tilt of the camera against the galactic plane in degree (0 = face on)
 	uint32_t _flags;	///< The display flags
 	Galaxy _galaxy;
 

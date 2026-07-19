@@ -20,5 +20,7 @@ struct Star
 	float b;          // große halbachse
 	float temp;       // star temperature
 	float mag;        // brightness;
-	int32_t type;	  // Type 0:star, 1:dust, 2 and 3: h2 regions	
+	int32_t type;	  // Type 0:star, 1:dust, 2 and 3: h2 regions
+	float zAmp;       // amplitude of the vertical (epicyclic) oscillation
+	float zPhase;     // phase of the vertical oscillation in degree
 };

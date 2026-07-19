@@ -38,7 +38,7 @@ protected:
 			"out vec4 vertexColor;\n"
 			"void main()\n"
 			"{\n"
-			"	gl_Position =  projMat * vec4(position, 1);\n"
+			"	gl_Position =  projMat * viewMat * vec4(position, 1);\n"
 			"	vertexColor = color;\n"
 			"	gl_PointSize = 3;\n"	// point size is only used for the velocity curve
 			"}\n";
