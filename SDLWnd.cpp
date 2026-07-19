@@ -90,7 +90,7 @@ void SDLWindow::Init(int width, int height, float axisLen, const std::string& ca
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		width, height,
-		SDL_WINDOW_OPENGL);
+		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	if (!_pSdlWnd)
 		throw std::runtime_error(SDL_GetError());
@@ -236,6 +236,17 @@ void SDLWindow::PollEvents()
 		{
 		case SDL_QUIT:
 			ExitMainLoop();
+			break;
+
+		case SDL_WINDOWEVENT:
+			if (_event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+			{
+				_width = _event.window.data1;
+				_height = _event.window.data2;
+				glViewport(0, 0, _width, _height);
+				AdjustCamera();
+			}
+			OnProcessEvents(_event.type);
 			break;
 
 		case SDL_KEYDOWN:
