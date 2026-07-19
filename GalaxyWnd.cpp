@@ -98,6 +98,9 @@ void GalaxyWnd::LoadPresets()
 				else if (key == "fov")            preset.fov = val;
 				else if (key == "h2SizeMax")      preset.h2SizeMax = val;
 				else if (key == "h2Threshold")    preset.h2Threshold = val;
+				else if (key == "hasBar")         p.hasBar = val != 0;
+				else if (key == "barRadius")      p.barRadius = val;
+				else if (key == "barEx")          p.barEx = val;
 				else if (key == "showStars")         displayFlag(DisplayItem::STARS);
 				else if (key == "showAxis")          displayFlag(DisplayItem::AXIS);
 				else if (key == "showDust")          displayFlag(DisplayItem::DUST);
@@ -202,6 +205,9 @@ bool GalaxyWnd::SavePreset(const std::string& name)
 	file << "fov=" << _fov << "\n";
 	file << "h2SizeMax=" << _h2SizeMax << "\n";
 	file << "h2Threshold=" << _h2Threshold << "\n";
+	file << "hasBar=" << (_galaxy.HasBar() ? 1 : 0) << "\n";
+	file << "barRadius=" << _galaxy.GetBarRadius() << "\n";
+	file << "barEx=" << _galaxy.GetBarEx() << "\n";
 	file << "showStars=" << ((_flags & (uint32_t)DisplayItem::STARS) ? 1 : 0) << "\n";
 	file << "showAxis=" << ((_flags & (uint32_t)DisplayItem::AXIS) ? 1 : 0) << "\n";
 	file << "showDust=" << ((_flags & (uint32_t)DisplayItem::DUST) ? 1 : 0) << "\n";
@@ -577,6 +583,9 @@ void GalaxyWnd::RenderUI()
 		_ui.numStars  = _galaxy.GetNumStars();
 		_ui.numDust   = _galaxy.GetNumDust();
 		_ui.numH2     = _galaxy.GetNumH2();
+		_ui.hasBar    = _galaxy.HasBar();
+		_ui.barRadius = (int)_galaxy.GetBarRadius();
+		_ui.barEx     = _galaxy.GetBarEx();
 	}
 
 	// Let the panel auto-size to its content so it never shows a vertical
@@ -706,6 +715,35 @@ void GalaxyWnd::RenderUI()
 			_galaxy.SetPertAmp(pertAmp);
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 		}
+		endSection();
+	}
+
+	// --- Central bar (rebuilds the population) ------------------------------
+	if (beginSection("Central Bar", ImVec4(0.45f, 0.28f, 0.40f, 1.0f)))
+	{
+		if (ImGui::Checkbox("Bar", &_ui.hasBar))
+		{
+			_galaxy.SetBarEnabled(_ui.hasBar);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(
+				"Aligns the inner orbits into a central bar; the spiral\n"
+				"arms peel off at the bar ends. H2 regions and young\n"
+				"stars are suppressed inside the bar body.");
+
+		ImGui::BeginDisabled(!_ui.hasBar);
+		if (ImGui::SliderInt("Bar radius (pc)", &_ui.barRadius, 500, std::max(_ui.radCore, 500)))
+		{
+			_galaxy.SetBarRadius((float)_ui.barRadius);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
+		}
+		if (ImGui::SliderFloat("Bar axis ratio", &_ui.barEx, 0.2f, 0.9f, "%.2f"))
+		{
+			_galaxy.SetBarEx(_ui.barEx);
+			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
+		}
+		ImGui::EndDisabled();
 		endSection();
 	}
 
@@ -938,7 +976,9 @@ void GalaxyWnd::RenderScene(glm::mat4& matView, glm::mat4& matProjection, bool o
 			_galaxy.GetExOuter(),
 			_galaxy.GetAngularOffset(),
 			_h2SizeMax,
-			_h2Threshold });
+			_h2Threshold,
+			_galaxy.HasBar() ? _galaxy.GetBarRadius() : 0.0f,
+			_galaxy.GetBarEx() });
 		_vertStars.Draw(matView, matProjection);
 	}
 

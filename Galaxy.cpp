@@ -32,6 +32,9 @@ Galaxy::Galaxy(
 	, _pertAmp(0)
 	, _hasDarkMatter(true)
 	, _baseTemp(4000)
+	, _hasBar(false)
+	, _barRadius(3000.0f)
+	, _barEx(0.55f)
 	, _stars()
 	, _dustRenderSize(70)
 {}
@@ -56,6 +59,9 @@ void Galaxy::Reset(GalaxyParam param)
 	_hasDarkMatter = param.hasDarkMatter;
 	_pertN = param.pertN;
 	_pertAmp = param.pertAmp;
+	_hasBar = param.hasBar;
+	_barRadius = std::min(param.barRadius, _radCore);
+	_barEx = param.barEx;
 	_seed = (unsigned int)std::rand();
 
 	InitStarsAndDust();
@@ -215,6 +221,39 @@ void Galaxy::InitStarsAndDust()
 	}
 }
 
+bool Galaxy::HasBar() const noexcept
+{
+	return _hasBar;
+}
+
+float Galaxy::GetBarRadius() const noexcept
+{
+	return _barRadius;
+}
+
+float Galaxy::GetBarEx() const noexcept
+{
+	return _barEx;
+}
+
+void Galaxy::SetBarEnabled(bool on)
+{
+	_hasBar = on;
+	InitStarsAndDust();
+}
+
+void Galaxy::SetBarRadius(float rad)
+{
+	_barRadius = std::clamp(rad, 100.0f, _radCore);
+	InitStarsAndDust();
+}
+
+void Galaxy::SetBarEx(float ex)
+{
+	_barEx = std::clamp(ex, 0.1f, 1.0f);
+	InitStarsAndDust();
+}
+
 float Galaxy::GetBaseTemp() const noexcept
 {
 	return _baseTemp;
@@ -286,8 +325,19 @@ float Galaxy::GetOrbitalVelocity(float rad) const
 
 float Galaxy::GetExcentricity(float r) const
 {
+	// NOTE: the star shader mirrors this profile in GLSL (VertexBufferStars,
+	// excentricity()); both must be changed in lockstep.
 	if (r < _radCore)
 	{
+		if (_hasBar && _barRadius > 0)
+		{
+			// Barred core: strongly elongated orbits out to the bar end,
+			// then blending back into the regular core value.
+			if (r < _barRadius)
+				return 1 + (r / _barRadius) * (_barEx - 1);
+			return _barEx + (r - _barRadius) / (_radCore - _barRadius) * (_elEx1 - _barEx);
+		}
+
 		// Core region of the galaxy. Innermost part is round
 		// excentricity increasing linear to the border of the core.
 		return 1 + (r / _radCore) * (_elEx1 - 1);
@@ -307,6 +357,13 @@ float Galaxy::GetExcentricity(float r) const
 
 float Galaxy::GetAngularOffset(float rad) const
 {
+	// Inside the bar all orbits share the orientation of the bar-end orbit,
+	// so the inner ellipses line up into a bar instead of twisting into a
+	// spiral. C0-continuous at the bar end where the arms peel off.
+	// Mirrored in GLSL as tiltAt() (VertexBufferStars).
+	if (_hasBar && rad < _barRadius)
+		return _barRadius * _angleOffset;
+
 	return rad * _angleOffset;
 }
 

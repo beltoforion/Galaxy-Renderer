@@ -24,6 +24,8 @@ public:
 		float angleOffset;  ///< ellipse tilt per parsec (the spiral twist)
 		float sizeMax;      ///< point size of a fully ignited region (px)
 		float threshold;    ///< density enhancement rho at which a region ignites
+		float barRadius;    ///< bar semi-major axis (pc); 0 = no bar
+		float barEx;        ///< axis ratio of the bar orbits
 	};
 	VertexBufferStars(GLuint blendEquation, GLuint blendFunc)
 		: VertexBufferBase(GL_STATIC_DRAW)
@@ -143,7 +145,8 @@ protected:
 			"uniform float angleOffset;\n"
 			"uniform float h2SizeMax;\n"
 			"uniform float h2Threshold;\n"
-//			"uniform float DEG_TO_RAD = 0.01745329251;\n"
+			"uniform float barRadius;\n"   // 0 = no bar
+			"uniform float barEx;\n"
 			"\n"
 			"layout(location = 0) in float theta0;\n"
 			"layout(location = 1) in float velTheta;\n"
@@ -167,7 +170,7 @@ protected:
 			"	float sinalpha = sin(alpha);\n"
 			"	float cosbeta = cos(beta);\n"
 			"	float sinbeta = sin(beta);\n"
-			"	vec2 center = vec2(0,0);\n"	
+			"	vec2 center = vec2(0,0);\n"
 			"	vec2 ps = vec2(center.x + (a * cosalpha * cosbeta - b * sinalpha * sinbeta),\n"
 			"			       center.y + (a * cosalpha * sinbeta + b * sinalpha * cosbeta));\n"
 			"	if (pertAmp > 0.0 && pertN > 0) {\n"
@@ -177,10 +180,17 @@ protected:
 			"	return ps;\n"
 			"}\n"
 			"\n"
-			"// Excentricity of the density wave at radius r (mirrors Galaxy::GetExcentricity).\n"
+			"// Excentricity of the density wave at radius r. Mirrors\n"
+			"// Galaxy::GetExcentricity (incl. the bar profile) - keep in lockstep.\n"
 			"float excentricity(float r) {\n"
-			"	if (r < radCore)\n"
+			"	if (r < radCore) {\n"
+			"		if (barRadius > 0.0) {\n"
+			"			if (r < barRadius)\n"
+			"				return 1.0 + (r / barRadius) * (barEx - 1.0);\n"
+			"			return barEx + (r - barRadius) / (radCore - barRadius) * (exInner - barEx);\n"
+			"		}\n"
 			"		return 1.0 + (r / radCore) * (exInner - 1.0);\n"
+			"	}\n"
 			"	else if (r <= radGalaxy)\n"
 			"		return exInner + (r - radCore) / (radGalaxy - radCore) * (exOuter - exInner);\n"
 			"	else if (r < radFarField)\n"
@@ -189,9 +199,22 @@ protected:
 			"		return 1.0;\n"
 			"}\n"
 			"\n"
+			"// Ellipse tilt at radius r. Mirrors Galaxy::GetAngularOffset(r):\n"
+			"// inside the bar all orbits share the bar-end orientation.\n"
+			"float tiltAt(float r) {\n"
+			"	return ((barRadius > 0.0) ? max(r, barRadius) : r) * angleOffset;\n"
+			"}\n"
+			"\n"
+			"// Suppression of star formation inside the bar body (bars are old and\n"
+			"// gas-poor); reaches 1.0 slightly beyond the bar end where real barred\n"
+			"// galaxies do form stars.\n"
+			"float barFactor(float r) {\n"
+			"	return (barRadius > 0.0) ? smoothstep(0.6 * barRadius, 1.05 * barRadius, r) : 1.0;\n"
+			"}\n"
+			"\n"
 			"void main()\n"
 			"{\n"
-			"	vec2 ps = calcPos(a, b, theta0, velTheta, time, tiltAngle);"	
+			"	vec2 ps = calcPos(a, b, theta0, velTheta, time, tiltAngle);"
 			"\n"
 			"	if (type==0) {\n"
 			"		gl_PointSize = mag * 4.0;\n"
@@ -212,10 +235,15 @@ protected:
 			"		float aI = max(a - delta, 0.0);\n"
 			"		float dI = a - aI;\n"
 			"		float aO = a + delta;\n"
-			"		vec2 psI = calcPos(aI, aI * excentricity(aI), theta0 - (dI * angleOffset) / DEG_TO_RAD, velTheta, time, aI * angleOffset);\n"
-			"		vec2 psO = calcPos(aO, aO * excentricity(aO), theta0 + (delta * angleOffset) / DEG_TO_RAD, velTheta, time, aO * angleOffset);\n"
+			"		float tA = tiltAt(a);\n"
+			"		float tI = tiltAt(aI);\n"
+			"		float tO = tiltAt(aO);\n"
+			"		vec2 psI = calcPos(aI, aI * excentricity(aI), theta0 - (tA - tI) / DEG_TO_RAD, velTheta, time, tI);\n"
+			"		vec2 psO = calcPos(aO, aO * excentricity(aO), theta0 + (tO - tA) / DEG_TO_RAD, velTheta, time, tO);\n"
 			"		float rho = 0.5 * (dI / max(distance(ps, psI), 1.0) + delta / max(distance(ps, psO), 1.0));\n"
-			"		float ignite = smoothstep(h2Threshold, 1.5 * h2Threshold, rho);\n"
+			"		// Ignition is suppressed inside the bar body: bars are old and\n"
+			"		// gas-poor except at their ends.\n"
+			"		float ignite = smoothstep(h2Threshold, 1.5 * h2Threshold, rho) * barFactor(a);\n"
 			"		if (type==3) {\n"
 			"			gl_PointSize = h2SizeMax * ignite;\n"
 			"			vertexColor = color * mag * vec4(2.0, 0.5, 0.5, 1.0) * ignite;\n"
@@ -255,7 +283,7 @@ protected:
 			"		FragColor = vec4(vertexColor.xyz, alpha);\n"
 			"	} else if (vertexType==2) {\n"
 			"		if ( (features & 4) ==0)\n"
-			"			discard;\n"	
+			"			discard;\n"
 			"		vec2 circCoord = 2.0 * gl_PointCoord - 1.0;\n"
 			"		float alpha = 0.07 * (1-length(circCoord));\n"
 			"		FragColor = vec4(vertexColor.xyz, alpha);\n"
@@ -303,6 +331,8 @@ protected:
 		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "angleOffset"), _h2.angleOffset);
 		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "h2SizeMax"), _h2.sizeMax);
 		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "h2Threshold"), _h2.threshold);
+		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "barRadius"), _h2.barRadius);
+		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "barEx"), _h2.barEx);
 	}
 
 

@@ -8,6 +8,16 @@ Copyright (C) 2009 - 2020 Ingo Berg
 History:
 --------
 
+Rev 2.1.1 2026-07-20
+--------------------
+Changes:
+   * central bar (off by default, "Central Bar" section in the control
+     panel): the inner orbits share the orientation of the bar-end orbit so
+     they line up into a bar, the spiral arms peel off at the bar ends and
+     H2 ignition is suppressed inside the bar body; preset keys hasBar,
+     barRadius, barEx
+   * the version number is shown below the control panel title
+
 Rev 2.0.0 2026-07-18
 --------------------
 Changes:

@@ -23,6 +23,12 @@ public:
 		float baseTemp;
 		int numDust = -1;   ///< number of dust clouds; -1 = same as numStars
 		int numH2 = 400;    ///< number of H2 regions
+
+		// Central bar (off by default: presets from older versions keep
+		// their look)
+		bool hasBar = false;
+		float barRadius = 3000.0f;    ///< length of the bar semi-major axis (pc)
+		float barEx = 0.55f;          ///< axis ratio b/a of the bar orbits
 	};
 
 	Galaxy(
@@ -54,6 +60,9 @@ public:
 	int GetNumStars() const;
 	int GetNumDust() const;
 	int GetNumH2() const;
+	bool HasBar() const noexcept;
+	float GetBarRadius() const noexcept;
+	float GetBarEx() const noexcept;
 
 	void SetPertN(int n);
 	void SetPertAmp(float amp);
@@ -67,6 +76,9 @@ public:
 	void SetNumStars(int n);
 	void SetNumDust(int n);
 	void SetNumH2(int n);
+	void SetBarEnabled(bool on);
+	void SetBarRadius(float rad);
+	void SetBarEx(float ex);
 
 	void ToggleDarkMatter();
 	bool HasDarkMatter() const noexcept;
@@ -99,6 +111,10 @@ private:
 
 	bool _hasDarkMatter;
 	float _baseTemp;
+
+	bool _hasBar;
+	float _barRadius;
+	float _barEx;
 
 private:
 	std::vector<Star> _stars;  ///< Pointer to an array of star and dust data

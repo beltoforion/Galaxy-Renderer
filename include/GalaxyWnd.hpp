@@ -147,6 +147,9 @@ private:
 		int   numStars = 0;
 		int   numDust = 0;
 		int   numH2 = 0;
+		bool  hasBar = false;
+		int   barRadius = 3000;
+		float barEx = 0.55f;
 	} _ui;
 };
 

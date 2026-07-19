@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 # The version is shown in the UI below the control panel title; it is bumped
 # with every source change (patch level for fixes/tweaks, minor for features).
 project(galaxy_renderer
-    VERSION 2.0.2
+    VERSION 2.1.1
     DESCRIPTION "Spiral galaxy renderer based on the density wave theory (Dear ImGui UI)"
     LANGUAGES CXX)
 
