@@ -26,6 +26,7 @@ Galaxy::Galaxy(
 	, _radFarField(_radGalaxy * 2)
 	, _numStars(numStars)
 	, _numH2(400)
+	, _seed((unsigned int)std::rand())
 	, _pertN(0)
 	, _pertAmp(0)
 	, _hasDarkMatter(true)
@@ -52,6 +53,7 @@ void Galaxy::Reset(GalaxyParam param)
 	_hasDarkMatter = param.hasDarkMatter;
 	_pertN = param.pertN;
 	_pertAmp = param.pertAmp;
+	_seed = (unsigned int)std::rand();
 
 	InitStarsAndDust();
 }
@@ -69,6 +71,10 @@ void Galaxy::ToggleDarkMatter()
 
 void Galaxy::InitStarsAndDust()
 {
+	// Reseed so rebuilds with tweaked parameters morph the same star
+	// population instead of rerolling it (needed for live slider updates).
+	std::srand(_seed);
+
 	_stars = std::vector<Star>();
 	_stars.reserve(_numStars);
 

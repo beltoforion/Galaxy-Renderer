@@ -83,6 +83,8 @@ private:
 	int _numStars;          ///< Total number of stars
 	int _numH2;             ///< Number of H2 Regions
 
+	unsigned int _seed;     ///< RNG seed so parameter tweaks rebuild the same star population
+
 	int _pertN;
 	float _pertAmp;
 

@@ -462,39 +462,34 @@ void GalaxyWnd::RenderUI()
 	ImGui::SameLine();
 	ImGui::TextDisabled("(F1 toggles this panel)");
 
-	// --- Geometry (heavy edits: applied on release) -----------------------
+	// --- Geometry (applied live while dragging) ---------------------------
 	if (beginSection("Geometry", ImVec4(0.15f, 0.30f, 0.55f, 1.0f)))
 	{
-		ImGui::SliderInt("Core radius (pc)", &_ui.radCore, 0, _ui.radGalaxy);
-		if (ImGui::IsItemDeactivatedAfterEdit())
+		if (ImGui::SliderInt("Core radius (pc)", &_ui.radCore, 0, _ui.radGalaxy))
 		{
 			_galaxy.SetCoreRad((float)_ui.radCore);
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 		}
 
-		ImGui::SliderInt("Galaxy radius (pc)", &_ui.radGalaxy, 1000, 40000);
-		if (ImGui::IsItemDeactivatedAfterEdit())
+		if (ImGui::SliderInt("Galaxy radius (pc)", &_ui.radGalaxy, 1000, 40000))
 		{
 			_galaxy.SetRad((float)_ui.radGalaxy);
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 		}
 
-		ImGui::SliderFloat("Excentricity inner", &_ui.exInner, 0.0f, 2.0f, "%.2f");
-		if (ImGui::IsItemDeactivatedAfterEdit())
+		if (ImGui::SliderFloat("Excentricity inner", &_ui.exInner, 0.0f, 2.0f, "%.2f"))
 		{
 			_galaxy.SetExInner(_ui.exInner);
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 		}
 
-		ImGui::SliderFloat("Excentricity outer", &_ui.exOuter, 0.0f, 2.0f, "%.2f");
-		if (ImGui::IsItemDeactivatedAfterEdit())
+		if (ImGui::SliderFloat("Excentricity outer", &_ui.exOuter, 0.0f, 2.0f, "%.2f"))
 		{
 			_galaxy.SetExOuter(_ui.exOuter);
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 		}
 
-		ImGui::SliderFloat("Angular offset (deg/pc)", &_ui.angOff, 0.0f, 0.001f, "%.5f");
-		if (ImGui::IsItemDeactivatedAfterEdit())
+		if (ImGui::SliderFloat("Angular offset (deg/pc)", &_ui.angOff, 0.0f, 0.001f, "%.5f"))
 		{
 			_galaxy.SetAngularOffset(_ui.angOff);
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
@@ -771,6 +766,19 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 	switch (type)
 	{
 	case SDL_MOUSEBUTTONDOWN:
+		break;
+
+	case SDL_MOUSEWHEEL:
+		// Zoom the field of view; multiplicative steps match the
+		// logarithmic FoV slider (wheel up = zoom in).
+		if (_event.wheel.y != 0)
+		{
+			_fov *= std::pow(0.9f, (float)_event.wheel.y);
+			_fov = std::clamp(_fov, 1000.0f, 60000.0f);
+			AdjustCamera();
+			SetCameraOrientation({ 0, 1, 0 });
+			_renderUpdateHint |= ruhAXIS | ruhDENSITY_WAVES;
+		}
 		break;
 
 	case SDL_KEYDOWN:
