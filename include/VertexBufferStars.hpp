@@ -11,6 +11,20 @@ struct VertexStar
 class VertexBufferStars : public VertexBufferBase<VertexStar>
 {
 public:
+
+	/// Parameters of the H2 region shader model: the density wave shape needed
+	/// to locate the neighbouring waves plus the ignition tuning values.
+	struct H2Params
+	{
+		float radCore;      ///< radius of the galaxy core (see Galaxy::GetExcentricity)
+		float radGalaxy;    ///< radius of the galaxy disc
+		float radFarField;  ///< radius beyond which the waves become circular
+		float exInner;      ///< excentricity at the core edge
+		float exOuter;      ///< excentricity at the disc edge
+		float angleOffset;  ///< ellipse tilt per parsec (the spiral twist)
+		float sizeMax;      ///< point size of a fully ignited region (px)
+		float threshold;    ///< density enhancement rho at which a region ignites
+	};
 	VertexBufferStars(GLuint blendEquation, GLuint blendFunc)
 		: VertexBufferBase(GL_STATIC_DRAW)
 		, _pertN(0)
@@ -41,6 +55,11 @@ public:
 		_time = time;
 		_dustSize = dustSize;
 		_displayFeatures = displayFeatures;
+	}
+
+	void UpdateH2Params(const H2Params& params)
+	{
+		_h2 = params;
 	}
 
 	/// Scales all point sizes. Needed to keep the relative sizes of stars and
@@ -104,6 +123,14 @@ protected:
 			"uniform float pertAmp;\n"
 			"uniform float time;\n"
 			"uniform float sizeFactor;\n"
+			"uniform float radCore;\n"
+			"uniform float radGalaxy;\n"
+			"uniform float radFarField;\n"
+			"uniform float exInner;\n"
+			"uniform float exOuter;\n"
+			"uniform float angleOffset;\n"
+			"uniform float h2SizeMax;\n"
+			"uniform float h2Threshold;\n"
 //			"uniform float DEG_TO_RAD = 0.01745329251;\n"
 			"\n"
 			"layout(location = 0) in float theta0;\n"
@@ -138,6 +165,18 @@ protected:
 			"	return ps;\n"
 			"}\n"
 			"\n"
+			"// Excentricity of the density wave at radius r (mirrors Galaxy::GetExcentricity).\n"
+			"float excentricity(float r) {\n"
+			"	if (r < radCore)\n"
+			"		return 1.0 + (r / radCore) * (exInner - 1.0);\n"
+			"	else if (r <= radGalaxy)\n"
+			"		return exInner + (r - radCore) / (radGalaxy - radCore) * (exOuter - exInner);\n"
+			"	else if (r < radFarField)\n"
+			"		return exOuter + (r - radGalaxy) / (radFarField - radGalaxy) * (1.0 - exOuter);\n"
+			"	else\n"
+			"		return 1.0;\n"
+			"}\n"
+			"\n"
 			"void main()\n"
 			"{\n"
 			"	vec2 ps = calcPos(a, b, theta0, velTheta, time, tiltAngle);"	
@@ -151,18 +190,27 @@ protected:
 			"	} else if (type==2) {\n"
 			"		gl_PointSize = mag * 2.0 * float(dustSize);\n"
 			"	    vertexColor = color * mag;\n"
-			"	} else if (type==3) {\n"
-			"		vec2 ps2 = calcPos(a + 1000.0, b, theta0, velTheta, time, tiltAngle);\n"
-			"		float dst = distance(ps, ps2);\n"
-			"		float size = ((1000.0 - dst) / 10) - 50;\n"
-			"		gl_PointSize = size;\n"
-			"	    vertexColor = color * mag * vec4(2, 0.5, 0.5, 1);\n"
-			"	} else if (type==4) {\n"
-			"		vec2 ps2 = calcPos(a + 1000.0, b, theta0, velTheta, time, tiltAngle);\n"
-			"		float dst = distance(ps, ps2);\n"
-			"		float size = ((1000.0 - dst) / 10.0) - 50.0;\n"
-			"		gl_PointSize = size/10.0;\n"
-			"	    vertexColor = vec4(1,1,1,1);\n"
+			"	} else if (type==3 || type==4) {\n"
+			"		// Orbit crowding: measure the radial gap to the neighbouring density\n"
+			"		// waves at a +/- delta, each with its own excentricity and tilt. The\n"
+			"		// parametric angle is shifted by the tilt difference so both points\n"
+			"		// lie at the same polar angle; the distance is then the true wave\n"
+			"		// spacing. Where waves converge (arm crest) the region ignites.\n"
+			"		float delta = 1000.0;\n"
+			"		float aI = max(a - delta, 0.0);\n"
+			"		float dI = a - aI;\n"
+			"		float aO = a + delta;\n"
+			"		vec2 psI = calcPos(aI, aI * excentricity(aI), theta0 - (dI * angleOffset) / DEG_TO_RAD, velTheta, time, aI * angleOffset);\n"
+			"		vec2 psO = calcPos(aO, aO * excentricity(aO), theta0 + (delta * angleOffset) / DEG_TO_RAD, velTheta, time, aO * angleOffset);\n"
+			"		float rho = 0.5 * (dI / max(distance(ps, psI), 1.0) + delta / max(distance(ps, psO), 1.0));\n"
+			"		float ignite = smoothstep(h2Threshold, 1.5 * h2Threshold, rho);\n"
+			"		if (type==3) {\n"
+			"			gl_PointSize = h2SizeMax * ignite;\n"
+			"			vertexColor = color * mag * vec4(2.0, 0.5, 0.5, 1.0) * ignite;\n"
+			"		} else {\n"
+			"			gl_PointSize = h2SizeMax * ignite / 10.0;\n"
+			"			vertexColor = vec4(1,1,1,1) * ignite;\n"
+			"		}\n"
 			"   }\n"
 			"	gl_Position =  projMat * vec4(ps, 0, 1);\n"
 			"   gl_PointSize = max(gl_PointSize * sizeFactor, 0.0);\n"
@@ -234,6 +282,15 @@ protected:
 
 		GLuint varSizeFactor = glGetUniformLocation(GetShaderProgramm(), "sizeFactor");
 		glUniform1f(varSizeFactor, _sizeFactor);
+
+		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "radCore"), _h2.radCore);
+		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "radGalaxy"), _h2.radGalaxy);
+		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "radFarField"), _h2.radFarField);
+		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "exInner"), _h2.exInner);
+		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "exOuter"), _h2.exOuter);
+		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "angleOffset"), _h2.angleOffset);
+		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "h2SizeMax"), _h2.sizeMax);
+		glUniform1f(glGetUniformLocation(GetShaderProgramm(), "h2Threshold"), _h2.threshold);
 	}
 
 
@@ -261,4 +318,5 @@ private:
 	GLuint _blendEquation;
 	int _displayFeatures;
 	float _sizeFactor;
+	H2Params _h2 = {};
 };

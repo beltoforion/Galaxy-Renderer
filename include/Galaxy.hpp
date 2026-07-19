@@ -21,6 +21,8 @@ public:
 		float pertAmp;
 		float dustRenderSize;
 		float baseTemp;
+		int numDust = -1;   ///< number of dust clouds; -1 = same as numStars
+		int numH2 = 400;    ///< number of H2 regions
 	};
 
 	Galaxy(
@@ -49,6 +51,9 @@ public:
 	int GetPertN() const;
 	float GetPertAmp() const;
 	float GetBaseTemp() const noexcept;
+	int GetNumStars() const;
+	int GetNumDust() const;
+	int GetNumH2() const;
 
 	void SetPertN(int n);
 	void SetPertAmp(float amp);
@@ -59,6 +64,9 @@ public:
 	void SetExOuter(float ex);
 	void SetDustRenderSize(float sz);
 	void SetBaseTemp(float temp);
+	void SetNumStars(int n);
+	void SetNumDust(int n);
+	void SetNumH2(int n);
 
 	void ToggleDarkMatter();
 	bool HasDarkMatter() const noexcept;
@@ -81,6 +89,7 @@ private:
 	float _dustRenderSize;
 
 	int _numStars;          ///< Total number of stars
+	int _numDust;           ///< Number of dust clouds
 	int _numH2;             ///< Number of H2 Regions
 
 	unsigned int _seed;     ///< RNG seed so parameter tweaks rebuild the same star population

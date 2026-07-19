@@ -31,3 +31,6 @@ cmake-install*
 # Runtime artifacts
 /galaxy_renderer
 galaxy-*.mp4
+
+# Staged deliverable (cmake --build build --target dist)
+/dist/

@@ -118,11 +118,29 @@ add_custom_command(TARGET galaxy_renderer POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/assets
         $<TARGET_FILE_DIR:galaxy_renderer>/assets
-    COMMENT "Copying assets next to the galaxy_renderer binary")
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/presets
+        $<TARGET_FILE_DIR:galaxy_renderer>/presets
+    COMMENT "Copying assets and presets next to the galaxy_renderer binary")
+
+# ---------------------------------------------------------------------------
+# Dist: stage a portable, runnable deliverable in <repo>/dist
+# (binary + assets + presets; run the app from inside that folder)
+# ---------------------------------------------------------------------------
+set(DIST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dist)
+add_custom_target(dist
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${DIST_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:galaxy_renderer> ${DIST_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/assets ${DIST_DIR}/assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/presets ${DIST_DIR}/presets
+    DEPENDS galaxy_renderer
+    COMMENT "Staging portable dist folder in ${DIST_DIR}")
 
 # ---------------------------------------------------------------------------
 # Install
 # ---------------------------------------------------------------------------
 include(GNUInstallDirs)
 install(TARGETS galaxy_renderer RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(DIRECTORY assets DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY assets presets DESTINATION ${CMAKE_INSTALL_BINDIR})

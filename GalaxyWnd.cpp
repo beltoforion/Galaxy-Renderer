@@ -6,6 +6,9 @@
 #include <cstdio>
 #include <cfloat>
 #include <ctime>
+#include <cctype>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -35,15 +38,163 @@ GalaxyWnd::GalaxyWnd()
 	, _videoHeight(2160)
 	, _videoFps(60)
 {
-	_predefinedGalaxies.push_back({ 13000, 4000, .0004f, .85f, .95f, 40000, true, 2, 40, 90, 3600 });
-	_predefinedGalaxies.push_back({ 16000, 4000, .0003f, .8f, .85f, 40000, true, 0, 40, 100, 4500 });
-	_predefinedGalaxies.push_back({ 13000, 4000, .00064f, .9f, .9f, 40000, true, 0, 0, 85, 4100 });
-	_predefinedGalaxies.push_back({ 13000, 4000, .0004f, 1.35f, 1.05f, 40000, true, 0, 0, 70, 4500 });
-	_predefinedGalaxies.push_back({ 13000, 4500, .0002f, .65f, .95f, 40000, true, 3, 72, 90, 4000 });
-	_predefinedGalaxies.push_back({ 15000, 4000, .0003f, 1.45f, 1.0f, 40000, true, 0, 0, 100, 4500 });
-	_predefinedGalaxies.push_back({ 14000, 12500, .0002f, 0.65f, 0.95f, 40000, true, 3, 72, 85, 2200 });
-	_predefinedGalaxies.push_back({ 13000, 1500, .0004f, 1.1f, 1.0f, 40000, true, 1, 20, 80, 2800 });
-	_predefinedGalaxies.push_back({ 13000, 4000, .0004f, .85f, .95f, 40000, true, 1, 20, 80, 4500 });
+	LoadPresets();
+}
+
+void GalaxyWnd::LoadPresets()
+{
+	_presets.clear();
+
+	namespace fs = std::filesystem;
+	const fs::path dir = "presets";
+	std::error_code ec;
+	if (fs::is_directory(dir, ec))
+	{
+		for (const auto& entry : fs::directory_iterator(dir, ec))
+		{
+			if (!entry.is_regular_file() || entry.path().extension() != ".txt")
+				continue;
+
+			GalaxyPreset preset;
+			preset.name = entry.path().stem().string();
+			preset.param = { 13000, 4000, .0004f, .85f, .95f, 40000, true, 2, 40, 70, 4000 };
+
+			std::ifstream file(entry.path());
+			std::string line;
+			while (std::getline(file, line))
+			{
+				const auto sep = line.find('=');
+				if (line.empty() || line[0] == '#' || sep == std::string::npos)
+					continue;
+
+				std::string key = line.substr(0, sep);
+				key.erase(std::remove_if(key.begin(), key.end(), ::isspace), key.end());
+				const float val = std::strtof(line.c_str() + sep + 1, nullptr);
+
+				auto displayFlag = [&preset, val](DisplayItem item)
+				{
+					preset.displayMask |= (uint32_t)item;
+					if (val != 0)
+						preset.displayFlags |= (uint32_t)item;
+				};
+
+				auto& p = preset.param;
+				if      (key == "radius")         p.rad = val;
+				else if (key == "coreRadius")     p.radCore = val;
+				else if (key == "angularOffset")  p.deltaAng = val;
+				else if (key == "exInner")        p.ex1 = val;
+				else if (key == "exOuter")        p.ex2 = val;
+				else if (key == "numStars")       p.numStars = (int)val;
+				else if (key == "numDust")        p.numDust = (int)val;
+				else if (key == "numH2")          p.numH2 = (int)val;
+				else if (key == "hasDarkMatter")  p.hasDarkMatter = val != 0;
+				else if (key == "pertN")          p.pertN = (int)val;
+				else if (key == "pertAmp")        p.pertAmp = val;
+				else if (key == "dustRenderSize") p.dustRenderSize = val;
+				else if (key == "baseTemp")       p.baseTemp = val;
+				else if (key == "fov")            preset.fov = val;
+				else if (key == "h2SizeMax")      preset.h2SizeMax = val;
+				else if (key == "h2Threshold")    preset.h2Threshold = val;
+				else if (key == "showStars")         displayFlag(DisplayItem::STARS);
+				else if (key == "showAxis")          displayFlag(DisplayItem::AXIS);
+				else if (key == "showDust")          displayFlag(DisplayItem::DUST);
+				else if (key == "showH2")            displayFlag(DisplayItem::H2);
+				else if (key == "showFilaments")     displayFlag(DisplayItem::FILAMENTS);
+				else if (key == "showDensityWaves")  displayFlag(DisplayItem::DENSITY_WAVES);
+				else if (key == "showVelocityCurve") displayFlag(DisplayItem::VELOCITY);
+			}
+			_presets.push_back(preset);
+		}
+
+		std::sort(_presets.begin(), _presets.end(),
+			[](const GalaxyPreset& a, const GalaxyPreset& b) { return a.name < b.name; });
+	}
+
+	// No preset files found: fall back to the built-in classics so the combo
+	// box and the numpad shortcuts keep working.
+	if (_presets.empty())
+	{
+		_presets = {
+			{ "Galaxy 1", { 13000,  4000, .0004f,  .85f,  .95f, 40000, true, 2, 40,  90, 3600 }, 33960 },
+			{ "Galaxy 2", { 16000,  4000, .0003f,   .8f,  .85f, 40000, true, 0, 40, 100, 4500 }, 46585 },
+			{ "Galaxy 3", { 13000,  4000, .00064f,  .9f,   .9f, 40000, true, 0,  0,  85, 4100 }, 0 },
+			{ "Galaxy 4", { 13000,  4000, .0004f, 1.35f, 1.05f, 40000, true, 0,  0,  70, 4500 }, 0 },
+			{ "Galaxy 5", { 13000,  4500, .0002f,  .65f,  .95f, 40000, true, 3, 72,  90, 4000 }, 35000 },
+			{ "Galaxy 6", { 15000,  4000, .0003f, 1.45f,  1.0f, 40000, true, 0,  0, 100, 4500 }, 0 },
+			{ "Galaxy 7", { 14000, 12500, .0002f, 0.65f, 0.95f, 40000, true, 3, 72,  85, 2200 }, 36982 },
+			{ "Galaxy 8", { 13000,  1500, .0004f,  1.1f,  1.0f, 40000, true, 1, 20,  80, 2800 }, 41091 },
+			{ "Galaxy 9", { 13000,  4000, .0004f,  .85f,  .95f, 40000, true, 1, 20,  80, 4500 }, 41091 },
+		};
+	}
+}
+
+void GalaxyWnd::ApplyPreset(int idx)
+{
+	if (idx < 0 || idx >= (int)_presets.size())
+		return;
+
+	const auto& preset = _presets[idx];
+	_galaxy.Reset(preset.param);
+	if (preset.fov > 0)
+	{
+		_fov = preset.fov;
+		AdjustCamera();
+		SetCameraOrientation({ 0, 1, 0 });
+	}
+	if (preset.h2SizeMax > 0)
+		_h2SizeMax = preset.h2SizeMax;
+	if (preset.h2Threshold > 0)
+		_h2Threshold = preset.h2Threshold;
+	_flags = (_flags & ~preset.displayMask) | (preset.displayFlags & preset.displayMask);
+	_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE | ruhAXIS;
+	_selectedPreset = idx;
+}
+
+bool GalaxyWnd::SavePreset(const std::string& name)
+{
+	// Keep only file-system friendly characters of the requested name.
+	std::string safeName;
+	for (char c : name)
+	{
+		if (std::isalnum((unsigned char)c) || c == ' ' || c == '-' || c == '_' || c == '.')
+			safeName += c;
+	}
+	if (safeName.empty())
+		return false;
+
+	namespace fs = std::filesystem;
+	std::error_code ec;
+	fs::create_directories("presets", ec);
+
+	std::ofstream file(fs::path("presets") / (safeName + ".txt"));
+	if (!file)
+		return false;
+
+	file << "# Galaxy preset\n";
+	file << "radius=" << _galaxy.GetRad() << "\n";
+	file << "coreRadius=" << _galaxy.GetCoreRad() << "\n";
+	file << "angularOffset=" << _galaxy.GetAngularOffset() << "\n";
+	file << "exInner=" << _galaxy.GetExInner() << "\n";
+	file << "exOuter=" << _galaxy.GetExOuter() << "\n";
+	file << "numStars=" << _galaxy.GetNumStars() << "\n";
+	file << "numDust=" << _galaxy.GetNumDust() << "\n";
+	file << "numH2=" << _galaxy.GetNumH2() << "\n";
+	file << "hasDarkMatter=" << (_galaxy.HasDarkMatter() ? 1 : 0) << "\n";
+	file << "pertN=" << _galaxy.GetPertN() << "\n";
+	file << "pertAmp=" << _galaxy.GetPertAmp() << "\n";
+	file << "dustRenderSize=" << _galaxy.GetDustRenderSize() << "\n";
+	file << "baseTemp=" << _galaxy.GetBaseTemp() << "\n";
+	file << "fov=" << _fov << "\n";
+	file << "h2SizeMax=" << _h2SizeMax << "\n";
+	file << "h2Threshold=" << _h2Threshold << "\n";
+	file << "showStars=" << ((_flags & (uint32_t)DisplayItem::STARS) ? 1 : 0) << "\n";
+	file << "showAxis=" << ((_flags & (uint32_t)DisplayItem::AXIS) ? 1 : 0) << "\n";
+	file << "showDust=" << ((_flags & (uint32_t)DisplayItem::DUST) ? 1 : 0) << "\n";
+	file << "showH2=" << ((_flags & (uint32_t)DisplayItem::H2) ? 1 : 0) << "\n";
+	file << "showFilaments=" << ((_flags & (uint32_t)DisplayItem::FILAMENTS) ? 1 : 0) << "\n";
+	file << "showDensityWaves=" << ((_flags & (uint32_t)DisplayItem::DENSITY_WAVES) ? 1 : 0) << "\n";
+	file << "showVelocityCurve=" << ((_flags & (uint32_t)DisplayItem::VELOCITY) ? 1 : 0) << "\n";
+	return file.good();
 }
 
 
@@ -404,6 +555,9 @@ void GalaxyWnd::RenderUI()
 		_ui.angOff    = _galaxy.GetAngularOffset();
 		_ui.baseTemp  = _galaxy.GetBaseTemp();
 		_ui.fov       = _fov;
+		_ui.numStars  = _galaxy.GetNumStars();
+		_ui.numDust   = _galaxy.GetNumDust();
+		_ui.numH2     = _galaxy.GetNumH2();
 	}
 
 	// Let the panel auto-size to its content so it never shows a vertical
@@ -453,10 +607,13 @@ void GalaxyWnd::RenderUI()
 			ImGui::PushStyleColor(ImGuiCol_Button,           scaleCol(col, 0.75f, 0.85f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered,    scaleCol(col, 1.05f, 0.90f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive,     scaleCol(col, 1.35f, 1.00f));
+			// Scope widget IDs to the section so the same label may appear in
+			// different sections (e.g. the "Stars" slider and checkbox).
+			ImGui::PushID(label);
 		}
 		return open;
 	};
-	auto endSection = []() { ImGui::PopStyleColor(9); };
+	auto endSection = []() { ImGui::PopID(); ImGui::PopStyleColor(9); };
 
 	ImGui::Text("%d FPS", GetFPS());
 	ImGui::SameLine();
@@ -527,11 +684,46 @@ void GalaxyWnd::RenderUI()
 		endSection();
 	}
 
-	// --- Display features (flag toggles + dust size) ----------------------
+	// --- Particles (counts and render sizes, applied live) -----------------
+	if (beginSection("Particles", ImVec4(0.32f, 0.32f, 0.42f, 1.0f)))
+	{
+		if (ImGui::SliderInt("Stars", &_ui.numStars, 0, 500000))
+		{
+			_galaxy.SetNumStars(_ui.numStars);
+			_renderUpdateHint |= ruhSTARS | ruhDUST;
+		}
+
+		if (ImGui::SliderInt("Dust clouds", &_ui.numDust, 0, 500000))
+		{
+			_galaxy.SetNumDust(_ui.numDust);
+			_renderUpdateHint |= ruhSTARS | ruhDUST;
+		}
+
+		if (ImGui::SliderInt("H2 regions", &_ui.numH2, 0, 2000))
+		{
+			_galaxy.SetNumH2(_ui.numH2);
+			_renderUpdateHint |= ruhSTARS | ruhDUST;
+		}
+
+		float dustSize = _galaxy.GetDustRenderSize();
+		if (ImGui::SliderFloat("Dust render size (px)", &dustSize, 1.0f, 200.0f, "%.0f"))
+			_galaxy.SetDustRenderSize(dustSize);   // cheap: no rebuild
+
+		// Pure shader parameters of the H2 orbit-crowding model: no rebuild.
+		ImGui::SliderFloat("H2 max size (px)", &_h2SizeMax, 10.0f, 300.0f, "%.0f");
+		ImGui::SliderFloat("H2 ignition threshold", &_h2Threshold, 1.0f, 3.0f, "%.2f");
+		endSection();
+	}
+
+	// --- Display features (flag toggles) -----------------------------------
 	if (beginSection("Display Features", ImVec4(0.15f, 0.45f, 0.25f, 1.0f)))
 	{
+		// Two-column checkbox grid to save vertical space.
+		int checkboxIdx = 0;
 		auto flagCheckbox = [&](const char* label, DisplayItem item)
 		{
+			if (checkboxIdx++ % 2 == 1)
+				ImGui::SameLine(180.0f);
 			bool on = (_flags & (int)item) != 0;
 			if (ImGui::Checkbox(label, &on))
 			{
@@ -547,18 +739,13 @@ void GalaxyWnd::RenderUI()
 		flagCheckbox("Filaments", DisplayItem::FILAMENTS);
 		flagCheckbox("Density waves", DisplayItem::DENSITY_WAVES);
 		flagCheckbox("Velocity curve", DisplayItem::VELOCITY);
-
-		float dustSize = _galaxy.GetDustRenderSize();
-		if (ImGui::SliderFloat("Dust render size (px)", &dustSize, 1.0f, 200.0f, "%.0f"))
-			_galaxy.SetDustRenderSize(dustSize);   // cheap: no rebuild
 		endSection();
 	}
 
 	// --- Physics ----------------------------------------------------------
 	if (beginSection("Physics", ImVec4(0.55f, 0.35f, 0.12f, 1.0f)))
 	{
-		ImGui::SliderFloat("Base temperature (K)", &_ui.baseTemp, 1000.0f, 10000.0f, "%.0f");
-		if (ImGui::IsItemDeactivatedAfterEdit())
+		if (ImGui::SliderFloat("Base temperature (K)", &_ui.baseTemp, 1000.0f, 10000.0f, "%.0f"))
 		{
 			_galaxy.SetBaseTemp(_ui.baseTemp);
 			_renderUpdateHint |= ruhSTARS | ruhDUST;
@@ -593,26 +780,52 @@ void GalaxyWnd::RenderUI()
 	// --- Predefined galaxies ---------------------------------------------
 	if (beginSection("Predefined Galaxies", ImVec4(0.55f, 0.20f, 0.22f, 1.0f)))
 	{
-		// FoV each preset selects (0 = keep the current field of view).
-		static const float presetFov[9] = { 33960, 46585, 0, 0, 35000, 0, 36982, 41091, 41091 };
-		for (int i = 0; i < (int)_predefinedGalaxies.size() && i < 9; ++i)
+		const char* preview = (_selectedPreset >= 0 && _selectedPreset < (int)_presets.size())
+			? _presets[_selectedPreset].name.c_str()
+			: "Select preset...";
+		if (ImGui::BeginCombo("Preset", preview))
 		{
-			char label[16];
-			std::snprintf(label, sizeof(label), "Galaxy %d", i + 1);
-			if (i % 3 != 0)
-				ImGui::SameLine();
-			if (ImGui::Button(label, ImVec2(95, 0)))
+			for (int i = 0; i < (int)_presets.size(); ++i)
 			{
-				_galaxy.Reset(_predefinedGalaxies[i]);
-				if (presetFov[i] > 0.0f)
-				{
-					_fov = presetFov[i];
-					AdjustCamera();
-					SetCameraOrientation({ 0, 1, 0 });
-				}
-				_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE | ruhAXIS;
+				const bool selected = (i == _selectedPreset);
+				if (ImGui::Selectable(_presets[i].name.c_str(), selected))
+					ApplyPreset(i);
+				if (selected)
+					ImGui::SetItemDefaultFocus();
 			}
+			ImGui::EndCombo();
 		}
+
+		// Writes the current state to a preset file and refreshes the list,
+		// keeping the saved preset selected.
+		auto saveAndReload = [&](const std::string& name)
+		{
+			if (!SavePreset(name))
+				return;
+			LoadPresets();
+			for (int i = 0; i < (int)_presets.size(); ++i)
+				if (_presets[i].name == name)
+					_selectedPreset = i;
+		};
+
+		ImGui::InputTextWithHint("##presetName", "new preset name", _presetSaveName, sizeof(_presetSaveName));
+		ImGui::SameLine();
+		if (ImGui::Button("Save as") && _presetSaveName[0] != '\0')
+		{
+			saveAndReload(_presetSaveName);
+			_presetSaveName[0] = '\0';
+		}
+
+		ImGui::SameLine();
+		const bool hasSelection = _selectedPreset >= 0 && _selectedPreset < (int)_presets.size();
+		ImGui::BeginDisabled(!hasSelection);
+		if (ImGui::Button("Save") && hasSelection)
+			saveAndReload(_presets[_selectedPreset].name);
+		ImGui::EndDisabled();
+		if (hasSelection && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+			ImGui::SetTooltip("Overwrite \"%s\"", _presets[_selectedPreset].name.c_str());
+
+		ImGui::TextDisabled("Files: presets/*.txt (numpad 1-9 applies 1st-9th)");
 		endSection();
 	}
 
@@ -684,6 +897,15 @@ void GalaxyWnd::RenderScene(glm::mat4& matView, glm::mat4& matProjection, bool o
 	if (features != 0)
 	{
 		_vertStars.UpdateShaderVariables(_time, _galaxy.GetPertN(), _galaxy.GetPertAmp(), (int)_galaxy.GetDustRenderSize(), features);
+		_vertStars.UpdateH2Params({
+			_galaxy.GetCoreRad(),
+			_galaxy.GetRad(),
+			_galaxy.GetFarFieldRad(),
+			_galaxy.GetExInner(),
+			_galaxy.GetExOuter(),
+			_galaxy.GetAngularOffset(),
+			_h2SizeMax,
+			_h2Threshold });
 		_vertStars.Draw(matView, matProjection);
 	}
 
@@ -919,56 +1141,41 @@ void GalaxyWnd::OnProcessEvents(Uint32 type)
 			break;
 
 		case SDLK_KP_0:
-			_galaxy.Reset(_predefinedGalaxies[0]);      // dust render size in pixel
-			_fov = 33960;
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST| ruhCREATE_VELOCITY_CURVE;
+			ApplyPreset(0);
 			break;
 
 		case SDLK_KP_1:
-			_galaxy.Reset(_predefinedGalaxies[1]);
-			_fov = 46585;
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST| ruhCREATE_VELOCITY_CURVE;
+			ApplyPreset(1);
 			break;
 
 		case SDLK_KP_2:
-			_galaxy.Reset(_predefinedGalaxies[2]);
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
+			ApplyPreset(2);
 			break;
 		case SDLK_KP_3:
-			_galaxy.Reset(_predefinedGalaxies[3]);
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
+			ApplyPreset(3);
 			break;
 
 		case SDLK_KP_4:
-			_galaxy.Reset(_predefinedGalaxies[4]);
-			_fov = 35000;
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
+			ApplyPreset(4);
 			break;
 
 			// Typ SBb
 		case SDLK_KP_5:
-			_galaxy.Reset(_predefinedGalaxies[5]);
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
+			ApplyPreset(5);
 			break;
 
 		case SDLK_KP_6:
-			_galaxy.Reset(_predefinedGalaxies[6]);
-			_fov = 36982;
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
+			ApplyPreset(6);
 			break;
 
 
 		case SDLK_KP_7:
-			_galaxy.Reset(_predefinedGalaxies[7]);    // dust render size in pixel
-			_fov = 41091;
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
+			ApplyPreset(7);
 			break;
 
 
 		case SDLK_KP_8:
-			_galaxy.Reset(_predefinedGalaxies[8]);
-			_fov = 41091;
-			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
+			ApplyPreset(8);
 			break;
 
 		case SDLK_PLUS:

@@ -1,0 +1,24 @@
+# Galaxy preset
+radius=15000
+coreRadius=4000
+angularOffset=0.0003
+exInner=1.45
+exOuter=1.0
+numStars=40000
+numDust=-1
+numH2=400
+hasDarkMatter=1
+pertN=0
+pertAmp=0
+dustRenderSize=100
+baseTemp=4500
+fov=0
+h2SizeMax=100
+h2Threshold=1.2
+showStars=1
+showAxis=1
+showDust=1
+showH2=1
+showFilaments=1
+showDensityWaves=0
+showVelocityCurve=0

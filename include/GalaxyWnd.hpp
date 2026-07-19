@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 #include <SDL_ttf.h>
 
 #include "SDLWnd.hpp"
@@ -76,7 +77,26 @@ private:
 	int _videoHeight;
 	int _videoFps;
 
-	std::vector<Galaxy::GalaxyParam> _predefinedGalaxies;
+	/// A galaxy configuration loaded from a text file in the "presets" folder.
+	/// Values a file does not mention keep their current setting when applied.
+	struct GalaxyPreset
+	{
+		std::string name;           ///< file name without extension
+		Galaxy::GalaxyParam param;
+		float fov = 0;              ///< field of view; 0 = keep the current one
+		float h2SizeMax = 0;        ///< H2 render size; 0 = keep the current one
+		float h2Threshold = 0;      ///< H2 ignition threshold; 0 = keep the current one
+		uint32_t displayFlags = 0;  ///< display feature bits set by the file
+		uint32_t displayMask = 0;   ///< display feature bits the file specified at all
+	};
+
+	std::vector<GalaxyPreset> _presets;
+	int _selectedPreset = -1;       ///< index into _presets shown in the combo box
+	char _presetSaveName[64] = {};  ///< edit buffer of the "Save as" input field
+
+	void LoadPresets();
+	void ApplyPreset(int idx);
+	bool SavePreset(const std::string& name);
 
 	static const float TimeStepSize;
 
@@ -105,6 +125,8 @@ private:
 	bool _showUi = true;   ///< Visibility of the control panel (toggled with F1)
 
 	// Framerate limiting
+	float _h2SizeMax = 100.0f;      ///< Point size of a fully ignited H2 region (px)
+	float _h2Threshold = 1.2f;      ///< Density wave crowding factor at which H2 regions ignite
 	bool _limitFramerate = true;    ///< Cap the render loop to _targetFps
 	int _targetFps = 60;            ///< Target framerate when limiting is on
 	uint32_t _lastFrameTicks = 0;   ///< SDL_GetTicks() at the previous frame
@@ -122,6 +144,9 @@ private:
 		float angOff = 0.0f;
 		float baseTemp = 0.0f;
 		float fov = 0.0f;
+		int   numStars = 0;
+		int   numDust = 0;
+		int   numH2 = 0;
 	} _ui;
 };
 

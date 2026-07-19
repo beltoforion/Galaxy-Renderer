@@ -16,9 +16,9 @@ struct Star
 	float theta0;     // initial angular position on the ellipse
 	float velTheta;   // angular velocity
 	float tiltAngle;  // tilt angle of the ellipse
-	float a;          // kleine halbachse
-	float b;          // große halbachse
+	float a;          // große halbachse
+	float b;          // kleine halbachse
 	float temp;       // star temperature
 	float mag;        // brightness;
-	int32_t type;	  // Type 0:star, 1:dust, 2 and 3: h2 regions	
+	int32_t type;	  // Type 0:star, 1:dust, 2:filament, 3:h2 halo, 4:h2 core
 };

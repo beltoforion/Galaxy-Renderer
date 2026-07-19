@@ -25,6 +25,7 @@ Galaxy::Galaxy(
 	, _radGalaxy(rad)
 	, _radFarField(_radGalaxy * 2)
 	, _numStars(numStars)
+	, _numDust(numStars)
 	, _numH2(400)
 	, _seed((unsigned int)std::rand())
 	, _pertN(0)
@@ -49,6 +50,8 @@ void Galaxy::Reset(GalaxyParam param)
 	_radGalaxy = param.rad;
 	_radFarField = _radGalaxy * 2;  // there is no science behind this threshold it just looks nice
 	_numStars = param.numStars;
+	_numDust = (param.numDust < 0) ? param.numStars : param.numDust;
+	_numH2 = param.numH2;
 	_dustRenderSize = param.dustRenderSize;
 	_hasDarkMatter = param.hasDarkMatter;
 	_pertN = param.pertN;
@@ -76,7 +79,7 @@ void Galaxy::InitStarsAndDust()
 	std::srand(_seed);
 
 	_stars = std::vector<Star>();
-	_stars.reserve(_numStars);
+	_stars.reserve(_numStars + _numDust + _numDust / 2 + 2 * _numH2);
 
 	//
 	// 1.) Initialize the stars
@@ -117,10 +120,9 @@ void Galaxy::InitStarsAndDust()
 	//
 	// 2.) Initialise Dust:
 	//
-	//	The galaxy gets as many dust clouds as stars
 
 	float x, y, rad;
-	for (int i = 0; i < _numStars; ++i)
+	for (int i = 0; i < _numDust; ++i)
 	{
 		if (i % 2 == 0)
 		{
@@ -152,7 +154,7 @@ void Galaxy::InitStarsAndDust()
 	// 3.) Initialize additional dust filaments
 	//
 
-	for (int i = 0; i < _numStars / 100; ++i)
+	for (int i = 0; i < _numDust / 100; ++i)
 	{
 		rad = (float)cdf.ValFromProb(Helper::rnum());
 
@@ -344,6 +346,39 @@ void Galaxy::SetPertN(int n)
 void Galaxy::SetPertAmp(float amp)
 {
 	_pertAmp = std::max(0.0f, amp);
+}
+
+int Galaxy::GetNumStars() const
+{
+	return _numStars;
+}
+
+int Galaxy::GetNumDust() const
+{
+	return _numDust;
+}
+
+int Galaxy::GetNumH2() const
+{
+	return _numH2;
+}
+
+void Galaxy::SetNumStars(int n)
+{
+	_numStars = std::max(0, n);
+	InitStarsAndDust();
+}
+
+void Galaxy::SetNumDust(int n)
+{
+	_numDust = std::max(0, n);
+	InitStarsAndDust();
+}
+
+void Galaxy::SetNumH2(int n)
+{
+	_numH2 = std::max(0, n);
+	InitStarsAndDust();
 }
 
 void Galaxy::SetRad(float rad)
