@@ -89,9 +89,10 @@ void Galaxy::InitStarsAndDust()
 
 	// Scale heights of the different particle populations. Stars form a
 	// comparatively thick disc, dust and H2 regions concentrate in a thin disc.
-	// (Milky Way: thin disc ~300 pc, thick disc ~1000 pc, dust ~100 pc)
-	const float heightStarDisc = _radGalaxy / 25.0f;
-	const float heightDust = _radGalaxy / 80.0f;
+	// Real discs are thinner (Milky Way: thin disc ~300 pc at 15000 pc radius)
+	// but these values give a better visual impression of the 3d structure.
+	const float heightStarDisc = _radGalaxy / 16.0f;
+	const float heightDust = _radGalaxy / 60.0f;
 
 	//
 	// 1.) Initialize the stars
@@ -120,13 +121,21 @@ void Galaxy::InitStarsAndDust()
 		star.mag = 0.1f + 0.4f * Helper::rnum();
 		star.type = 0;
 
-		// Stars close to the core belong to the bulge and get a larger
-		// vertical extent than the disc population further out.
-		float scaleHeight = heightStarDisc;
-		if (_radCore > 0)
-			scaleHeight *= 1.0f + 3.0f * std::exp(-2.0f * rad / _radCore);
-
+		// Disc population: sech^2 distributed amplitudes, the disc flares
+		// slightly towards the rim.
+		float scaleHeight = heightStarDisc * (0.6f + 0.6f * rad / _radGalaxy);
 		star.zAmp = SampleVerticalAmplitude(scaleHeight);
+
+		// Stars inside the core belong to the bulge, an approximately
+		// spheroidal component. Its ellipsoidal envelope (axis ratio 0.65)
+		// dominates the thin disc amplitudes there and fades out smoothly
+		// towards the core radius.
+		if (rad < _radCore)
+		{
+			float zMaxBulge = 0.65f * std::sqrt(_radCore * _radCore - rad * rad);
+			star.zAmp = std::max(star.zAmp, zMaxBulge * Helper::rnum());
+		}
+
 		star.zPhase = 360.0f * Helper::rnum();
 
 		// Make a small portion of the stars brighter
