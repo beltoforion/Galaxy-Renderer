@@ -58,6 +58,25 @@ cd build
 ./galaxy_renderer
 ```
 
+### Cross-compiling the Windows binaries on Linux
+
+The Windows (x64) binaries can be built on Linux with MinGW-w64. Install the toolchain and run the
+build script:
+
+```
+sudo apt install cmake make g++-mingw-w64-x86-64-posix curl
+./build_windows.sh
+```
+
+The script downloads and cross-compiles SDL2, FreeType, SDL2_ttf and GLEW once (into
+`build-win-deps/`), then builds the application and stages a portable folder in `dist-win/`
+containing `galaxy_renderer.exe`, the required DLLs (`SDL2.dll`, `SDL2_ttf.dll`, `glew32.dll`),
+`assets/` and `presets/`. Copy that folder to a Windows machine and run the exe from inside it.
+The GCC runtime is linked statically, so no MinGW DLLs are needed at runtime; video export needs
+`ffmpeg.exe` in the `PATH` as on the other platforms.
+
+`./build_windows.sh clean` removes all Windows build output.
+
 -----------
 
 ## User Interface

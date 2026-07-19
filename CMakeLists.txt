@@ -105,7 +105,9 @@ elseif(TARGET PkgConfig::SDL2_TTF)
     target_link_libraries(galaxy_renderer PRIVATE PkgConfig::SDL2_TTF)
 endif()
 
-if(MSVC)
+if(WIN32)
+    # _USE_MATH_DEFINES: expose M_PI & friends (MSVC always, MinGW in strict
+    # ISO mode); NOMINMAX: keep windows.h from defining min/max macros.
     target_compile_definitions(galaxy_renderer PRIVATE
         _USE_MATH_DEFINES NOMINMAX _CRT_SECURE_NO_WARNINGS)
 endif()
