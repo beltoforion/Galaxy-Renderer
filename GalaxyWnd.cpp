@@ -38,7 +38,6 @@ GalaxyWnd::GalaxyWnd()
 	, _videoHeight(2160)
 	, _videoFps(60)
 {
-	LoadPresets();
 }
 
 void GalaxyWnd::LoadPresets()
@@ -46,10 +45,14 @@ void GalaxyWnd::LoadPresets()
 	_presets.clear();
 
 	namespace fs = std::filesystem;
-	const fs::path dir = "presets";
-	std::error_code ec;
-	if (fs::is_directory(dir, ec))
+
+	// Reads every *.txt in dir and merges it into _presets. A preset replaces
+	// an earlier one with the same name, so later scanned directories win.
+	auto scanDir = [this](const fs::path& dir)
 	{
+		std::error_code ec;
+		if (!fs::is_directory(dir, ec))
+			return;
 		for (const auto& entry : fs::directory_iterator(dir, ec))
 		{
 			if (!entry.is_regular_file() || entry.path().extension() != ".txt")
@@ -103,12 +106,20 @@ void GalaxyWnd::LoadPresets()
 				else if (key == "showDensityWaves")  displayFlag(DisplayItem::DENSITY_WAVES);
 				else if (key == "showVelocityCurve") displayFlag(DisplayItem::VELOCITY);
 			}
-			_presets.push_back(preset);
+			auto existing = std::find_if(_presets.begin(), _presets.end(),
+				[&preset](const GalaxyPreset& other) { return other.name == preset.name; });
+			if (existing != _presets.end())
+				*existing = preset;
+			else
+				_presets.push_back(preset);
 		}
+	};
 
-		std::sort(_presets.begin(), _presets.end(),
-			[](const GalaxyPreset& a, const GalaxyPreset& b) { return a.name < b.name; });
-	}
+	scanDir(fs::path(GetAppDir()) / "presets");   // shipped with the application
+	scanDir(fs::path(GetUserDir()) / "presets");  // user saves; override shipped ones
+
+	std::sort(_presets.begin(), _presets.end(),
+		[](const GalaxyPreset& a, const GalaxyPreset& b) { return a.name < b.name; });
 
 	// No preset files found: fall back to the built-in classics so the combo
 	// box and the numpad shortcuts keep working.
@@ -162,11 +173,15 @@ bool GalaxyWnd::SavePreset(const std::string& name)
 	if (safeName.empty())
 		return false;
 
+	// Always save into the per-user folder: the install location (e.g. an
+	// AppImage mount or "Program Files") may be read-only. A user preset with
+	// the name of a shipped one overrides it on load.
 	namespace fs = std::filesystem;
+	const fs::path dir = fs::path(GetUserDir()) / "presets";
 	std::error_code ec;
-	fs::create_directories("presets", ec);
+	fs::create_directories(dir, ec);
 
-	std::ofstream file(fs::path("presets") / (safeName + ".txt"));
+	std::ofstream file(dir / (safeName + ".txt"));
 	if (!file)
 		return false;
 
@@ -248,6 +263,10 @@ void GalaxyWnd::InitGL() noexcept(false)
 
 void GalaxyWnd::InitSimulation()
 {
+	// Deferred to here (not the constructor) because the preset folders are
+	// resolved via SDL, which must be initialized first.
+	LoadPresets();
+
 	_galaxy.Reset({
 			13000,		// radius of the galaxy
 			4000,		// radius of the core
@@ -825,7 +844,13 @@ void GalaxyWnd::RenderUI()
 		if (hasSelection && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
 			ImGui::SetTooltip("Overwrite \"%s\"", _presets[_selectedPreset].name.c_str());
 
-		ImGui::TextDisabled("Files: presets/*.txt (numpad 1-9 applies 1st-9th)");
+		ImGui::TextDisabled("Text files, numpad 1-9 applies 1st-9th (hover for paths)");
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(
+				"Shipped presets: %spresets\n"
+				"Your saves:      %spresets\n"
+				"A saved preset with the name of a shipped one overrides it.",
+				GetAppDir().c_str(), GetUserDir().c_str());
 		endSection();
 	}
 

@@ -23,6 +23,14 @@ public:
 
 	int GetWidth() const;
 	int GetHeight() const;
+
+	/// Directory of the executable (trailing separator included). Use it to
+	/// locate resources shipped with the application (assets, presets).
+	static std::string GetAppDir();
+
+	/// Per-user writable data directory (trailing separator included). Use it
+	/// for files the application saves; the install location may be read-only.
+	static std::string GetUserDir();
 	
 protected:
 	SDLWindow();

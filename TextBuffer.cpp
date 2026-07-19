@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Helper.hpp"
+#include "SDLWnd.hpp"
 
 TextBuffer::TextBuffer()
 	: _textureData()
@@ -82,15 +83,19 @@ void TextBuffer::Initialize()
 	if (!TTF_WasInit())
 		TTF_Init();
 
-	_pSmallFont = TTF_OpenFont("assets/consola.ttf", 14);
+	// Resolve the fonts relative to the executable so the application can be
+	// started from any working directory.
+	const std::string assetDir = SDLWindow::GetAppDir() + "assets/";
+
+	_pSmallFont = TTF_OpenFont((assetDir + "consola.ttf").c_str(), 14);
 	if (_pSmallFont == nullptr)
 		throw std::runtime_error(TTF_GetError());
 
-	_pFont = TTF_OpenFont("assets/arial.ttf", 18);
+	_pFont = TTF_OpenFont((assetDir + "arial.ttf").c_str(), 18);
 	if (_pFont == nullptr)
 		throw std::runtime_error(TTF_GetError());
 
-	_pFontCaption = TTF_OpenFont("assets/arial.ttf", 40);
+	_pFontCaption = TTF_OpenFont((assetDir + "arial.ttf").c_str(), 40);
 	if (_pFontCaption == nullptr)
 		throw std::runtime_error(TTF_GetError());
 

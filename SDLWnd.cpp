@@ -64,6 +64,30 @@ void SDLWindow::Close()
 }
 */
 
+std::string SDLWindow::GetAppDir()
+{
+	static const std::string dir = []()
+	{
+		char* path = SDL_GetBasePath();
+		std::string result = (path != nullptr) ? path : "";
+		SDL_free(path);
+		return result;
+	}();
+	return dir;
+}
+
+std::string SDLWindow::GetUserDir()
+{
+	static const std::string dir = []()
+	{
+		char* path = SDL_GetPrefPath("beltoforion", "GalaxyRenderer");
+		std::string result = (path != nullptr) ? path : "";
+		SDL_free(path);
+		return result;
+	}();
+	return dir;
+}
+
 void SDLWindow::Init(int width, int height, float axisLen, const std::string& caption)
 {
 	_fov = axisLen;
