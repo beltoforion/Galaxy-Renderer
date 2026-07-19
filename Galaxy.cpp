@@ -82,6 +82,20 @@ static float SampleVerticalAmplitude(float scaleHeight)
 	return scaleHeight * std::atanh(u);
 }
 
+/** \brief Samples a vertical amplitude inside the spheroidal bulge.
+
+	The bulge is modelled as an ellipsoidal envelope with axis ratio 0.65
+	that fades out smoothly towards the core radius. Returns 0 outside
+	the core.
+*/
+static float SampleBulgeAmplitude(float rad, float radCore)
+{
+	if (rad >= radCore)
+		return 0;
+
+	return 0.65f * std::sqrt(radCore * radCore - rad * rad) * Helper::rnum();
+}
+
 void Galaxy::InitStarsAndDust()
 {
 	_stars = std::vector<Star>();
@@ -122,20 +136,12 @@ void Galaxy::InitStarsAndDust()
 		star.type = 0;
 
 		// Disc population: sech^2 distributed amplitudes, the disc flares
-		// slightly towards the rim.
+		// slightly towards the rim. Inside the core the spheroidal bulge
+		// envelope dominates the disc amplitudes.
 		float scaleHeight = heightStarDisc * (0.6f + 0.6f * rad / _radGalaxy);
-		star.zAmp = SampleVerticalAmplitude(scaleHeight);
-
-		// Stars inside the core belong to the bulge, an approximately
-		// spheroidal component. Its ellipsoidal envelope (axis ratio 0.65)
-		// dominates the thin disc amplitudes there and fades out smoothly
-		// towards the core radius.
-		if (rad < _radCore)
-		{
-			float zMaxBulge = 0.65f * std::sqrt(_radCore * _radCore - rad * rad);
-			star.zAmp = std::max(star.zAmp, zMaxBulge * Helper::rnum());
-		}
-
+		star.zAmp = std::max(
+			SampleVerticalAmplitude(scaleHeight),
+			SampleBulgeAmplitude(rad, _radCore));
 		star.zPhase = 360.0f * Helper::rnum();
 
 		// Make a small portion of the stars brighter
@@ -178,7 +184,12 @@ void Galaxy::InitStarsAndDust()
 		// the following temperature distribution (no science here it just looks right)
 		dustParticle.temp = _baseTemp + rad / 4.5f;
 		dustParticle.mag = 0.02f + 0.15f * Helper::rnum();
-		dustParticle.zAmp = SampleVerticalAmplitude(heightDust);
+
+		// The dust is a visual aid to make the galaxy appear fuller, so
+		// unlike real (disc bound) dust it also fills the bulge.
+		dustParticle.zAmp = std::max(
+			SampleVerticalAmplitude(heightDust),
+			SampleBulgeAmplitude(rad, _radCore));
 		dustParticle.zPhase = 360.0f * Helper::rnum();
 		_stars.push_back(dustParticle);
 	}
