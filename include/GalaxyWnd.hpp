@@ -104,6 +104,11 @@ private:
 	// --- Dear ImGui control panel state -----------------------------------
 	bool _showUi = true;   ///< Visibility of the control panel (toggled with F1)
 
+	// Framerate limiting
+	bool _limitFramerate = false;   ///< Cap the render loop to _targetFps
+	int _targetFps = 60;            ///< Target framerate when limiting is on
+	uint32_t _lastFrameTicks = 0;   ///< SDL_GetTicks() at the previous frame
+
 	// Cache for parameters whose edit triggers an expensive star/dust rebuild.
 	// Widgets bind to these; the model is only updated when a widget is
 	// released (see RenderUI). Kept in sync with the model while no widget is

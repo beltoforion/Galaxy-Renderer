@@ -365,7 +365,20 @@ void GalaxyWnd::Render()
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	SDL_GL_SwapWindow(_pSdlWnd);
-	SDL_Delay(1);
+
+	// Optionally cap the render loop to the target framerate.
+	if (_limitFramerate && _targetFps > 0)
+	{
+		const Uint32 frameMs = 1000u / (Uint32)_targetFps;
+		const Uint32 elapsed = SDL_GetTicks() - _lastFrameTicks;
+		if (elapsed < frameMs)
+			SDL_Delay(frameMs - elapsed);
+	}
+	else
+	{
+		SDL_Delay(1);
+	}
+	_lastFrameTicks = SDL_GetTicks();
 }
 
 void GalaxyWnd::RenderUI()
@@ -410,12 +423,47 @@ void GalaxyWnd::RenderUI()
 	// and the labels to the right are never clipped.
 	ImGui::PushItemWidth(150.0f);
 
+	// Draws a collapsing header tinted with its own colour so the sections are
+	// easy to tell apart at a glance.
+	// Draws a collapsing header tinted with its own colour and, when the
+	// section is open, tints the widgets inside it (frame backgrounds, slider
+	// grabs, check marks and buttons) with the same colour so each section is
+	// visually coherent. Every open beginSection() must be paired with an
+	// endSection() to pop the pushed colours.
+	auto scaleCol = [](ImVec4 c, float f, float a) -> ImVec4
+	{
+		return ImVec4(std::min(c.x * f, 1.0f), std::min(c.y * f, 1.0f), std::min(c.z * f, 1.0f), a);
+	};
+	auto beginSection = [&](const char* label, ImVec4 col) -> bool
+	{
+		ImGui::PushStyleColor(ImGuiCol_Header, col);
+		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, scaleCol(col, 1.3f, 0.90f));
+		ImGui::PushStyleColor(ImGuiCol_HeaderActive, scaleCol(col, 1.6f, 1.00f));
+		bool open = ImGui::CollapsingHeader(label, ImGuiTreeNodeFlags_DefaultOpen);
+		ImGui::PopStyleColor(3);
+
+		if (open)
+		{
+			ImGui::PushStyleColor(ImGuiCol_FrameBg,          scaleCol(col, 0.45f, 0.55f));
+			ImGui::PushStyleColor(ImGuiCol_FrameBgHovered,   scaleCol(col, 0.65f, 0.70f));
+			ImGui::PushStyleColor(ImGuiCol_FrameBgActive,    scaleCol(col, 0.85f, 0.80f));
+			ImGui::PushStyleColor(ImGuiCol_SliderGrab,       scaleCol(col, 1.7f, 1.00f));
+			ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, scaleCol(col, 2.0f, 1.00f));
+			ImGui::PushStyleColor(ImGuiCol_CheckMark,        scaleCol(col, 2.0f, 1.00f));
+			ImGui::PushStyleColor(ImGuiCol_Button,           scaleCol(col, 0.75f, 0.85f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered,    scaleCol(col, 1.05f, 0.90f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive,     scaleCol(col, 1.35f, 1.00f));
+		}
+		return open;
+	};
+	auto endSection = []() { ImGui::PopStyleColor(9); };
+
 	ImGui::Text("%d FPS", GetFPS());
 	ImGui::SameLine();
 	ImGui::TextDisabled("(F1 toggles this panel)");
 
 	// --- Geometry (heavy edits: applied on release) -----------------------
-	if (ImGui::CollapsingHeader("Geometry", ImGuiTreeNodeFlags_DefaultOpen))
+	if (beginSection("Geometry", ImVec4(0.15f, 0.30f, 0.55f, 1.0f)))
 	{
 		ImGui::SliderInt("Core radius (pc)", &_ui.radCore, 0, _ui.radGalaxy);
 		if (ImGui::IsItemDeactivatedAfterEdit())
@@ -462,10 +510,11 @@ void GalaxyWnd::RenderUI()
 		}
 
 		ImGui::Text("Far field radius: %d pc", (int)_galaxy.GetFarFieldRad());
+		endSection();
 	}
 
 	// --- Spiral arms (cheap edits) ----------------------------------------
-	if (ImGui::CollapsingHeader("Spiral Arms", ImGuiTreeNodeFlags_DefaultOpen))
+	if (beginSection("Spiral Arms", ImVec4(0.10f, 0.42f, 0.45f, 1.0f)))
 	{
 		int pertN = _galaxy.GetPertN();
 		if (ImGui::SliderInt("Perturbations", &pertN, 0, 5))
@@ -480,10 +529,11 @@ void GalaxyWnd::RenderUI()
 			_galaxy.SetPertAmp(pertAmp);
 			_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST;
 		}
+		endSection();
 	}
 
 	// --- Display features (flag toggles + dust size) ----------------------
-	if (ImGui::CollapsingHeader("Display Features", ImGuiTreeNodeFlags_DefaultOpen))
+	if (beginSection("Display Features", ImVec4(0.15f, 0.45f, 0.25f, 1.0f)))
 	{
 		auto flagCheckbox = [&](const char* label, DisplayItem item)
 		{
@@ -506,10 +556,11 @@ void GalaxyWnd::RenderUI()
 		float dustSize = _galaxy.GetDustRenderSize();
 		if (ImGui::SliderFloat("Dust render size (px)", &dustSize, 1.0f, 200.0f, "%.0f"))
 			_galaxy.SetDustRenderSize(dustSize);   // cheap: no rebuild
+		endSection();
 	}
 
 	// --- Physics ----------------------------------------------------------
-	if (ImGui::CollapsingHeader("Physics", ImGuiTreeNodeFlags_DefaultOpen))
+	if (beginSection("Physics", ImVec4(0.55f, 0.35f, 0.12f, 1.0f)))
 	{
 		ImGui::SliderFloat("Base temperature (K)", &_ui.baseTemp, 1000.0f, 10000.0f, "%.0f");
 		if (ImGui::IsItemDeactivatedAfterEdit())
@@ -524,10 +575,11 @@ void GalaxyWnd::RenderUI()
 			_galaxy.ToggleDarkMatter();
 			_renderUpdateHint |= ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE;
 		}
+		endSection();
 	}
 
 	// --- Simulation -------------------------------------------------------
-	if (ImGui::CollapsingHeader("Simulation", ImGuiTreeNodeFlags_DefaultOpen))
+	if (beginSection("Simulation", ImVec4(0.42f, 0.20f, 0.52f, 1.0f)))
 	{
 		bool paused = (_flags & (int)DisplayItem::PAUSE) != 0;
 		if (ImGui::Checkbox("Pause", &paused))
@@ -535,10 +587,16 @@ void GalaxyWnd::RenderUI()
 			if (paused) _flags |= (int)DisplayItem::PAUSE;
 			else        _flags &= ~(int)DisplayItem::PAUSE;
 		}
+
+		ImGui::Checkbox("Limit framerate", &_limitFramerate);
+		ImGui::BeginDisabled(!_limitFramerate);
+		ImGui::SliderInt("Target FPS", &_targetFps, 10, 144);
+		ImGui::EndDisabled();
+		endSection();
 	}
 
 	// --- Predefined galaxies ---------------------------------------------
-	if (ImGui::CollapsingHeader("Predefined Galaxies", ImGuiTreeNodeFlags_DefaultOpen))
+	if (beginSection("Predefined Galaxies", ImVec4(0.55f, 0.20f, 0.22f, 1.0f)))
 	{
 		// FoV each preset selects (0 = keep the current field of view).
 		static const float presetFov[9] = { 33960, 46585, 0, 0, 35000, 0, 36982, 41091, 41091 };
@@ -560,10 +618,11 @@ void GalaxyWnd::RenderUI()
 				_renderUpdateHint |= ruhDENSITY_WAVES | ruhSTARS | ruhDUST | ruhCREATE_VELOCITY_CURVE | ruhAXIS;
 			}
 		}
+		endSection();
 	}
 
 	// --- Video export -----------------------------------------------------
-	if (ImGui::CollapsingHeader("Video Export", ImGuiTreeNodeFlags_DefaultOpen))
+	if (beginSection("Video Export", ImVec4(0.52f, 0.45f, 0.12f, 1.0f)))
 	{
 		const bool recording = _videoRecorder.IsRecording();
 
@@ -593,6 +652,7 @@ void GalaxyWnd::RenderUI()
 				_videoRecorder.GetFilename().c_str(), _videoRecorder.GetFrameCount());
 		else
 			ImGui::TextDisabled("Requires ffmpeg (libx264) in PATH");
+		endSection();
 	}
 
 	ImGui::PopItemWidth();
