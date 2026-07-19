@@ -19,3 +19,5 @@ vsproject/.nuget/*
 .vs/*
 packages/*
 x64/*
+*.o
+galaxy_renderer
