@@ -568,6 +568,16 @@ void GalaxyWnd::RenderUI()
 		const bool recording = _videoRecorder.IsRecording();
 
 		ImGui::BeginDisabled(recording);
+
+		// Resolution presets (16:9 UHD family).
+		ImGui::TextUnformatted("Resolution:");
+		ImGui::SameLine();
+		if (ImGui::Button("2K")) { _videoWidth = 2560; _videoHeight = 1440; }
+		ImGui::SameLine();
+		if (ImGui::Button("4K")) { _videoWidth = 3840; _videoHeight = 2160; }
+		ImGui::SameLine();
+		if (ImGui::Button("8K")) { _videoWidth = 7680; _videoHeight = 4320; }
+
 		ImGui::InputInt("Width", &_videoWidth);
 		ImGui::InputInt("Height", &_videoHeight);
 		ImGui::SliderInt("FPS", &_videoFps, 24, 120);
