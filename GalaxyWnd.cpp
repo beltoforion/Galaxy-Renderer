@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <cstddef>
 #include <cstdio>
+#include <cfloat>
 #include <ctime>
 #include <iostream>
 
@@ -392,16 +393,22 @@ void GalaxyWnd::RenderUI()
 		_ui.fov       = _fov;
 	}
 
+	// Let the panel auto-size to its content so it never shows a vertical
+	// scrollbar while it still fits inside the window; only cap the height at
+	// the available window height (a scrollbar then appears only when needed).
+	const ImGuiViewport* viewport = ImGui::GetMainViewport();
 	ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2(400, 640), ImGuiCond_FirstUseEver);
-	if (!ImGui::Begin("Galaxy Controls", &_showUi))
+	ImGui::SetNextWindowSizeConstraints(ImVec2(360.0f, 0.0f),
+		ImVec2(FLT_MAX, viewport->WorkSize.y - 20.0f));
+	if (!ImGui::Begin("Galaxy Controls", &_showUi, ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		ImGui::End();
 		return;
 	}
 
-	// Reserve room on the right for widget labels so they are not clipped.
-	ImGui::PushItemWidth(-180.0f);
+	// Fixed widget width so the auto-resized window has a deterministic size
+	// and the labels to the right are never clipped.
+	ImGui::PushItemWidth(150.0f);
 
 	ImGui::Text("%d FPS", GetFPS());
 	ImGui::SameLine();
