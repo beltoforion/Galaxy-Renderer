@@ -38,3 +38,4 @@ galaxy-*.mp4
 # Windows cross-build (packaging/build-windows.sh)
 /build-windows/
 /dependencies/windows/
+galaxy-renderer.zip
