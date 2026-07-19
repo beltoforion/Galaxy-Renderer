@@ -29,6 +29,46 @@ Hers is a list of galaxies created by the algorithm:
 
 -----------
 
+## Building
+
+The project is built with [CMake](https://cmake.org) (3.16+) and a C++17 compiler. It depends on
+**SDL2**, **SDL2_ttf**, **GLEW** and **OpenGL**. [Dear ImGui](https://github.com/ocornut/imgui) is
+fetched automatically by CMake, and [glm](https://github.com/g-truc/glm) is bundled in
+`dependencies/`.
+
+Install the dependencies:
+
+* **Linux (Debian/Ubuntu):** `sudo apt install cmake libsdl2-dev libsdl2-ttf-dev libglew-dev`
+* **macOS (Homebrew):** `brew install cmake sdl2 sdl2_ttf glew`
+* **Windows ([vcpkg](https://vcpkg.io)):** `vcpkg install sdl2 sdl2-ttf glew` and configure with the
+  vcpkg toolchain file.
+
+Then configure and build:
+
+```
+cmake -S . -B build
+cmake --build build
+```
+
+The executable is written to `build/` and the `assets/` folder (fonts) is copied next to it, so run
+it from there:
+
+```
+cd build
+./galaxy_renderer
+```
+
+-----------
+
+## User Interface
+
+All parameters can be edited live through a **Dear ImGui** control panel (sliders, checkboxes,
+combo boxes and buttons). Press **[F1]** to show or hide the panel. The classic keyboard shortcuts
+still work as well (e.g. `[F2]` axis, `[F3]` dust, `[+]`/`[-]` zoom, `[Space]` pause, the numeric
+keypad for the predefined galaxies).
+
+-----------
+
 ## Video Export
 
 The renderer can export its animation as an H.264 encoded MP4 video. The video is rendered into an 
@@ -36,9 +76,11 @@ offscreen framebuffer whose resolution is independent of the window size, so you
 (or higher) footage on a normal desktop. The raw frames are piped to [ffmpeg](https://ffmpeg.org) 
 for encoding, so ffmpeg must be installed and available in the search path.
 
-* Press **[F7]** to start and stop the recording. The video is written to a file named 
-  `galaxy-YYYYMMDD-HHMMSS.mp4` in the current working directory.
-* The default video resolution is 3840x2160 (4K UHD) at 60 fps. It can be changed on the command line:
+* Press **[F7]** (or use the *Video Export* section of the control panel) to start and stop the 
+  recording. The video is written to a file named `galaxy-YYYYMMDD-HHMMSS.mp4` in the current 
+  working directory.
+* The default video resolution is 3840x2160 (4K UHD) at 60 fps. It can be set in the control panel 
+  or on the command line:
 
 ```
 ./galaxy_renderer --video-size 1920x1080 --video-fps 30
