@@ -34,3 +34,7 @@ galaxy-*.mp4
 
 # Staged deliverable (cmake --build build --target dist)
 /dist/
+
+# Windows cross-build (packaging/build-windows.sh)
+/build-windows/
+/dependencies/windows/

@@ -57,6 +57,31 @@ cd build
 ./galaxy_renderer
 ```
 
+To stage a portable copy (binary + assets + presets) in `dist/`:
+
+```
+cmake --build build --target dist
+```
+
+On Linux, to additionally package that into a self-contained `dist/Galaxy_Renderer-x86_64.AppImage`
+(fetches [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy) on first run):
+
+```
+cmake --build build --target appimage
+```
+
+### Cross-compiling for Windows (on Linux)
+
+With the MinGW-w64 toolchain installed (`sudo apt install g++-mingw-w64-x86-64`), a portable
+Windows build (exe + DLLs + assets + presets) can be staged in `dist/windows/` with:
+
+```
+./packaging/build-windows.sh
+```
+
+Windows builds of SDL2/SDL2_ttf and the GLEW sources are downloaded automatically on first run and
+cached in `dependencies/windows/`.
+
 -----------
 
 ## User Interface

@@ -23,8 +23,18 @@ include(FetchContent)
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 
-# GLEW
-find_package(GLEW REQUIRED)
+# GLEW: from the system, or compiled from a source tree when cross-compiling
+# for Windows (set GLEW_SOURCE_DIR; see packaging/build-windows.sh)
+if(GLEW_SOURCE_DIR)
+    enable_language(C)
+    add_library(glew_from_source STATIC ${GLEW_SOURCE_DIR}/src/glew.c)
+    target_include_directories(glew_from_source PUBLIC ${GLEW_SOURCE_DIR}/include)
+    target_compile_definitions(glew_from_source PUBLIC GLEW_STATIC)
+    target_link_libraries(glew_from_source PUBLIC OpenGL::GL)
+    add_library(GLEW::GLEW ALIAS glew_from_source)
+else()
+    find_package(GLEW REQUIRED)
+endif()
 
 # SDL2
 find_package(SDL2 REQUIRED)
@@ -81,6 +91,13 @@ add_executable(galaxy_renderer
 target_include_directories(galaxy_renderer PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# SDL2main on platforms that need it (Windows): SDL.h renames main() to
+# SDL_main, and SDL2main supplies the real entry point that calls it. It is a
+# static archive, so it must precede SDL2 on the linker command line.
+if(TARGET SDL2::SDL2main)
+    target_link_libraries(galaxy_renderer PRIVATE SDL2::SDL2main)
+endif()
+
 target_link_libraries(galaxy_renderer PRIVATE
     glm_headers
     imgui
@@ -93,9 +110,10 @@ if(TARGET OpenGL::GLU)
     target_link_libraries(galaxy_renderer PRIVATE OpenGL::GLU)
 endif()
 
-# SDL2main on platforms that need it (Windows)
-if(TARGET SDL2::SDL2main)
-    target_link_libraries(galaxy_renderer PRIVATE SDL2::SDL2main)
+# MinGW: bundle no compiler-runtime DLLs; link libgcc/libstdc++/winpthread
+# statically so only SDL2.dll and SDL2_ttf.dll need to ship with the exe.
+if(MINGW)
+    target_link_options(galaxy_renderer PRIVATE -static-libgcc -static-libstdc++ -static)
 endif()
 
 # SDL2_ttf via config target or pkg-config fallback
@@ -105,7 +123,7 @@ elseif(TARGET PkgConfig::SDL2_TTF)
     target_link_libraries(galaxy_renderer PRIVATE PkgConfig::SDL2_TTF)
 endif()
 
-if(MSVC)
+if(WIN32)
     target_compile_definitions(galaxy_renderer PRIVATE
         _USE_MATH_DEFINES NOMINMAX _CRT_SECURE_NO_WARNINGS)
 endif()
@@ -137,6 +155,19 @@ add_custom_target(dist
         ${CMAKE_CURRENT_SOURCE_DIR}/presets ${DIST_DIR}/presets
     DEPENDS galaxy_renderer
     COMMENT "Staging portable dist folder in ${DIST_DIR}")
+
+# ---------------------------------------------------------------------------
+# AppImage: package galaxy_renderer + assets/presets as a portable Linux
+# AppImage in <repo>/dist (requires network access on first run to fetch
+# linuxdeploy into <build-dir>/appimage-tools)
+# ---------------------------------------------------------------------------
+if(UNIX AND NOT APPLE)
+    add_custom_target(appimage
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/packaging/build-appimage.sh
+                ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS galaxy_renderer
+        COMMENT "Packaging galaxy_renderer as an AppImage")
+endif()
 
 # ---------------------------------------------------------------------------
 # Install

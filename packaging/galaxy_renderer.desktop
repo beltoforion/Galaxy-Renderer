@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Galaxy Renderer
+GenericName=Spiral Galaxy Simulator
+Comment=Spiral galaxy renderer based on the density wave theory
+Exec=galaxy_renderer
+Icon=galaxy_renderer
+Categories=Education;Science;
+Terminal=false

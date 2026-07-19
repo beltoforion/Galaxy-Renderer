@@ -91,14 +91,24 @@ public:
 		// in the fragment shader. Required on some (e.g. NVIDIA compatibility) GL
 		// contexts, where gl_PointCoord otherwise stays (0,0) and the stars become
 		// invisible (their alpha turns negative under additive blending).
-		glEnable(GL_POINT_SPRITE);
+		// GL_POINT_SPRITE only exists in compatibility profiles; core profiles
+		// always provide gl_PointCoord and reject the enum with GL_INVALID_ENUM
+		// (strict drivers, e.g. via Wine/Windows, then kill the renderer).
+		static const bool isCompatProfile = []() {
+			GLint mask = 0;
+			glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
+			return (mask & GL_CONTEXT_COMPATIBILITY_PROFILE_BIT) != 0;
+		}();
+		if (isCompatProfile)
+			glEnable(GL_POINT_SPRITE);
 		OnBeforeDraw();
 
 		glBindVertexArray(GetVertexArrayObject());
 		glDrawElements(GetPrimitiveType(), GetArrayElementCount(), GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
 
-		glDisable(GL_POINT_SPRITE);
+		if (isCompatProfile)
+			glDisable(GL_POINT_SPRITE);
 		glDisable(GL_PROGRAM_POINT_SIZE);
 		glDisable(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
