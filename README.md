@@ -4,10 +4,10 @@
 
 # Spiral Galaxy Renderer
 
-A Program for modelling a two dimensional galaxy based on the density wave theory. This archive contains the source code for an 
+A program for modelling a two dimensional galaxy based on the density wave theory. This repository contains the source code for an
 article at beltoforion.de about simulating a galaxy with the density wave theory.
 
-For more Details please read the Articles.
+For more details please read the articles:
 
 * https://beltoforion.de/en/spiral_galaxy_renderer [english]
 * https://beltoforion.de/de/rendern_von_spiralgalaxien [german]
@@ -23,7 +23,7 @@ An online demo of the typescript version can be viewed here:
 The output of the C++ version is virtually the same.
 <img width="1920" height="1080" alt="Bildschirmfoto vom 2026-07-19 21-58-13" src="https://github.com/user-attachments/assets/aff7e84a-f03d-4544-88ef-c013f5052c27" />
 
-Hers is a list of galaxies created by the algorithm:
+Here is a selection of galaxies created by the algorithm:
 ![galaxy-renderer-overview](https://user-images.githubusercontent.com/2202567/183997403-eff97429-b0d2-4933-a49e-ac16e0cab27c.jpg)
 
 -----------
@@ -93,6 +93,17 @@ keypad for the predefined galaxies).
 
 -----------
 
+## Presets
+
+Galaxy configurations are stored as plain text files. The presets shipped with the application live
+in the `presets/` folder next to the executable; your own saves go to the per-user data directory
+(`~/.local/share/beltoforion/GalaxyRenderer/presets/` on Linux,
+`%APPDATA%\beltoforion\GalaxyRenderer\presets\` on Windows). A user preset with the same name
+overrides a shipped one. Presets can be selected, saved and overwritten from the *Presets* section
+of the control panel.
+
+-----------
+
 ## Video Export
 
 The renderer can export its animation as an H.264 encoded MP4 video. The video is rendered into an 
@@ -121,9 +132,12 @@ Notes:
 
 -----------
 
-For old system or GPU unsupported OpenGL 3.3 use overload MESA version for running application.
-In Linux.
+## Troubleshooting
+
+The renderer requires OpenGL 3.3. On old systems or GPUs whose driver does not advertise it, the
+Mesa version override may help (Linux):
+
 ```
-MESA_GL_VERSION_OVERRIDE=3.3 MESA_GLSL_VERSION_OVERRIDE=330 ./galaxy_rendere
+MESA_GL_VERSION_OVERRIDE=3.3 MESA_GLSL_VERSION_OVERRIDE=330 ./galaxy_renderer
 ```
 
