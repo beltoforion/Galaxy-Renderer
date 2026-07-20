@@ -47,8 +47,6 @@ private:
 		attTexturePosition = 1
 	};
 
-	GLuint _vbo;
-
 	bool _updating;
 
 	std::vector<TextureData> _textureData;

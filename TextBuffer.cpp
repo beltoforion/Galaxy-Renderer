@@ -12,7 +12,6 @@ TextBuffer::TextBuffer()
 	, _pSmallFont(nullptr)
 	, _pFont(nullptr)
 	, _pFontCaption(nullptr)
-	, _vbo(0)
 	, _updating(false)
 	, _shaderProgram(0)
 {}
@@ -99,8 +98,6 @@ void TextBuffer::Initialize()
 	if (_pFontCaption == nullptr)
 		throw std::runtime_error(TTF_GetError());
 
-	glGenBuffers(1, &_vbo);
-
 	const char* srcVertex = GetVertexShaderSource();
 	GLuint vertexShader = CreateShader(GL_VERTEX_SHADER, &srcVertex);
 
@@ -163,9 +160,6 @@ void TextBuffer::Clear()
 	}
 
 	_textureData.clear();
-
-	if (_vbo != 0)
-		glDeleteBuffers(1, &_vbo);
 }
 
 void TextBuffer::Draw(int width, int height, glm::mat4& matView, glm::mat4& matProjection)
